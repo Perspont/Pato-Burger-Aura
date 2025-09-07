@@ -1,3 +1,6 @@
+#ifndef PILHA_H
+#define PILHA_H
+
 #include <stdio.h>
 #define MAX 100
 typedef char tp_item;
@@ -113,3 +116,4 @@ typedef char tp_item;
         }
         return 1;
     }
+#endif
