@@ -9,11 +9,10 @@ void inicializarCardapio(Burger *cardapio)
 	cardapio[2] = (Burger){3, "Quackteirão", 19.0, {1, 2, 3, 1}};
 	cardapio[3] = (Burger){4, "Big Pato", 27.0, {1, 2, 4, 1, 2, 3, 4, 1}};
 	cardapio[4] = (Burger){5, "Zero e Um", 16.0, {1, 2, 3, 1}};
-	cardapio[5] = (Burger){6, "Burg TESTE", 5.0, {1, 2, 3, 1}};
-	cardapio[6] = (Burger){7, "Burg TESTE 2", 5.0, {1, 2, 3, 1}};
-	cardapio[7] = (Burger){8, "Burg TESTE 3", 5.0, {1, 2, 3, 1}};
-	cardapio[8] = (Burger){9, "Burg TESTE 4", 5.0, {1, 2, 3, 1}};
-	cardapio[9] = (Burger){10, "Burg TESTE 5", 5.0, {1, 2, 3, 1}};
+	cardapio[6] = (Burger){7, "Pato sobre rodas", 27.0, {1, 11, 8, 2, 8, 11, 1, 0}};
+	cardapio[7] = (Burger){8, "Recursivo", 28.0, {1, 2, 3, 2, 3, 2, 3, 1}};
+	cardapio[8] = (Burger){9, "Duck_a_Doodle", 23.0, {1, 10, 3, 1, 10, 3, 9, 1}};
+	cardapio[9] = (Burger){10, "Pickles and MAYO!", 26.0, {1, 7, 12, 8, 3, 6, 2, 1}};
 }
 
 void exibirCardapio(Burger *cardapio)
