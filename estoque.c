@@ -16,7 +16,7 @@ void inicializarEstoque(Estoque *estoque)
 	estoque->ingredientes[8] = (Ingrediente){9, "Falafel", 2.0, 10};
 	estoque->ingredientes[9] = (Ingrediente){10, "Molho do Pato", 1.5, 10};
 	estoque->ingredientes[10] = (Ingrediente){11, "Onion Rings", 2.5, 10};
-	estoque->ingredientes[11] = (Ingrediente){12, "___", 3.0, 10};
+	estoque->ingredientes[11] = (Ingrediente){12, "Frango", 3.0, 10};
 }
 
 void adicionarIngrediente(Estoque *estoque, int id, int quantidade) {
