@@ -3,6 +3,7 @@
 #include "burger.h"
 #include <math.h>
 #include <stdlib.h>
+#include <time.h>
 
 // inicializa a fila
 void inicializaFilaPedidos(FilaPedidos *f)
