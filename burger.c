@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "burger.h"
 
-// inicializa a fila
+// inicializa a fila e define o cardápio inicial com os hambúrgueres disponíveis, seus preços e ingredientes
 void inicializarCardapio(Burger *cardapio)
 {
 	cardapio[0] = (Burger){1, "Bit and Bacon", 16.0, {1, 2, 3, 8, 1}};
@@ -15,7 +15,7 @@ void inicializarCardapio(Burger *cardapio)
 	cardapio[8] = (Burger){9, "Burg TESTE 4", 5.0, {1, 2, 3, 1}};
 	cardapio[9] = (Burger){10, "Burg TESTE 5", 5.0, {1, 2, 3, 1}};
 }
-
+// Exibe o cardápio completo para o player
 void exibirCardapio(Burger *cardapio)
 {
 	printf("\n======== Cardápio ========\n\n");
