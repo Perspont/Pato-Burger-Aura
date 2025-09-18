@@ -42,7 +42,7 @@ typedef char tp_item;
         return 1;
     }
 
-    int top (tp_pilha *p, tp_item *e){
+    int top (tp_pilha *p, tp_item *e){ //Insere item que está no topo da pilha {p} na variável {e}.
         if (pilha_vazia(p)){
             return 0;
         }
@@ -111,5 +111,6 @@ typedef char tp_item;
             pop(&a, &e);
             push(p, e);
         }
-        return 1;
-    }
+        return 1; //Estes loops desempilham pilha {p1} na pilha
+    }             //temporária {a}, e então desempilham {a} em {p}.
+                  //Deste modo, {p1} é empilhada em cima de {p}.
