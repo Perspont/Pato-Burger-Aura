@@ -15,7 +15,7 @@ typedef struct hamburguer
 
 } Burger;
 
-void inicializarCardapio(Burger *cardapio);
+void inicializarHamburgueres(Burger *cardapio);
 void exibirCardapio(Burger *cardapio);
 
 
