@@ -11,7 +11,7 @@ int main()
 {
 	// Declaração das principais estruturas de dados do jogo e inicialização dos dados do jogo
 	Burger cardapio[MAX_BURGERS];
-	inicializarCardapio(cardapio);
+	inicializarHamburgueres(cardapio);
 	FilaPedidos pedidos;
 	inicializaFilaPedidos(&pedidos);
 	Estoque estoque;

@@ -1,8 +1,10 @@
+#ifndef PILHA_H
+#define PILHA_H
 #include <stdio.h>
 #define MAX 100
 typedef char tp_item;
 
-    typedef struct{
+    typedef struct pilha{
         int topo;
         tp_item item[MAX];
     }tp_pilha;
@@ -114,3 +116,5 @@ typedef char tp_item;
         return 1; //Estes loops desempilham pilha {p1} na pilha
     }             //temporária {a}, e então desempilham {a} em {p}.
                   //Deste modo, {p1} é empilhada em cima de {p}.
+
+#endif
