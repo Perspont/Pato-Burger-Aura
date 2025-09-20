@@ -25,9 +25,3 @@ void exibirCardapio(Burger *hamburgueres)
 		printf("%d. %s - R$ %.2f\n", hamburgueres[i].id, hamburgueres[i].nome, hamburgueres[i].preco);
 	}
 }
-
-int main() {
-	Burger hamburgueres[MAX_BURGERS];
-	inicializarHamburgueres(hamburgueres);
-	exibirCardapio(hamburgueres);
-}
