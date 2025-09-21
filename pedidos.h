@@ -4,14 +4,15 @@
 #include "burger.h"
 
 #define MAX_PEDIDOS 20
-// Estrutura para representar um único pedido
-typedef struct
+
+typedef struct Pedido
 {
 	int id;
 	int burg_id; // ID do hambúrguer pedido
 } Pedido;
+
 // Estrutura da fila de pedidos (implementação circular)
-typedef struct
+typedef struct filaPedidos
 {
 	Pedido pedidos[MAX_PEDIDOS];
 	int frente;	 // início da fila
@@ -19,7 +20,7 @@ typedef struct
 	int tamanho; 	// Número atual de pedidos na fila
 } FilaPedidos;
 
-// Protótipos das funções definidas em pedidos.c
+
 void inicializaFilaPedidos(FilaPedidos *f);
 int filaPedidosVazia(FilaPedidos *f);
 int filaPedidosCheia(FilaPedidos *f);
