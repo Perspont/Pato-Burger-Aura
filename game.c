@@ -36,13 +36,14 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 
 				inicializarCardapio(cardapio);
 				inicializaFilaPedidos(pedidos);
-				inicializarEstado(estado);
 
 				printf("\nIniciando Dia %d\n", estado->dia);
 
 				geraPedidos(pedidos, estado->dia);
 
 				imprimeFilaPedidos(pedidos, cardapio);
+
+				estado->dia++;
 
 				printf("\nTecle qualquer tecla/enter para continuar para o proximo dia ");
 

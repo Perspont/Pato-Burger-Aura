@@ -2,7 +2,7 @@
 #define GAME_H
 
 #include "burger.h"
-#include "include/pedidos.h"
+#include "pedidos.h"
 
 typedef struct
 {
