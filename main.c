@@ -9,6 +9,8 @@
 
 int main()
 {
+
+	/*
 	// Declaração das principais estruturas de dados do jogo e inicialização dos dados do jogo
 	Burger cardapio[MAX_BURGERS];
 	inicializarHamburgueres(cardapio);
@@ -47,6 +49,8 @@ int main()
 
 		imprimeFilaPedidos(&pedidos, cardapio); // Exibe a fila de pedidos gerada
 	}
+      */
 
-		return 0;
+	gameplayLoop();
+	return 0;
 }

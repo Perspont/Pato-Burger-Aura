@@ -1,12 +1,12 @@
 #ifndef PILHA_H
 #define PILHA_H
 #include <stdio.h>
-#define MAX 100
+#define MAX_PILHA 100
 typedef char tp_item;
 
     typedef struct pilha{
         int topo;
-        tp_item item[MAX];
+        tp_item item[MAX_PILHA];
     }tp_pilha;
 
     void inicializa_pilha(tp_pilha *p){
@@ -20,7 +20,7 @@ typedef char tp_item;
     }
 
     int pilha_cheia(tp_pilha *p){
-        if (p->topo == MAX - 1){
+        if (p->topo == MAX_PILHA - 1){
             return 1;
         }
             return 0;

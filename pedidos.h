@@ -2,8 +2,8 @@
 #define PEDIDOS_H
 
 #include "burger.h"
-// Define a capacidade máxima da fila de pedidos
-#define MAX 20 
+
+#define MAX_PEDIDOS 20
 // Estrutura para representar um único pedido
 typedef struct
 {
@@ -13,7 +13,7 @@ typedef struct
 // Estrutura da fila de pedidos (implementação circular)
 typedef struct
 {
-	Pedido pedidos[MAX];
+	Pedido pedidos[MAX_PEDIDOS];
 	int frente;	 // início da fila
 	int tras;		// fim da fila 
 	int tamanho; 	// Número atual de pedidos na fila

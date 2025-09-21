@@ -1,17 +1,17 @@
 #ifndef FILA_H
 #define FILA_H
 #include <stdio.h>
-#define MAX 100
+#define MAX_FILA 100
 
 typedef char tp_item;
 
 typedef struct {
-    tp_item item[MAX];
+    tp_item item[MAX_FILA];
     int ini, fim;
 }tp_fila;
 
 void inicializa_fila(tp_fila *f){
-    f->ini = f->fim = MAX-1; 
+    f->ini = f->fim = MAX_FILA-1;
 }
 
 int fila_vazia(tp_fila *f){
@@ -20,7 +20,7 @@ int fila_vazia(tp_fila *f){
 }
 
 int proximo (int pos){           //Retorna próxima posição da fila.
-    if (pos == MAX - 1) return 0;
+    if (pos == MAX_FILA - 1) return 0;
     return ++pos;
 }
 

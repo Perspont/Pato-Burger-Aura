@@ -1,5 +1,10 @@
+/*
+
+
 #include <stdio.h>
 #include "burger.h"
+
+
 
 // inicializa um array, com cada index contendo um dos hambúrgueres.
 void inicializarHamburgueres(Burger *hamburgueres)
@@ -25,3 +30,5 @@ void exibirCardapio(Burger *hamburgueres)
 		printf("%d. %s - R$ %.2f\n", hamburgueres[i].id, hamburgueres[i].nome, hamburgueres[i].preco);
 	}
 }
+
+*/
