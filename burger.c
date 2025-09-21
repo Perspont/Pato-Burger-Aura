@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "burger.h"
+#include "include/burger.h"
 
 // inicializa a fila
 void inicializarCardapio(Burger *cardapio)
