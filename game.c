@@ -33,22 +33,19 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 		if (strlen(input) == 1 && input[0] == 'f') { //Gera e muda os pedidos do dia a cada iteração.
 
 			for (int i = 0; i < 7; i++) { //Roda por 7 dias.
-                #ifdef _WIN32
-				system("cls");
-				#else
-				system("clear");
-				#endif
 
 
-				printf("\nIniciando Dia %d\n", estado.dia);
+				printf("\nIniciando Dia %d\n", estado->dia);
 
-				sleep(1);
-
-				geraPedidos(pedidos, estado.dia);
-
-				sleep(1);
+				geraPedidos(pedidos, estado->dia);
 
 				imprimeFilaPedidos(pedidos, cardapio);
+
+				printf("\nAperte qualquer tecla para continuar para o proximo dia ");
+
+				fgets(input, sizeof(input), stdin);
+
+
 			}
 
 			return;
@@ -57,7 +54,7 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 			return;
 		}
 		else {
-			printf("Comando inválido\n\n");
+			printf("Comando invalido\n\n");
 		}
 	}
 }
@@ -82,11 +79,11 @@ void gameplayLoop() {
 
 		valido = 0;
 
-		printf("\nBem vindo à Pato Burger!! \n\n Nós temos comida.\n");
-		printf("Você deseja?:\n");
-		printf("(1) -> Começar o jogo.\n");
+		printf("\nBem vindo a Pato Burger!! \n\n Nos temos comida!!\n");
+		printf("Voce deseja?:\n");
+		printf("(1) -> Iniciar o jogo.\n");
 		printf("(2) -> Exibir lista de ingredientes.\n");
-		printf("(3) -> Exibir cardápio.\n");
+		printf("(3) -> Exibir cardapio.\n");
 		printf("(0) -> Sair do jogo.\n\n");
 
 		while (!valido) {
@@ -97,7 +94,7 @@ void gameplayLoop() {
 			if (strlen(input) == 1 && (input[0] == '1' || input[0] == '2' || input[0] == '3' || input[0] == '0')) { //Verifica se o input tem apenas 1 caractere,
 				valido = 1;																	//E se esse caractere é um dos que podem ser colocados ou não.
 			} else {
-				printf("Não é um dos números válidos. Selecione novamente.\n");
+				printf("Nao é um dos numeros validos. Selecione novamente.\n");
 			}
 		}
 
