@@ -1,4 +1,5 @@
-#include <stdio.h>
+/*
+ *#include <stdio.h>
 #include "pedidos.h"
 #include "burger.h"
 #include <math.h>
@@ -35,6 +36,7 @@ int enfileiraPedido(FilaPedidos *f, Pedido elem)
 	f->tamanho++;
 	return 1;
 }
+
 // Remove o primeiro pedido da fila e retorna 1 se o pedido foi removido com sucesso
 int desenfileiraPedido(FilaPedidos *f, Pedido *elem)
 {
@@ -45,6 +47,7 @@ int desenfileiraPedido(FilaPedidos *f, Pedido *elem)
 	f->tamanho--;
 	return 1;
 }
+
 // Exibe todos os pedidos atualmente na fila
 void imprimeFilaPedidos(FilaPedidos *f, Burger *cardapio)
 {
@@ -71,18 +74,20 @@ void imprimeFilaPedidos(FilaPedidos *f, Burger *cardapio)
 		i = (i + 1) % MAX; // Move para o próximo elemento da fila circular
 	}
 }
-// Gera uma quantidade aleatória de pedidos para o dia
+
 void geraPedidos(FilaPedidos *f, int num_dia)
 {
 	srand(time(NULL)); // Inicializa o gerador de números aleatórios
+
 	// A quantidade base de pedidos aumenta com o passar dos dias
 	int base = 3 + (num_dia - 1); 
-	// Gera um número de pedidos com uma variação aleatória
+
 	int qtdPedidos = base + (rand() % 3);
 
 	if (qtdPedidos < 1) {
 		qtdPedidos = 1;
 	}
+
 	// Cria e enfileira cada novo pedido
 	for (int i = 0; i < qtdPedidos; i++)
 	{
@@ -91,3 +96,5 @@ void geraPedidos(FilaPedidos *f, int num_dia)
 		enfileiraPedido(f, novo_pedido);
 	}
 }
+
+*/
