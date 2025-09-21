@@ -84,7 +84,7 @@ void gameplayLoop() {
 		valido = 0;
 
 		printf("\nBem vindo ao Pato Burger! Os melhores burgers de Salvador!\n");
-		printf("\nVoce deseja?:\n");
+		printf("\nVoce deseja...\n");
 		printf("\n(1) -> Iniciar o jogo.\n");
 		printf("(2) -> Exibir lista de ingredientes.\n");
 		printf("(3) -> Exibir cardapio.\n");
@@ -98,7 +98,7 @@ void gameplayLoop() {
 			if (strlen(input) == 1 && (input[0] == '1' || input[0] == '2' || input[0] == '3' || input[0] == '0')) { //Verifica se o input tem apenas 1 caractere,
 				valido = 1;																	//E se esse caractere é um dos que podem ser colocados ou não.
 			} else {
-				printf("Numero invalido, Selecione novamente.\n");
+				printf("Numero invalido, Selecione novamente:\n");
 			}
 		}
 
@@ -122,7 +122,7 @@ void gameplayLoop() {
 
 			exibirEstoque(&estoque);
 
-			printf("\nDigite qualquer tecla para voltar, digite 0 para sair:"\n);
+			printf("\nDigite qualquer tecla para voltar, digite 0 para sair:\n");
 			fgets(input, sizeof(input), stdin);
 		}
 		else if (input[0] == '3') {
