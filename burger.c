@@ -18,7 +18,7 @@ void inicializarCardapio(Burger *cardapio)
 
 void exibirCardapio(Burger *cardapio)
 {
-	printf("\n======== Cardápio ========\n\n");
+	printf("\n======== Cardapio ========\n\n");
 	for (int i = 0; i < MAX_BURGERS; i++)
 	{
 		printf("%d. %s - R$ %.2f\n", cardapio[i].id, cardapio[i].nome, cardapio[i].preco);
