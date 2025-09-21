@@ -4,6 +4,10 @@
 #include <locale.h>
 #include <string.h>
 
+#include "burger.h"
+#include "estoque.h"
+#include "pedidos.h"
+
 
 // Estrutura para guardar o estado atual do jogo
 typedef struct estado
@@ -59,6 +63,7 @@ void gameplayLoop() {
 
 	Burger hamburgueres[MAX_BURGERS];
 	Estado estadoDoPlayer;
+	Estoque estoque;
 
 	char input[10] = {'~'};
 	char returnInput[10] = {'~'};
@@ -67,12 +72,13 @@ void gameplayLoop() {
 
 	inicializarEstado(&estadoDoPlayer); //Inicializa estado do player atual.
 	inicializarHamburgueres(hamburgueres); //Inicializa hamburgueres no cardápio.
+	inicializarEstoque(&estoque);
 
 	while (input[0] != '0') { //Loop principal.
 
 		valido = 0;
 
-		printf("\nBem vindo à Pato Burger!! \n\n Nós temos SIM comida.\n");
+		printf("\nBem vindo à Pato Burger!! \n\n Nós temos comida.\n");
 		printf("Você deseja?:\n");
 		printf("(1) -> Começar o jogo.\n");
 		printf("(2) -> Exibir lista de ingredientes.\n");
@@ -96,8 +102,10 @@ void gameplayLoop() {
 			telaDePedidos(&estadoDoPlayer, hamburgueres);
 		}
 		else if (input[0] == '2') {
-			//exibirEstoque(Estoque *estoque);
-			return;
+			exibirEstoque(&estoque);
+
+			printf("\nDigite qualquer tecla para voltar, digite 0 para sair: ");
+			fgets(input, sizeof(input), stdin);
 		}
 		else if (input[0] == '3') {
 			exibirCardapio(hamburgueres);

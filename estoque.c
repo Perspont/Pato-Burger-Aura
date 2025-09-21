@@ -1,4 +1,4 @@
-#include <stdio.h>
+/*#include <stdio.h>
 #include <string.h>
 #include "estoque.h"
 
@@ -73,3 +73,4 @@ void removerIngrediente(Estoque *estoque, int id, int quantidade) {
 		printf("Ingrediente com ID %d não encontrado no estoque.\n", id);
 	}
 }
+*/
