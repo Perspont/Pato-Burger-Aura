@@ -24,7 +24,7 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 	char input[10] = {'~'};
 
 	while (input[0] != 's') { //Loop principal.
-		printf("\nTecle (f) para gerar os pedidos de 1 semana, e (s) para voltar ao menu inicial.\n\n");
+		printf("\nDigite (f) para gerar os pedidos de 1 semana, e (s) para voltar ao menu inicial.\n");
 
 		fgets(input, sizeof(input), stdin);
 		input[strcspn(input, "\n")] = '\0'; //Remove newLine char.
@@ -45,7 +45,7 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 
 				estado->dia++;
 
-				printf("\nTecle qualquer tecla/enter para continuar para o proximo dia ");
+				printf("\nDigite qualquer tecla ou ENTER para continuar para o proximo dia ");
 
 				fgets(input, sizeof(input), stdin);
 
@@ -83,9 +83,9 @@ void gameplayLoop() {
 
 		valido = 0;
 
-		printf("\nBem vindo a Pato Burger!! \n\n Nos temos comida!!\n");
-		printf("Voce deseja?:\n");
-		printf("(1) -> Iniciar o jogo.\n");
+		printf("\nBem vindo ao Pato Burger! Os melhores burgers de Salvador!\n");
+		printf("\nVoce deseja?:\n");
+		printf("\n(1) -> Iniciar o jogo.\n");
 		printf("(2) -> Exibir lista de ingredientes.\n");
 		printf("(3) -> Exibir cardapio.\n");
 		printf("(0) -> Sair do jogo.\n\n");
@@ -98,13 +98,13 @@ void gameplayLoop() {
 			if (strlen(input) == 1 && (input[0] == '1' || input[0] == '2' || input[0] == '3' || input[0] == '0')) { //Verifica se o input tem apenas 1 caractere,
 				valido = 1;																	//E se esse caractere é um dos que podem ser colocados ou não.
 			} else {
-				printf("Nao eh um dos numeros validos. Selecione novamente.\n");
+				printf("Numero invalido, Selecione novamente.\n");
 			}
 		}
 
 		if (input[0] == '1') {
 
-			#ifdef _WIN32
+			#ifdef _WIN32 // Limpa o terminal
 			system("cls");
 			#else
 			system("clear");
@@ -122,7 +122,7 @@ void gameplayLoop() {
 
 			exibirEstoque(&estoque);
 
-			printf("\nDigite qualquer tecla para voltar, digite 0 para sair: ");
+			printf("\nDigite qualquer tecla para voltar, digite 0 para sair:"\n);
 			fgets(input, sizeof(input), stdin);
 		}
 		else if (input[0] == '3') {
@@ -134,7 +134,7 @@ void gameplayLoop() {
 
 			exibirCardapio(cardapio);
 
-			printf("\nDigite qualquer tecla para voltar, digite 0 para sair: ");
+			printf("\nDigite qualquer tecla para voltar, digite 0 para sair:\n");
 			fgets(input, sizeof(input), stdin);
 		}
 	}
