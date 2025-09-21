@@ -98,11 +98,17 @@ void gameplayLoop() {
 			if (strlen(input) == 1 && (input[0] == '1' || input[0] == '2' || input[0] == '3' || input[0] == '0')) { //Verifica se o input tem apenas 1 caractere,
 				valido = 1;																	//E se esse caractere é um dos que podem ser colocados ou não.
 			} else {
-				printf("Nao é um dos numeros validos. Selecione novamente.\n");
+				printf("Nao eh um dos numeros validos. Selecione novamente.\n");
 			}
 		}
 
 		if (input[0] == '1') {
+
+			#ifdef _WIN32
+			system("cls");
+			#else
+			system("clear");
+			#endif
 
 			telaDePedidos(&estado, cardapio, &pedidos);
 		}
