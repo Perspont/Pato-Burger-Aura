@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "include/burger.h"
+#include "burger.h"
 #include "include/pedidos.h"
 
 typedef struct

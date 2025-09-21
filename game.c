@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
-#include "include/burger.h"
-#include "include/estoque.h"
-#include "include/pedidos.h"
-#include "include/game.h"
+#include "burger.h"
+#include "estoque.h"
+#include "pedidos.h"
+#include "game.h"
 
 #include <stdlib.h>
 
@@ -34,6 +34,9 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 
 			for (int i = 0; i < 7; i++) { //Roda por 7 dias.
 
+				inicializarCardapio(cardapio);
+				inicializaFilaPedidos(pedidos);
+				inicializarEstado(estado);
 
 				printf("\nIniciando Dia %d\n", estado->dia);
 
@@ -41,7 +44,7 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 
 				imprimeFilaPedidos(pedidos, cardapio);
 
-				printf("\nAperte qualquer tecla para continuar para o proximo dia ");
+				printf("\nTecle qualquer tecla/enter para continuar para o proximo dia ");
 
 				fgets(input, sizeof(input), stdin);
 
