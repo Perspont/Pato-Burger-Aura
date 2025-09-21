@@ -56,10 +56,12 @@ void gameplayLoop() {
 		}
 
 		if (input[0] == '1') {
-			exibirDiaDePedidos();
+			//exibirDiaDePedidos();
+			return;
 		}
 		else if (input[0] == '2') {
-			exibirEstoque(Estoque *estoque);
+			//exibirEstoque(Estoque *estoque);
+			return;
 		}
 		else if (input[0] == '3') {
 			exibirCardapio(hamburgueres);
