@@ -1,6 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "burger.h"
+#include "pedidos.h"
+
 typedef struct
 {
 	int dia;
@@ -8,5 +11,7 @@ typedef struct
 } Estado;
 
 void inicializarEstado(Estado *estado);
+void gameplayLoop();
+void telaDePedidos(Estado *estadoDoPlayer, Burger *hamburgueres, FilaPedidos *pedidos);
 
 #endif
