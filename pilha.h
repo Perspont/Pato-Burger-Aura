@@ -1,6 +1,6 @@
 #include <stdio.h>
 #define MAX 100
-typedef char tp_item;
+typedef int tp_item;
 
     typedef struct{
         int topo;

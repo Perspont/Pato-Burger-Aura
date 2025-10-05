@@ -3,7 +3,7 @@
 
 #include "burger.h"
 
-#define MAX 20
+#define MAX_PEDIDOS 20
 
 typedef struct
 {
@@ -13,7 +13,7 @@ typedef struct
 
 typedef struct
 {
-	Pedido pedidos[MAX];
+	Pedido pedidos[MAX_PEDIDOS];
 	int frente;	 
 	int tras;		 
 	int tamanho;

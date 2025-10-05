@@ -71,7 +71,7 @@ void imprimeFilaPedidos(FilaPedidos *f, Burger *cardapio)
 	}
 }
 
-void geraPedidos(FilaPedidos *f, int num_dia)
+void geraPedidos(FilaPedidos *f, int num_dia) //Gera uma fila de pedidos.
 {
 	srand(time(NULL));
 
