@@ -1,6 +1,8 @@
 #ifndef BURGER_H
 #define BURGER_H
 
+#include "pilha.h"
+
 #define MAX_BURGERS 10
 
 typedef struct
@@ -8,7 +10,7 @@ typedef struct
 	int id;
 	char nome[30];
 	float preco;
-	int ingredientes[10];
+	tp_pilha ingredientes;
 } Burger;
 
 void inicializarCardapio(Burger *cardapio);

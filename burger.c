@@ -16,6 +16,45 @@ void inicializarCardapio(Burger *cardapio)
 	cardapio[9] = (Burger){10, "Pickles and MAYO", 25.0, {1, 7, 10, 6, 7, 10, 1}};
 }
 
+
+//Funções para inicializar cada hambúrguer.
+
+void inicializa_BitAndBacon() {
+
+}
+
+void inicializa_DuckCheese() {
+
+}
+
+void inicializa_Quackteirao() {
+
+}
+
+void inicializa_BigPato() {
+
+}
+
+void inicializa_ZeroUm() {
+
+}
+
+void inicializa_ChickenDuckey() {
+
+}
+
+void inicializa_PatoSobreRodas() {
+
+}
+
+void inicializa_PatoVerde() {
+
+}
+
+void inicializa_PicklesAndMayo() {
+	
+}
+
 void exibirCardapio(Burger *cardapio)
 {
 	printf("\n======== Cardapio ========\n\n");
