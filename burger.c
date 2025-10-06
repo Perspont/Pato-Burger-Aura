@@ -6,7 +6,9 @@
 //Caso necessário, em futuras atualizações, utilizar estas funções para definir tudo dos hamburgueres ao invés de um vetor
 //cardapio para preencher preço, nome, etc.
 
-tp_pilha inicializa_BitAndBacon() { //{1, 2, 3, 8, 1}
+//Todos os hambúrgueres são montados de baixo pra cima (Como uma pilha).
+
+tp_pilha inicializa_BitAndBacon() { //{1, 2, 3, 6, 1}
 
 	tp_pilha p;
 
@@ -15,78 +17,172 @@ tp_pilha inicializa_BitAndBacon() { //{1, 2, 3, 8, 1}
 	push(&p, 1);
 	push(&p, 2);
 	push(&p, 3);
-	push(&p, 8);
+	push(&p, 6);
 	push(&p, 1);
 
 	return p;
 }
 
-void inicializa_DuckCheese() {
+tp_pilha inicializa_DuckCheese() { //{1, 3, 5, 4, 1}
 
 	tp_pilha p;
+
+	inicializa_pilha(&p);
+
+	push(&p, 1);
+	push(&p, 3);
+	push(&p, 5);
+	push(&p, 4);
+	push(&p, 1);
 
 	return p;
 
 }
 
-void inicializa_Quackteirao() {
+tp_pilha inicializa_Quackteirao() { //{1, 3, 2, 3, 4, 1}
 
 	tp_pilha p;
+
+	inicializa_pilha(&p);
+
+	push(&p, 1);
+	push(&p, 3);
+	push(&p, 2);
+	push(&p, 3);
+	push(&p, 4);
+	push(&p, 1);
 
 	return p;
 
 }
 
-void inicializa_BigPato() {
+tp_pilha inicializa_BigPato() { //{1, 4, 3, 2, 1, 4, 2, 1}
 
 	tp_pilha p;
+
+	inicializa_pilha(&p);
+
+	push(&p, 1);
+	push(&p, 4);
+	push(&p, 3);
+	push(&p, 2);
+	push(&p, 1);
+	push(&p, 4);
+	push(&p, 2);
+	push(&p, 1);
 
 	return p;
 
 }
 
-void inicializa_ZeroUm() {
+tp_pilha inicializa_ZeroUm() { //{1, 2, 3, 1}
 
 	tp_pilha p;
+
+	inicializa_pilha(&p);
+
+	push(&p, 1);
+	push(&p, 2);
+	push(&p, 3);
+	push(&p, 1);
 
 	return p;
 
 }
 
-void inicializa_ChickenDuckey() {
+tp_pilha inicializa_ChickenDuckey() { //{1, 4, 13, 7, 10, 1}
 
 	tp_pilha p;
+
+	inicializa_pilha(&p);
+
+	push(&p, 1);
+	push(&p, 4);
+	push(&p, 13);
+	push(&p, 7);
+	push(&p, 10);
+	push(&p, 1);
 
 	return p;
 
 }
 
-void inicializa_PatoSobreRodas() {
+tp_pilha inicializa_PatoSobreRodas() { //{1, 2, 3, 4, 5, 6, 11, 10, 1}
 
 	tp_pilha p;
+
+	inicializa_pilha(&p);
+
+	push(&p, 1);
+	push(&p, 2);
+	push(&p, 3);
+	push(&p, 4);
+	push(&p, 5);
+	push(&p, 6);
+	push(&p, 11);
+	push(&p, 10);
+	push(&p, 1);
 
 	return p;
 
 }
 
-void inicializa_Recursivo() {
+tp_pilha inicializa_Recursivo() { //{1, 10, 2, 3, 8, 5, 8, 4, 2, 3, 2, 3, 6, 10, 1}
 
 	tp_pilha p;
+
+	inicializa_pilha(&p);
+
+	push(&p, 1);
+	push(&p, 10);
+	push(&p, 2);
+	push(&p, 3);
+	push(&p, 8);
+	push(&p, 5);
+	push(&p, 8);
+	push(&p, 4);
+	push(&p, 2);
+	push(&p, 3);
+	push(&p, 2);
+	push(&p, 3);
+	push(&p, 6);
+	push(&p, 10);
+	push(&p, 1);
 
 	return p;
 
 }
 
-void inicializa_PatoVerde() {
+tp_pilha inicializa_PatoVerde() { //{1, 9, 3, 8, 7, 10, 1}
 
 	tp_pilha p;
+
+	inicializa_pilha(&p);
+
+	push(&p, 1);
+	push(&p, 9);
+	push(&p, 3);
+	push(&p, 8);
+	push(&p, 7);
+	push(&p, 10);
+	push(&p, 1);
 
 	return p;
 }
 
-void inicializa_PicklesAndMayo() {
+tp_pilha inicializa_PicklesAndMayo() { //{1, 10, 7, 6, 10, 7, 1}
 
 	tp_pilha p;
+
+	inicializa_pilha(&p);
+
+	push(&p, 1);
+	push(&p, 10);
+	push(&p, 7);
+	push(&p, 6);
+	push(&p, 10);
+	push(&p, 7);
+	push(&p, 1);
 
 	return p;
 
