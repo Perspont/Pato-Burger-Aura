@@ -1,13 +1,9 @@
+#include "pilha.h"
 #include <stdio.h>
-#define MAX 100
-typedef char tp_item;
 
-    typedef struct{
-        int topo;
-        tp_item item[MAX];
-    }tp_pilha;
 
-    void inicializa_pilha(tp_pilha *p){
+
+void inicializa_pilha(tp_pilha *p){
         p->topo = -1;
     }
 
@@ -73,11 +69,11 @@ typedef char tp_item;
             push(&a,e);
         }
     }
- 
+
     while (!pilha_vazia(&a)){
         pop (&a, &e);
         push(p,e);
-        
+
     }
 }
 
