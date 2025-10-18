@@ -93,16 +93,16 @@ void imprime_pilha(tp_pilha *pilha) {
 	 pilha_aux=inicializa_pilha();
      pilha_aux->topo = pilha->topo; //atribui o topo M de pilha para pilha_aux
      
-	 tp_no *atu=pilha->topo;
+	 //tp_no *atu=pilha->topo;
      
-	 while (!pilha_vazia(pilha))
-	       {
-            pop(pilha,&e);
-            printf("%d ", e);
-            push(pilha_aux, e);           
-            }
+	while (!pilha_vazia(pilha))
+	{
+        pop(pilha,&e);
+        printf("%d ", e);
+        push(pilha_aux, e);
+	}
 
-     pilha->topo = pilha_aux->topo; //atribui o topo de pilha_aux para pilha
+     pilha->topo = pilha_aux->topo; //atribui o topo de pilha_aux para pilha. Transfere a pilha_aux pra pilha, recuperando a pilha original.
      printf("\n");
      free(pilha_aux);
 }

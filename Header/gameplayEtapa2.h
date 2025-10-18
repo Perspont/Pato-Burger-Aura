@@ -1,0 +1,4 @@
+#ifndef GAMEPLAYETAPA2_H
+#define GAMEPLAYETAPA2_H
+
+#endif
