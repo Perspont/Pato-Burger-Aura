@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "estoque.h"
+#include "../Header/estoque.h"
 
 // inicializa a fila
 void inicializarEstoque(Estoque *estoque)
