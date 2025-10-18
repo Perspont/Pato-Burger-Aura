@@ -4,26 +4,26 @@
 
 
 
-tp_pilha *inicializa_pilha (){
-   tp_pilha *pilha=(tp_pilha*) malloc(sizeof(tp_pilha));   
+tp_pilhaLE *inicializa_pilha_LE(){
+   tp_pilhaLE *pilha=(tp_pilhaLE*) malloc(sizeof(tp_pilhaLE));   
    pilha->topo = NULL;   
    return pilha;
 }  
 
-tp_no *aloca() {
-	tp_no* pt;
-	pt=(tp_no*) malloc(sizeof(tp_no));
+tp_no_pilha *alocaPilhaLE() {
+	tp_no_pilha* pt;
+	pt=(tp_no_pilha*) malloc(sizeof(tp_no_pilha));
 	return pt;
 }
 
-int pilha_vazia (tp_pilha *pilha){   
+int pilha_vazia_LE(tp_pilhaLE *pilha){
  if (pilha->topo == NULL) return 1;
  return 0;
 }
 
-int push (tp_pilha *pilha, tp_item e){   
-  tp_no *novo;   
-  novo=aloca();
+int push_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE e){
+  tp_no_pilha *novo;   
+  novo=alocaPilhaLE();
   if (!novo) return 0;
 
   novo->info = e;  
@@ -39,10 +39,10 @@ int push (tp_pilha *pilha, tp_item e){
   return 1;   
 }        
 
-int pop (tp_pilha *pilha, tp_item *e){   
-  tp_no *aux;
+int pop_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE *e){
+  tp_no_pilha *aux;
 
-  if (pilha_vazia(pilha)) return 0;
+  if (pilha_vazia_LE(pilha)) return 0;
   *e=pilha->topo->info;
   aux=pilha->topo;
   pilha->topo=pilha->topo->prox;
@@ -50,32 +50,18 @@ int pop (tp_pilha *pilha, tp_item *e){
   return 1;   
 }        
 
-int top (tp_pilha *pilha, tp_item *e){   
-  tp_no *aux;
+int top_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE *e){
+  tp_no_pilha *aux;
 
-  if (pilha_vazia(pilha)) return 0;
+  if (pilha_vazia_LE(pilha)) return 0;
   *e=pilha->topo->info;
   return 1;   
-}        
-
-
-void imprime_pilha(tp_pilha *pilha) {
-    
-	 tp_no *atu=pilha->topo;
-     
-	 while (atu != NULL)
-	       {
-            printf("%d ", atu->info);  
-			atu= atu->prox; 
-            }
-
-     printf("\n");
 }
 
 
-void destroi_pilha(tp_pilha *pilha) {    
-	 tp_no *atu=pilha->topo, *aux;
-     tp_item e;
+tp_pilhaLE *destroi_pilha_LE(tp_pilhaLE *pilha) {
+	 tp_no_pilha *atu=pilha->topo, *aux;
+     tp_item_pilhaLE e;
 	 while (atu != NULL)
 	       {
 			aux = atu->prox;
@@ -86,14 +72,29 @@ void destroi_pilha(tp_pilha *pilha) {
 	free(pilha);
 }
 
-void imprime_pilha(tp_pilha *pilha) {
-     tp_pilha *pilha_aux;
-     tp_item e;
+void imprime_pilha_LE(tp_pilhaLE *pilha) {
+
+	tp_no_pilha *atu=pilha->topo;
+
+	while (atu != NULL)
+	{
+		printf("%d ", atu->info);
+		atu= atu->prox;
+	}
+
+	printf("\n");
+}
+
+
+/*
+void imprime_pilha(tp_pilhaLE *pilha) {
+     tp_pilhaLE *pilha_aux;
+     tp_item_pilhaLE e;
      //cria e inicializa uma pilha auxiliar
 	 pilha_aux=inicializa_pilha();
      pilha_aux->topo = pilha->topo; //atribui o topo M de pilha para pilha_aux
      
-	 //tp_no *atu=pilha->topo;
+	 //tp_no_pilha *atu=pilha->topo;
      
 	while (!pilha_vazia(pilha))
 	{
@@ -106,4 +107,4 @@ void imprime_pilha(tp_pilha *pilha) {
      printf("\n");
      free(pilha_aux);
 }
-
+*/
