@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
-#include "burger.h"
-#include "estoque.h"
-#include "pedidos.h"
-#include "game.h"
+#include "../Header/burger.h"
+#include "../Header/estoque.h"
+#include "../Header/pedidos.h"
+#include "../Header/game.h"
 
 #include <stdlib.h>
 

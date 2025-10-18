@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "burger.h"
+#include "../Header/burger.h"
 
 //Funções para inicializar cada hambúrguer.
 

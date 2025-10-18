@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "pedidos.h"
-#include "burger.h"
+#include "../Header/pedidos.h"
+#include "../Header/burger.h"
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
