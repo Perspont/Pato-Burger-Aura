@@ -6,9 +6,10 @@
 
 tp_pilhaLE *inicializa_pilha_LE(){
    tp_pilhaLE *pilha=(tp_pilhaLE*) malloc(sizeof(tp_pilhaLE));   
-   pilha->topo = NULL;   
+   pilha->topo = NULL;
+	pilha->tamanho = 0;
    return pilha;
-}  
+}
 
 tp_no_pilha *alocaPilhaLE() {
 	tp_no_pilha* pt;
@@ -22,22 +23,23 @@ int pilha_vazia_LE(tp_pilhaLE *pilha){
 }
 
 int push_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE e){
-  tp_no_pilha *novo;   
+  tp_no_pilha *novo;
   novo=alocaPilhaLE();
   if (!novo) return 0;
 
-  novo->info = e;  
-  if ( (pilha->topo == NULL) ) { //Se for o primeiro elemento da lista
-     novo->prox = NULL;   
+  novo->info = e;
+  if ( pilha->topo == NULL ) { //Se for o primeiro elemento da lista
+     novo->prox = NULL;
      //pilha->topo = novo;
-     }  
+     }
   else {
-     novo->prox = pilha->topo;   
-     //pilha->topo = novo; 
-     }  
-  pilha->topo = novo; 
-  return 1;   
-}        
+     novo->prox = pilha->topo;
+     //pilha->topo = novo;
+     }
+  pilha->topo = novo;
+	pilha->tamanho++;
+  return 1;
+}
 
 int pop_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE *e){
   tp_no_pilha *aux;
@@ -47,28 +49,30 @@ int pop_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE *e){
   aux=pilha->topo;
   pilha->topo=pilha->topo->prox;
   free(aux);
-  return 1;   
-}        
+	pilha->tamanho--;
+  return 1;
+}
 
 int top_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE *e){
   tp_no_pilha *aux;
 
   if (pilha_vazia_LE(pilha)) return 0;
   *e=pilha->topo->info;
-  return 1;   
+  return 1;
 }
 
 
-tp_pilhaLE *destroi_pilha_LE(tp_pilhaLE *pilha) {
-	 tp_no_pilha *atu=pilha->topo, *aux;
+void destroi_pilha_LE(tp_pilhaLE **pilha) {
+	 tp_no_pilha *atu=(*pilha)->topo, *aux;
      tp_item_pilhaLE e;
 	 while (atu != NULL)
 	       {
 			aux = atu->prox;
-            pop(pilha, &e);  
-			atu= aux; 
+            pop_pilha_LE(*pilha, &e);
+			atu= aux;
             }
-	pilha->topo = NULL;
+	(*pilha)->topo = NULL;
+	(*pilha)->tamanho = 0;
 	free(pilha);
 }
 
