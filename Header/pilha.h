@@ -1,3 +1,5 @@
+/*
+
 #ifndef PILHA_H
 #define PILHA_H
 
@@ -23,3 +25,5 @@ int compara_pilha (tp_pilha p, tp_pilha p1);
 int empilha_pilha(tp_pilha *p, tp_pilha *p1);
 
 #endif
+
+*/

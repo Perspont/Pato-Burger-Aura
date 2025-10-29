@@ -1,27 +1,30 @@
+/* Conteúdo de PilhaLE.h (CORRIGIDO) */
+
 #include <stdio.h>
 #include <stdlib.h>
 
 typedef int tp_item; 
 
-typedef struct tp_no_aux {   
+/* RENOMEADO AQUI */
+typedef struct tp_pilha_no_aux {   
   tp_item info;   
-  struct tp_no_aux *prox;   
-} tp_no; 
+  struct tp_pilha_no_aux *prox;   
+} tp_pilha_no; /* RENOMEADO AQUI */
 
 
 typedef struct {   
-  tp_no *topo;   
+  tp_pilha_no *topo; /* TIPO ATUALIZADO AQUI */
 } tp_pilha;
 
 
 tp_pilha *inicializa_pilha ();
 int pilha_vazia (tp_pilha *pilha);
-tp_no *aloca();
+
+/* RENOMEADO AQUI e o TIPO DE RETORNO ATUALIZADO */
+tp_pilha_no *aloca_pilha(); 
+
 int push (tp_pilha *pilha, tp_item e);
 int pop (tp_pilha *pilha, tp_item *e);
 int top (tp_pilha *pilha, tp_item *e);
-tp_pilha *destroi_pilha(tp_pilha *pilha);
+void destroi_pilha(tp_pilha *pilha); 
 void imprime_pilha(tp_pilha *pilha);
-
-
-
