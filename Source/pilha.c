@@ -1,4 +1,6 @@
-#include "../Header/pilha.h"
+/*
+
+#include "pilha.h"
 #include <stdio.h>
 
 
@@ -108,4 +110,5 @@ void inicializa_pilha(tp_pilha *p){
             push(p, e);
         }
         return 1;
-    }
+    } 
+*/   
