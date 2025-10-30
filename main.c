@@ -63,8 +63,8 @@ Produto catalogo[MAX_PRODUTOS] = {
     {7, "Picles", 10, 10, 4.00, 100},
     {8, "Cebola", 25, 10, 3.00, 100},
     {9, "Falafel", 5, 10, 7.00, 50},
-    {10, "Molho do Pato", 10, 10, 6.00, 50},
-    {11, "Onion Rings", 10, 10, 4.00, 50},
+    {10, "Molho do Pato", 10, 10, 2.00, 50},
+    {11, "Onion Rings", 10, 10, 6.00, 50},
     {12, "Maionese", 30, 10, 3.00, 100},
     {13, "Frango", 15, 10, 4.00, 75}
 };
