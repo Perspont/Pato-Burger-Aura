@@ -22,6 +22,7 @@ void adicionarIngredienteLE(BurgerLE_Player *burger, tp_item_pilhaLE e); //Quand
 float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedido); //Compara o hambúrguer criado pelo jogador com o hambúrguer pedido. Além disso, retorna o número de moedas que o player conseguiu com seu hambúrguer.
 void deletaBurgerLE(BurgerLE_Player *burger); //Quando o player deletar seu hambúrguer montado até agora.
 
+void inicializa_BitAndBacon_LE(BurgerLE *burgerPedido);
 void inicializaDuckCheese_LE(BurgerLE *burgerPedido);
 void inicializa_Quackteirao_LE(BurgerLE *burgerPedido);
 void inicializa_BigPato_LE(BurgerLE *burgerPedido);
