@@ -53,6 +53,15 @@ typedef struct
     int tomato_count;
     int cheese_count;
     int grilled_patty_count;
+    // --- NOVOS INGREDIENTES ADICIONADOS ---
+    int bacon_count;
+    int mayo_count;
+    int onion_rings_count;
+    int onion_count;
+    int pickles_count;
+    int falafel_count;
+    int chicken_count;
+    // --- FIM DA ADIÇÃO ---
 																			//Substituir por arquivo externo de save.
     // Pedido atual.
     char *PilhaDeHamburguerLE_display[MAX_BURGER_STACK]; //Pilha de hambúrguer (Em texto).
@@ -304,6 +313,23 @@ void drawInventory(GameContext *ctx, GameState *state, int left, int top, int ri
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "Cheese: %d", state->cheese_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+
+    // --- NOVOS INGREDIENTES ADICIONADOS ---
+    snprintf(text, sizeof(text), "Bacon:  %d", state->bacon_count);
+    writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+    snprintf(text, sizeof(text), "Maionese:%d", state->mayo_count);
+    writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+    snprintf(text, sizeof(text), "O.Rings:%d", state->onion_rings_count); // Abreviação para caber
+    writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+    snprintf(text, sizeof(text), "Cebola: %d", state->onion_count);
+    writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+    snprintf(text, sizeof(text), "Picles: %d", state->pickles_count);
+    writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+    snprintf(text, sizeof(text), "Falafel:%d", state->falafel_count);
+    writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+    snprintf(text, sizeof(text), "Frango: %d", state->chicken_count);
+    writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+    // --- FIM DA ADIÇÃO ---
 
     snprintf(text, sizeof(text), "Grilled: %d", state->grilled_patty_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
@@ -590,6 +616,15 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->tomato_count = 30;
     state->cheese_count = 30;
     state->grilled_patty_count = 0;
+    // --- NOVOS INGREDIENTES ADICIONADOS ---
+    state->bacon_count = 10;
+    state->mayo_count = 30;
+    state->onion_rings_count = 20;
+    state->onion_count = 30;
+    state->pickles_count = 30;
+    state->falafel_count = 10;
+    state->chicken_count = 10;
+    // --- FIM DA ADIÇÃO ---
     state->stackSize = 0;
     state->ordersPending = 0; // Alterado de 5 para 0, para sincronizar com os patos/guaxinims
     state->isGrilling = FALSE;
@@ -649,7 +684,7 @@ void stackItem(GameState *state, const char *item, int *inventory)
         state->PilhaDeHamburguerLE_display[state->stackSize] = _strdup(item); // Note: _strdup is windows-specific, free later!
         state->stackSize++;
 
-        //state->burgerPlayer
+        state->burgerPlayer
     }
     else
     {
@@ -703,6 +738,36 @@ void processCommand(GameState *state)
     {
         stackItem(state, "Hamburguer Grelhado", &state->grilled_patty_count);
     }
+    // --- NOVOS INGREDIENTES ADICIONADOS ---
+    else if (_stricmp(state->currentCommand, "bacon") == 0)
+    {
+        stackItem(state, "Bacon", &state->bacon_count);
+    }
+    else if (_stricmp(state->currentCommand, "maionese") == 0)
+    {
+        stackItem(state, "Maionese do Pato", &state->mayo_count);
+    }
+    else if (_stricmp(state->currentCommand, "onion_rings") == 0)
+    {
+        stackItem(state, "Onion Rings", &state->onion_rings_count);
+    }
+    else if (_stricmp(state->currentCommand, "cebola") == 0)
+    {
+        stackItem(state, "Cebola", &state->onion_count);
+    }
+    else if (_stricmp(state->currentCommand, "picles") == 0)
+    {
+        stackItem(state, "Picles", &state->pickles_count);
+    }
+    else if (_stricmp(state->currentCommand, "falafel") == 0)
+    {
+        stackItem(state, "Falafel", &state->falafel_count);
+    }
+    else if (_stricmp(state->currentCommand, "frango") == 0)
+    {
+        stackItem(state, "Frango", &state->chicken_count);
+    }
+    // --- FIM DA ADIÇÃO ---
     else if (_stricmp(state->currentCommand, "servir") == 0)
     {
         if (state->stackSize > 0 && state->ordersPending > 0)
