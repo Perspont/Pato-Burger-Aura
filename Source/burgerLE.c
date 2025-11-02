@@ -11,9 +11,18 @@ void inicializar_BurgerLE_Player(BurgerLE_Player *burger) { //Ingredientes -> Po
 
 void adicionarIngredienteLE(BurgerLE_Player *burger, tp_item_pilhaLE e) {
 
+    if (burger == NULL) {
+
+        printf("Erro: Tentativa de adicionar ingrediente a um hamburger nulo.\n");
+        return; // Aborta a operação com segurança
+
+    }
+
     if (burger->ingredientes == NULL) {
-        printf("Hambúrguer não possui memória alocada");
+
+        printf("Erro: Pilha de ingredientes do hamburger não inicializada.\n");
         return;
+
     }
 
     push_pilha_LE(burger->ingredientes, e);

@@ -46,21 +46,21 @@ typedef struct
 typedef struct
 {
     // Inventory
-    int money;
-    int bun_count;
-    int patty_count;
-    int lettuce_count;
-    int tomato_count;
-    int cheese_count;
-    int grilled_patty_count;
+    int dinheiro;
+    int pao_count;
+    int hamburguerCru_count;
+    int alface_count;
+    int tomate_count;
+    int queijo_count;
+    int hamburguerGrelhado_count;
     // --- NOVOS INGREDIENTES ADICIONADOS ---
     int bacon_count;
-    int mayo_count;
+    int maioneseDoPato_count;
     int onion_rings_count;
-    int onion_count;
-    int pickles_count;
+    int cebola_count;
+    int picles_count;
     int falafel_count;
-    int chicken_count;
+    int frango_count;
     // --- FIM DA ADIÇÃO ---
 																			//Substituir por arquivo externo de save.
     // Pedido atual.
@@ -92,6 +92,9 @@ typedef struct
     BOOL showEndScreen; //Flag para ativar a tela de "Game Over".
     BOOL showCardapio;  //Flag para ativar a tela de "cardapio" (Página 1).
     BOOL showCardapio_2; //Flag para a segunda página do cardápio.
+
+    //Dia.
+    int dia;
 
 } GameState;
 
@@ -300,38 +303,38 @@ void drawInventory(GameContext *ctx, GameState *state, int left, int top, int ri
     char text[64];
     int y = top + 2;
 
-    snprintf(text, sizeof(text), "Money: $%d", state->money);
+    snprintf(text, sizeof(text), "dinheiro: $%d", state->dinheiro);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN);
 
-    snprintf(text, sizeof(text), "Buns:   %d", state->bun_count);
+    snprintf(text, sizeof(text), "Buns:   %d", state->pao_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Patties:%d", state->patty_count);
+    snprintf(text, sizeof(text), "Patties:%d", state->hamburguerCru_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Lettuce:%d", state->lettuce_count);
+    snprintf(text, sizeof(text), "Lettuce:%d", state->alface_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Tomato: %d", state->tomato_count);
+    snprintf(text, sizeof(text), "Tomato: %d", state->tomate_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Cheese: %d", state->cheese_count);
+    snprintf(text, sizeof(text), "Cheese: %d", state->queijo_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 
     // --- NOVOS INGREDIENTES ADICIONADOS ---
     snprintf(text, sizeof(text), "Bacon:  %d", state->bacon_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Maionese:%d", state->mayo_count);
+    snprintf(text, sizeof(text), "Maionese:%d", state->maioneseDoPato_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "O.Rings:%d", state->onion_rings_count); // Abreviação para caber
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Cebola: %d", state->onion_count);
+    snprintf(text, sizeof(text), "Cebola: %d", state->cebola_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Picles: %d", state->pickles_count);
+    snprintf(text, sizeof(text), "Picles: %d", state->picles_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "Falafel:%d", state->falafel_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Frango: %d", state->chicken_count);
+    snprintf(text, sizeof(text), "Frango: %d", state->frango_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     // --- FIM DA ADIÇÃO ---
 
-    snprintf(text, sizeof(text), "Grilled: %d", state->grilled_patty_count);
+    snprintf(text, sizeof(text), "Grilled: %d", state->hamburguerGrelhado_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
 }
 
@@ -600,6 +603,38 @@ void desenharCardapio_pagina2(GameContext *ctx, GameState *state)
     blitToScreen(ctx);
 }
 
+/**
+ * @brief Draws the "Game Over" screen.
+ */
+void drawEndScreen(GameContext *ctx, GameState *state)
+{
+    clearBuffer(ctx);
+
+    int width = ctx->screenSize.X;
+    int height = ctx->screenSize.Y;
+    drawBox(ctx, 0, 0, width - 1, height - 1, FOREGROUND_RED | FOREGROUND_INTENSITY);
+
+    char text[64];
+    int y = height / 2 - 4;
+
+    const char *title = "GAME OVER";
+    writeToBuffer(ctx, (width - (int)strlen(title)) / 2, y, title, FOREGROUND_RED | FOREGROUND_INTENSITY);
+    y += 3;
+
+    snprintf(text, sizeof(text), "Final Score: $%d", state->dinheiro);
+    writeToBuffer(ctx, (width - (int)strlen(text)) / 2, y, text, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    y += 4;
+
+    const char *restart = "[R]estart";
+    writeToBuffer(ctx, (width - (int)strlen(restart)) / 2, y, restart, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+    y += 2;
+
+    const char *exitCmd = "[E]xit";
+    writeToBuffer(ctx, (width - (int)strlen(exitCmd)) / 2, y, exitCmd, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+
+    blitToScreen(ctx);
+}
+
 
 // --- Game Logic ---
 
@@ -609,22 +644,24 @@ void desenharCardapio_pagina2(GameContext *ctx, GameState *state)
 void initializeGame(GameContext *ctx, GameState *state)
 {
     // Set initial game state
-    state->money = 100;
-    state->bun_count = 20;
-    state->patty_count = 10;
-    state->lettuce_count = 30;
-    state->tomato_count = 30;
-    state->cheese_count = 30;
-    state->grilled_patty_count = 0;
-    // --- NOVOS INGREDIENTES ADICIONADOS ---
+    state->dinheiro = 100;
+    state->pao_count = 20;
+    state->hamburguerCru_count = 10;
+    state->alface_count = 30;
+    state->tomate_count = 30;
+    state->queijo_count = 30;
+    state->hamburguerGrelhado_count = 0;
+    // --- NOVOS INGREDIENTES ADICIONADOS ---                   //Usar arquivo .txt pra isso.
     state->bacon_count = 10;
-    state->mayo_count = 30;
+    state->maioneseDoPato_count = 30;
     state->onion_rings_count = 20;
-    state->onion_count = 30;
-    state->pickles_count = 30;
+    state->cebola_count = 30;
+    state->picles_count = 30;
     state->falafel_count = 10;
-    state->chicken_count = 10;
+    state->frango_count = 10;
     // --- FIM DA ADIÇÃO ---
+
+    inicializar_BurgerLE_Player(&state->burgerPlayer);
     state->stackSize = 0;
     state->ordersPending = 0; // Alterado de 5 para 0, para sincronizar com os patos/guaxinims
     state->isGrilling = FALSE;
@@ -633,7 +670,8 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->isRunning = TRUE;
     state->showEndScreen = FALSE;
     state->showCardapio = FALSE;
-    state->showCardapio_2 = FALSE; // Inicia na página 2 como falso
+    state->showCardapio_2 = FALSE; // Inicia na página 2 como falso.
+    state->dia = 1;
 
     // NEW: Initialize dynamic order state
     state->dynamicOrderCount = 0;
@@ -671,7 +709,7 @@ void initializeGame(GameContext *ctx, GameState *state)
 /**
  * @brief Adiciona ingrediente à pilha de hambúrguer.
  */
-void stackItem(GameState *state, const char *item, int *inventory)
+void empilharIngrediente_display(GameState *state, const char *item, int *inventory)
 {
     if (state->stackSize >= MAX_BURGER_STACK)
     {
@@ -681,14 +719,51 @@ void stackItem(GameState *state, const char *item, int *inventory)
     if (*inventory > 0)
     {
         (*inventory)--;
-        state->PilhaDeHamburguerLE_display[state->stackSize] = _strdup(item); // Note: _strdup is windows-specific, free later!
+        state->PilhaDeHamburguerLE_display[state->stackSize] = _strdup(item); // Dar free() em _stdrup().
         state->stackSize++;
 
-        state->burgerPlayer
+        if (strcmp(item, "Pao")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 1);
+        }
+        else if (strcmp(item, "Carne")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 2);
+        }
+        else if (strcmp(item, "Queijo")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 3);
+        }
+        else if (strcmp(item, "Alface")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 4);
+        }
+        else if (strcmp(item, "Tomate")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 5);
+        }
+        else if (strcmp(item, "Bacon")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 6);
+        }
+        else if (strcmp(item, "Picles")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 7);
+        }
+        else if (strcmp(item, "Cebola")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 8);
+        }
+        else if (strcmp(item, "Falafel")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 9);
+        }
+        else if (strcmp(item, "Onion Rings")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 10);
+        }
+        else if (strcmp(item, "Maionese")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 11);
+        }
+        else if (strcmp(item, "Frango")) {
+            adicionarIngredienteLE(&state->burgerPlayer, 12);
+        }
+        //state->burgerPlayer
     }
     else
     {
-        // Out of stock
+        // Sem estoque.
+        return;
     }
 }
 
@@ -701,6 +776,9 @@ void clearStack(GameState *state)
     {
         free(state->PilhaDeHamburguerLE_display[i]);
     }
+
+    deletaBurgerLE(&state->burgerPlayer);
+
     state->stackSize = 0;
 }
 
@@ -711,61 +789,61 @@ void processCommand(GameState *state)
 {
     if (_stricmp(state->currentCommand, "grelhar") == 0)
     {
-        if (!state->isGrilling && state->patty_count > 0)
+        if (!state->isGrilling && state->hamburguerCru_count > 0)
         {
-            state->patty_count--;
+            state->hamburguerCru_count--;
             state->isGrilling = TRUE;
             state->grillStartTime = GetTickCount64();
         }
     }
     else if (_stricmp(state->currentCommand, "pao") == 0)
     {
-        stackItem(state, "Pao", &state->bun_count);
+        empilharIngrediente_display(state, "Pao", &state->pao_count);
     }
     else if (_stricmp(state->currentCommand, "alface") == 0)
     {
-        stackItem(state, "Alface", &state->lettuce_count);
+        empilharIngrediente_display(state, "Alface", &state->alface_count);
     }
     else if (_stricmp(state->currentCommand, "tomate") == 0)
     {
-        stackItem(state, "Tomate", &state->tomato_count);
+        empilharIngrediente_display(state, "Tomate", &state->tomate_count);
     }
     else if (_stricmp(state->currentCommand, "queijo") == 0)
     {
-        stackItem(state, "Queijo", &state->cheese_count);
+        empilharIngrediente_display(state, "Queijo", &state->queijo_count);
     }
     else if (_stricmp(state->currentCommand, "hamburguer") == 0)
     {
-        stackItem(state, "Hamburguer Grelhado", &state->grilled_patty_count);
+        empilharIngrediente_display(state, "Hamburguer Grelhado", &state->hamburguerGrelhado_count);
     }
     // --- NOVOS INGREDIENTES ADICIONADOS ---
     else if (_stricmp(state->currentCommand, "bacon") == 0)
     {
-        stackItem(state, "Bacon", &state->bacon_count);
+        empilharIngrediente_display(state, "Bacon", &state->bacon_count);
     }
     else if (_stricmp(state->currentCommand, "maionese") == 0)
     {
-        stackItem(state, "Maionese do Pato", &state->mayo_count);
+        empilharIngrediente_display(state, "Maionese do Pato", &state->maioneseDoPato_count);
     }
     else if (_stricmp(state->currentCommand, "onion_rings") == 0)
     {
-        stackItem(state, "Onion Rings", &state->onion_rings_count);
+        empilharIngrediente_display(state, "Onion Rings", &state->onion_rings_count);
     }
     else if (_stricmp(state->currentCommand, "cebola") == 0)
     {
-        stackItem(state, "Cebola", &state->onion_count);
+        empilharIngrediente_display(state, "Cebola", &state->cebola_count);
     }
     else if (_stricmp(state->currentCommand, "picles") == 0)
     {
-        stackItem(state, "Picles", &state->pickles_count);
+        empilharIngrediente_display(state, "Picles", &state->picles_count);
     }
     else if (_stricmp(state->currentCommand, "falafel") == 0)
     {
-        stackItem(state, "Falafel", &state->falafel_count);
+        empilharIngrediente_display(state, "Falafel", &state->falafel_count);
     }
     else if (_stricmp(state->currentCommand, "frango") == 0)
     {
-        stackItem(state, "Frango", &state->chicken_count);
+        empilharIngrediente_display(state, "Frango", &state->frango_count);
     }
     // --- FIM DA ADIÇÃO ---
     else if (_stricmp(state->currentCommand, "servir") == 0)
@@ -774,7 +852,7 @@ void processCommand(GameState *state)
         {
             clearStack(state);
             state->ordersPending--;
-            state->money += 10; // Simple reward
+            state->dinheiro += 10; // Simple reward
         }
     }
     else if (_stricmp(state->currentCommand, "lixo") == 0)
@@ -904,7 +982,7 @@ void processInput(GameContext *ctx, GameState *state)
 }
 
 /**
- * @brief Updates the game state (e.g., grilling timer, game timer).
+ * @brief Atualiza o game state (timer da grelha, timer principal).
  */
 void updateGame(GameState *state)
 {
@@ -915,11 +993,11 @@ void updateGame(GameState *state)
         if (now - state->grillStartTime >= GRILL_TIME_MS)
         {
             state->isGrilling = FALSE;
-            state->grilled_patty_count++;
+            state->hamburguerGrelhado_count++;
         }
     }
 
-    // --- NEW: Dynamic Order Logic ---
+    // --- NEW: Dynamic Order Logic ---  Aqui que aparecem os pedidos.
     ULONGLONG now = GetTickCount64();
 
     // 1. Check for 10-second lifetime expiry
@@ -993,6 +1071,12 @@ void updateGame(GameState *state)
     state->ordersPending = state->dynamicOrderCount;
     // --- End of NEW Logic ---
 
+    // 1. Checa se o dinheiro acabou (Game Over imediato).
+    if (state->dinheiro <= 0)
+    {
+        state->showEndScreen = TRUE;
+        return; // Para atualizar o terminal, levando o player à tela de Game Over.
+    }
 
     // Check main game timer
     ULONGLONG elapsed = GetTickCount64() - state->gameStartTime;
@@ -1058,36 +1142,40 @@ void renderGame(GameContext *ctx, GameState *state)
     blitToScreen(ctx);
 }
 
+
 /**
- * @brief Draws the "Game Over" screen.
+ * @brief Reseta o estado para o início de um novo dia (sem resetar inventário/dinheiro).
  */
-void drawEndScreen(GameContext *ctx, GameState *state)
+void initializeNextDay(GameState *state)
 {
-    clearBuffer(ctx);
+    // Reseta o estado do dia
+    state->stackSize = 0;
+    state->ordersPending = 0;
+    state->isGrilling = FALSE;
+    state->commandLength = 0;
+    state->currentCommand[0] = '\0';
+    state->showEndScreen = FALSE; // Garante que não estamos na tela de game over
+    state->showCardapio = FALSE;
+    state->showCardapio_2 = FALSE;
 
-    int width = ctx->screenSize.X;
-    int height = ctx->screenSize.Y;
-    drawBox(ctx, 0, 0, width - 1, height - 1, FOREGROUND_RED | FOREGROUND_INTENSITY);
+    // Reseta os pedidos dinâmicos (pato/guaxinim)
+    state->dynamicOrderCount = 0;
+    state->lastDynamicOrderSpawn = GetTickCount64();
+    state->nextIsPato = TRUE;
+    state->spawnCycleCount = 0;
+    for (int i = 0; i < MAX_DYNAMIC_ORDERS; i++)
+    {
+        state->dynamicOrders[i].spawnTime = 0;
+        state->dynamicOrders[i].text[0] = '\0';
+    }
 
-    char text[64];
-    int y = height / 2 - 4;
+    // Reseta o timer do jogo.
+    state->gameStartTime = GetTickCount64();
 
-    const char *title = "GAME OVER";
-    writeToBuffer(ctx, (width - (int)strlen(title)) / 2, y, title, FOREGROUND_RED | FOREGROUND_INTENSITY);
-    y += 3;
+    //Aumenta o dia em 1.
+    state->dia++;
 
-    snprintf(text, sizeof(text), "Final Score: $%d", state->money);
-    writeToBuffer(ctx, (width - (int)strlen(text)) / 2, y, text, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-    y += 4;
-
-    const char *restart = "[R]estart";
-    writeToBuffer(ctx, (width - (int)strlen(restart)) / 2, y, restart, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    y += 2;
-
-    const char *exitCmd = "[E]xit";
-    writeToBuffer(ctx, (width - (int)strlen(exitCmd)) / 2, y, exitCmd, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-
-    blitToScreen(ctx);
+    // NOTA: Não reseta dinheiro nem ingredientes.
 }
 
 /**
@@ -1115,18 +1203,18 @@ BOOL runEndScreen(GameContext *ctx, GameState *state)
             {
                 switch (eventBuffer[i].EventType)
                 {
-                case KEY_EVENT:
-                    if (eventBuffer[i].Event.KeyEvent.bKeyDown)
-                    {
-                        char c = eventBuffer[i].Event.KeyEvent.uChar.AsciiChar;
-                        if (c == 'r' || c == 'R')
+                    case KEY_EVENT:
+                        if (eventBuffer[i].Event.KeyEvent.bKeyDown)
                         {
-                            // Restart
-                            clearStack(state);
-                            initializeGame(ctx, state); // Re-initialize the game
-                            return TRUE; // Tell main loop to continue
-                        }
-                        if (c == 'e' || c == 'E' || c == 'q' || c == 'Q')
+                            char c = eventBuffer[i].Event.KeyEvent.uChar.AsciiChar;
+                            if (c == 'r' || c == 'R')
+                            {
+                                // Reinicia o jogo COMPLETAMENTE
+                                clearStack(state);
+                                initializeGame(ctx, state); // Chama o reset TOTAL
+                                return TRUE; // Diz ao loop principal para continuar (no dia 1)
+                            }
+                        if (c == 'e' || c == 'E')
                         {
                             // Exit
                             return FALSE; // Tell main loop to stop
@@ -1179,52 +1267,84 @@ void cleanup(GameContext *ctx, GameState *state)
 
 
 // --- Main Function ---
-int telaPrincipalEtapa2()
+void telaPrincipalEtapa2()
 {
     GameContext gameContext = {0};
     GameState gameState = {0};
 
     initializeGame(&gameContext, &gameState);
 
-    while (gameState.isRunning)
-    {
+    BOOL showShopScreen = FALSE; // Flag para controlar a cena da loja
+
+    while (gameState.isRunning) {
         if (gameState.showEndScreen)
         {
-            // Este loop (runEndScreen) é bloqueante. Ele assume o controle
-            // até que o usuário escolha 'R' ou 'E'.
-            if (!runEndScreen(&gameContext, &gameState))
+            // O dia acabou (timer ou dinheiro). O que fazemos?
+
+            if (gameState.dinheiro <= 0)
             {
-                gameState.isRunning = FALSE; // Usuário escolheu sair
+                // CONDIÇÃO 1: Dinheiro acabou = GAME OVER
+
+                // runEndScreen agora é bloqueante.
+                // Se o jogador apertar 'R', ele já chama initializeGame (reset total).
+                if (runEndScreen(&gameContext, &gameState))
+                {
+                    // Jogador apertou 'R' (Restart)
+                    // O jogo já foi resetado por runEndScreen.
+                    // Apenas saia da tela de game over e volte ao gameplay.
+                    gameState.showEndScreen = FALSE;
+                }
+                else
+                {
+                    // Jogador apertou 'E' (Exit)
+                    gameState.isRunning = FALSE;
+                }
             }
-            // O runEndScreen tem seu próprio Sleep()
+            else
+            {
+                // CONDIÇÃO 2: Dia acabou, mas temos dinheiro = IR PARA A LOJA
+
+                // Pula a tela de Game Over
+                gameState.showEndScreen = FALSE;
+                showShopScreen = TRUE;
+            }
+        }
+        else if (showShopScreen)
+        {
+            // --- CENA DA LOJA ---
+
+            // Chame sua função de loja (que deve ser bloqueante)
+            suaFuncaoPrincipalDaLoja(&gameContext, &gameState); // <--- SUBSTITUA PELO NOME REAL
+
+            // Quando o jogador sair da loja:
+            showShopScreen = FALSE; // Desativa a flag da loja
+
+            // Prepara o próximo dia
+            clearStack(&gameState);
+            initializeNextDay(&gameState); // Reseta o timer/pedidos (NÃO o dinheiro)
         }
         else
         {
-            // --- LOOP DE JOGO NÃO-BLOQUEANTE ---
+            // --- CENA DE GAMEPLAY (DIA NORMAL) ---
 
-            // 1. Processa input. A função agora sabe se deve
-            //    ouvir comandos (jogo) ou teclas de navegação (cardápio).
+            // 1. Processa input
             processInput(&gameContext, &gameState);
 
-            // 2. Atualiza a lógica do jogo. Isso acontece
-            //    independentemente de qual tela está sendo mostrada.
-            //    (O timer e a grelha continuam)
+            // 2. Atualiza a lógica do jogo
+            // (updateGame irá ativar showEndScreen se o timer ou o dinheiro acabarem)
             updateGame(&gameState);
 
-            // 3. Decide qual cena desenhar.
+            // 3. Decide qual cena desenhar
             if (gameState.showCardapio)
             {
-                // Desenha a tela do cardapio (Página 1).
                 drawCardapioScreen(&gameContext, &gameState);
             }
             else if (gameState.showCardapio_2)
-			{
-            	// Desenha a tela do cardapio (Página 2).
+            {
                 desenharCardapio_pagina2(&gameContext, &gameState);
-			}
+            }
             else
             {
-                // Desenha a tela principal do jogo
                 renderGame(&gameContext, &gameState);
             }
 
@@ -1236,5 +1356,4 @@ int telaPrincipalEtapa2()
     // Cleanup
     cleanup(&gameContext, &gameState);
 
-    return 0;
 }
