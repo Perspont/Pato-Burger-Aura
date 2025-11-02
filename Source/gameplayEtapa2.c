@@ -877,6 +877,18 @@ void processCommand(GameState *state)
                     inicializa_Quackteirao_LE(&burgerPedido);
                 case 4:
                     inicializa_BigPato_LE(&burgerPedido);
+                case 5:
+                    inicializa_ZeroUm_LE(&burgerPedido);
+                case 6:
+                    inicializa_ChickenDuckey_LE(&burgerPedido);
+                case 7:
+                    inicializa_PatoSobreRodas_LE(&burgerPedido);
+                case 8:
+                    inicializa_Recursivo_LE(&burgerPedido);
+                case 9:
+                    inicializa_PatoVerde_LE(&burgerPedido);
+                case 10:
+                    inicializa_PicklesAndMayo_LE(&burgerPedido);
 
                 default: ;
             }
@@ -887,6 +899,7 @@ void processCommand(GameState *state)
     else if (_stricmp(state->currentCommand, "lixo") == 0)
     {
         clearStack(state);
+        deletaBurgerLE(&state->burgerPlayer); //Deleta hambúrguer (Itens dentro dele).
     }
 
     else if (_stricmp(state->currentCommand, "cardapio") == 0)

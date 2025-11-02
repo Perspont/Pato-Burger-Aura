@@ -29,6 +29,20 @@ void adicionarIngredienteLE(BurgerLE_Player *burger, tp_item_pilhaLE e) {
 
 }
 
+//Função para deletar burguer
+void deletaBurgerLE(BurgerLE_Player *burger)
+{
+    if (burger && burger->ingredientes)
+    {
+        tp_item_pilhaLE e;
+        int qtd = burger->ingredientes->tamanho;
+        for (int i = 0; i < qtd; i++)
+        {
+            pop_pilha_LE(burger->ingredientes, &e);
+        }
+    }
+}
+
 float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedido) {
 
     if (burgerPlayer == NULL || burgerPedido == NULL ||
@@ -174,7 +188,7 @@ float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedid
     destroi_pilha_LE(&ingredientesUsadosPedido);
 
     destroi_pilha_LE(&(burgerPedido->ingredientes));
-    //deletaBurgerLE(&burgerPlayer); //Deleta apenas a pilha de ingredientes.
+    deletaBurgerLE(burgerPlayer); //Deleta apenas a pilha de ingredientes.
 
 
     float moedasFinais = moedas - totalPenalidade;
@@ -182,21 +196,6 @@ float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedid
 
     return roundf(moedasFinais * 100) / 100.f;
 }
-
-
-//Função para deletar o burger..
-
-/*
-void deletaBurgerLE(BurgerLE_Player *burger)
-{
-    if(pilha_vazia_LE(burger->ingredientes)){
-        return;
-    }
-
-    destroi_pilha_LE((&burger->ingredientes));
-
-}
-*/
 
 //Função de inicializa o burguerLE
 void inicializa_BitAndBacon_LE(BurgerLE *burgerPedido) //{1, 2, 3, 6, 1};
@@ -251,83 +250,81 @@ void inicializa_BigPato_LE(BurgerLE *burgerPedido)
     push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
-/*
 void inicializa_ZeroUm_LE(BurgerLE *burgerPedido)
 {
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 2);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
+    burgerPedido->preco = 13;
+
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 2);
+    push_pilha_LE(burgerPedido->ingredientes, 3);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
 void inicializa_ChickenDuckey_LE(BurgerLE *burgerPedido)
 {
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 4);
-    push_pilha_LE((*burgerPedido)->ingredientes, 13);
-    push_pilha_LE((*burgerPedido)->ingredientes, 7);
-    push_pilha_LE((*burgerPedido)->ingredientes, 10);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
+    burgerPedido->preco = 21;
+
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 4);
+    push_pilha_LE(burgerPedido->ingredientes, 13);
+    push_pilha_LE(burgerPedido->ingredientes, 7);
+    push_pilha_LE(burgerPedido->ingredientes, 10);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
 void inicializa_PatoSobreRodas_LE(BurgerLE *burgerPedido)
 {
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 2);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 4);
-    push_pilha_LE((*burgerPedido)->ingredientes, 5);
-    push_pilha_LE((*burgerPedido)->ingredientes, 6);
-    push_pilha_LE((*burgerPedido)->ingredientes, 11);
-    push_pilha_LE((*burgerPedido)->ingredientes, 10);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
+    burgerPedido->preco = 24;
+
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 2);
+    push_pilha_LE(burgerPedido->ingredientes, 3);
+    push_pilha_LE(burgerPedido->ingredientes, 4);
+    push_pilha_LE(burgerPedido->ingredientes, 5);
+    push_pilha_LE(burgerPedido->ingredientes, 6);
+    push_pilha_LE(burgerPedido->ingredientes, 11);
+    push_pilha_LE(burgerPedido->ingredientes, 10);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
-void inicializa_Recursivo_LE(BurgerLE *burgerPedido)
-{
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 10);
-    push_pilha_LE((*burgerPedido)->ingredientes, 2);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 8);
-    push_pilha_LE((*burgerPedido)->ingredientes, 5);
-    push_pilha_LE((*burgerPedido)->ingredientes, 8);
-    push_pilha_LE((*burgerPedido)->ingredientes, 4);
-    push_pilha_LE((*burgerPedido)->ingredientes, 2);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 2);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 6);
-    push_pilha_LE((*burgerPedido)->ingredientes, 10);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
+void inicializa_Recursivo_LE(BurgerLE *burgerPedido) {
+
+    burgerPedido->preco = 35;
+
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    int ids[] = {1, 10, 2, 3, 8, 5, 8, 4, 2, 3, 2, 3, 6, 10, 1};
+    for (int i = 0; i < 15; i++){
+        push_pilha_LE(burgerPedido->ingredientes, ids[i]);
+    }
 }
 
 void inicializa_PatoVerde_LE(BurgerLE *burgerPedido)
 {
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 9);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 8);
-    push_pilha_LE((*burgerPedido)->ingredientes, 7);
-    push_pilha_LE((*burgerPedido)->ingredientes, 10);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
+    burgerPedido->preco = 21;
+
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 9);
+    push_pilha_LE(burgerPedido->ingredientes, 3);
+    push_pilha_LE(burgerPedido->ingredientes, 8);
+    push_pilha_LE(burgerPedido->ingredientes, 7);
+    push_pilha_LE(burgerPedido->ingredientes, 10);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
 void inicializa_PicklesAndMayo_LE(BurgerLE *burgerPedido)
 {
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 10);
-    push_pilha_LE((*burgerPedido)->ingredientes, 7);
-    push_pilha_LE((*burgerPedido)->ingredientes, 6);
-    push_pilha_LE((*burgerPedido)->ingredientes, 10);
-    push_pilha_LE((*burgerPedido)->ingredientes, 7);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-}
+    burgerPedido->preco = 25;
 
-*/
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 10);
+    push_pilha_LE(burgerPedido->ingredientes, 7);
+    push_pilha_LE(burgerPedido->ingredientes, 6);
+    push_pilha_LE(burgerPedido->ingredientes, 10);
+    push_pilha_LE(burgerPedido->ingredientes, 7);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+}

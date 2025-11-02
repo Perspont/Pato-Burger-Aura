@@ -17,7 +17,7 @@ Repositório para o projeto de AED 2025.2 da equipe Ronaldo + Aura + Ego.
     hamburguer -> Empilha hambúrguer (grelhado) no hambúrguer.
     bacon -> Empilha bacon no hambúrguer.
     maionese -> Empilha maionese no hambúrguer.
-    onion rings -> Empilha onion rings no hambúrguer
+    onion_rings -> Empilha onion rings no hambúrguer
     cebola -> Empilha cebola no hambúrguer.
     picles -> Empilha picles no hambúrguer.
     falafel -> Empilha falafel no hambúrguer.

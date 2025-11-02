@@ -1,294 +1,417 @@
+#include "../Header/loja.h" // Inclui o novo loja.h
 #include <stdio.h>
-#include <stdlib.h> 
-#include <time.h>   
+#include <stdlib.h>
 #include <string.h>
-#include "../Header/listade.h"
 
-// --- Definição das Estruturas e Constantes ---
-
-// Dados do Produto - A ID será a 'info' na sua lista
-typedef struct {
-    int id;
-    char nome[50];
-    int quantidade_loja; // Estoque DISPONÍVEL NA LOJA (para compra)
-    int quantidade_hamb; // Estoque NA HAMBURGUERIA (ingredientes comprados)
-    float preco;
-    int estoque_max_loja; // Máximo que a Loja pode ter
-} Produto;
-
-// Simulação de um catálogo de produtos com os ingredientes solicitados.
-#define MAX_PRODUTOS 13 // Total de produtos
-Produto catalogo[MAX_PRODUTOS] = {
-    // ID, Nome, Qtd_Loja_Inicial, Qtd_Hamb_Inicial, Preço, Max_Loja
-    {1, "Pao", 50, 0, 2.00, 100},
-    {2, "Carne", 30, 0, 5.00, 100},
-    {3, "Queijo", 40, 0, 3.00, 100},
-    {4, "Alface", 20, 0, 4.00, 100},
-    {5, "Tomate", 20, 0, 3.00, 100},
-    {6, "Bacon", 15, 0, 4.00, 100},
-    {7, "Picles", 10, 0, 4.00, 100},
-    {8, "Cebola", 25, 0, 3.00, 100},
-    {9, "Falafel", 5, 0, 7.00, 50},
-    {10, "Molho do Pato", 10, 0, 6.00, 50},
-    {11, "Onion Rings", 10, 0, 4.00, 50},
-    {12, "Maionese", 30, 0, 3.00, 100},
-    {13, "Frango", 15, 0, 4.00, 75}
-};
+#ifdef _WIN32
+#include <windows.h> // Para system("cls") e Sleep
+#else
+#include <unistd.h> // Para system("clear") e sleep
+#define Sleep(ms) usleep(ms * 1000)
+#endif
 
 
-// --- Funções Auxiliares ---
-
-Produto *busca_produto_por_id(int id) {
-    if (id > 0 && id <= MAX_PRODUTOS) {
-        return &catalogo[id - 1];
-    }
-    return NULL;
-}
-
-int produto_existe(int id) {
-    return (id > 0 && id <= MAX_PRODUTOS);
-}
-
-// Garante que a lista dinâmica reflita o estado de um estoque específico (loja ou hamburgueria)
-void gerenciar_lista_dinamica(tp_listad *lista, Produto *p, int tipo_estoque) {
-    int quantidade = (tipo_estoque == 1) ? p->quantidade_loja : p->quantidade_hamb;
-    tp_no *no = busca_listade(lista, p->id);
-    const char *nome_estoque = (tipo_estoque == 1) ? "ESTOQUE DA LOJA" : "ESTOQUE DA HAMBURGUERIA";
-
-    if (quantidade > 0 && no == NULL) {
-        // Se o estoque > 0 e o item NAO esta na lista, adiciona o ID
-        insere_listad_no_fim(lista, p->id);
-        printf("[INFO] Produto '%s' adicionado a lista de %s.\n", p->nome, nome_estoque);
-    } else if (quantidade == 0 && no != NULL) {
-        // Se o estoque = 0 e o item ESTA na lista, remove o ID
-        remove_listad(lista, p->id);
-        printf("[INFO] Produto '%s' removido da lista de %s (Estoque zerado).\n", p->nome, nome_estoque);
-    }
-}
-
-// --- Funções do Sistema de Loja e Hamburgueria ---
+/*
+ * ===================================================================
+ * FUNÇÕES AUXILIARES INTERNAS (static)
+ * ===================================================================
+ */
 
 /**
- * @brief Move itens do Estoque da Loja para o Estoque da Hamburgueria.
- * O delta pode ser negativo (usar/vender) ou positivo (comprar/adicionar).
+ * @brief Limpa o buffer de entrada (stdin) para scanf.
  */
-void modificar_estoque(tp_listad *lista_loja, tp_listad *lista_hamb, int id, int delta_loja, int delta_hamb) {
-    Produto *p = busca_produto_por_id(id);
+static void limparBufferInput() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
 
-    if (p == NULL) {
-        printf("[ERRO] Produto com ID %d nao encontrado.\n", id);
+/**
+ * @brief Limpa o terminal de forma cross-platform.
+ */
+static void limparTela() {
+    #ifdef _WIN32
+    system("cls");
+    #else
+    system("clear");
+    #endif
+}
+
+/**
+ * @brief Libera todos os nós de uma lista de ingrediente específica.
+ */
+static void _liberarListaIngrediente(ListaIngrediente *lista) {
+    IngredienteNode *atual = lista->cabeca;
+    IngredienteNode *temp;
+    while (atual != NULL) {
+        temp = atual;
+        atual = atual->prox;
+        free(temp);
+    }
+    lista->cabeca = NULL;
+    lista->cauda = NULL;
+    lista->quantidade = 0;
+}
+
+/**
+ * @brief Adiciona um nó (uma unidade) à lista de ingredientes do jogador.
+ * (Esta é a lógica do "novo nó à lista de queijo")
+ */
+static void _adicionarNoIngrediente(ListaIngrediente *lista) {
+    IngredienteNode *novoNo = (IngredienteNode*) malloc(sizeof(IngredienteNode));
+    if (novoNo == NULL) {
+        perror("Erro ao alocar memoria para ingrediente");
+        return;
+    }
+    novoNo->prox = NULL;
+    novoNo->ant = lista->cauda; // Aponta para a antiga cauda
+
+    if (lista->cabeca == NULL) { // Se a lista está vazia
+        lista->cabeca = novoNo;
+    } else { // Se a lista já tem itens
+        lista->cauda->prox = novoNo; // A antiga cauda aponta para o novo nó
+    }
+    lista->cauda = novoNo; // O novo nó é a nova cauda
+    lista->quantidade++;
+}
+
+/**
+ * @brief Remove um nó (uma unidade) da lista de ingredientes.
+ * Remove da cauda (LIFO/FIFO não importa, cauda é eficiente).
+ * @return 1 em sucesso, 0 se a lista estava vazia.
+ */
+static int _removerNoIngrediente(ListaIngrediente *lista) {
+    if (lista->quantidade == 0 || lista->cauda == NULL) {
+        return 0; // Falha, sem estoque
+    }
+
+    IngredienteNode *noRemovido = lista->cauda;
+
+    if (lista->cabeca == lista->cauda) { // Se for o último item
+        lista->cabeca = NULL;
+        lista->cauda = NULL;
+    } else { // Se houver mais itens
+        lista->cauda = noRemovido->ant; // A nova cauda é o item anterior
+        lista->cauda->prox = NULL; // A nova cauda não aponta para frente
+    }
+
+    free(noRemovido);
+    lista->quantidade--;
+    return 1; // Sucesso
+}
+
+
+/**
+ * @brief Retorna um ponteiro para a lista de ingredientes correta no inventário
+ * com base no ID do produto.
+ * @return Ponteiro para a ListaIngrediente, ou NULL se o ID for inválido.
+ */
+static ListaIngrediente* getListaPorID(InventarioJogador *inv, int id) {
+    switch (id) {
+        case 1:  return &inv->paes;
+        case 2:  return &inv->carnes;
+        case 3:  return &inv->queijos;
+        case 4:  return &inv->alfaces;
+        case 5:  return &inv->tomates;
+        case 6:  return &inv->bacons;
+        case 7:  return &inv->picles;
+        case 8:  return &inv->cebolas;
+        case 9:  return &inv->falafels;
+        case 10: return &inv->molhos;
+        case 11: return &inv->onionRings;
+        case 12: return &inv->maioneses;
+        case 13: return &inv->frangos;
+        default: return NULL;
+    }
+}
+
+/**
+ * @brief Adiciona um produto à loja.
+ * A inserção é feita em ORDEM ALFABÉTICA (por nome).
+ */
+static void _inserirProdutoOrdenado(Loja *loja, int id, const char *nome, double preco) {
+    ProdutoLojaNode *novoProduto = (ProdutoLojaNode*) malloc(sizeof(ProdutoLojaNode));
+    if (novoProduto == NULL) {
+        perror("Erro ao alocar memoria para produto da loja");
+        return;
+    }
+    strcpy(novoProduto->nome, nome);
+    novoProduto->id = id;
+    novoProduto->precoBase = preco;
+    novoProduto->precoAtual = preco;
+    novoProduto->prox = NULL;
+    novoProduto->ant = NULL;
+
+    // Caso 1: Lista vazia
+    if (loja->cabeca == NULL) {
+        loja->cabeca = novoProduto;
+        loja->cauda = novoProduto;
+        loja->numProdutos++;
         return;
     }
 
-    // --- LOGICA DA LOJA ---
-    int nova_qtd_loja = p->quantidade_loja + delta_loja;
-    
-    if (nova_qtd_loja < 0) {
-        printf("[ERRO] Nao ha estoque suficiente na LOJA (apenas %d disponiveis).\n", p->quantidade_loja);
-        return;
-    }
-    if (nova_qtd_loja > p->estoque_max_loja) {
-        printf("[AVISO] Estoque maximo da LOJA (%d) atingido para %s.\n", p->estoque_max_loja, p->nome);
-        nova_qtd_loja = p->estoque_max_loja;
-    }
-    p->quantidade_loja = nova_qtd_loja;
-
-    // --- LOGICA DA HAMBURGUERIA ---
-    int nova_qtd_hamb = p->quantidade_hamb + delta_hamb;
-    
-    if (nova_qtd_hamb < 0) {
-         printf("[ERRO] Nao ha estoque suficiente na HAMBURGUERIA (apenas %d disponiveis).\n", p->quantidade_hamb);
-         return;
-    }
-    p->quantidade_hamb = nova_qtd_hamb;
-    
-    // 1. Gerencia a lista da Loja
-    gerenciar_lista_dinamica(lista_loja, p, 1);
-    
-    // 2. Gerencia a lista da Hamburgueria
-    gerenciar_lista_dinamica(lista_hamb, p, 2);
-}
-
-
-/**
- * @brief Funcao wrapper para compra (Loja -> Hamburgueria).
- */
-void comprar_para_hamburgueria(tp_listad *lista_loja, tp_listad *lista_hamb, int id, int quantidade) {
-    Produto *p = busca_produto_por_id(id);
-
-    if (p == NULL) return;
-
-    // Compra: Diminui LOJA (delta_loja = -quantidade) e Aumenta HAMBURGUERIA (delta_hamb = +quantidade)
-    modificar_estoque(lista_loja, lista_hamb, id, -quantidade, quantidade);
-    
-    // Se a modificacao foi bem sucedida (sem erro de falta de estoque), imprime a transacao
-    if (quantidade <= p->quantidade_loja + quantidade) { // Verifica se a transacao foi autorizada
-        printf("[SUCESSO] Compra de %d unidades de %s realizada. Custo: R$ %.2f\n", 
-               quantidade, p->nome, (quantidade * p->preco));
-    }
-}
-
-
-/**
- * @brief Lista um estoque específico (Loja ou Hamburgueria)
- */
-void listar_estoque(tp_listad *lista, int tipo_estoque) {
-    const char *titulo = (tipo_estoque == 1) ? "ESTOQUE DA LOJA (Disponível para Compra)" : "ESTOQUE DA HAMBURGUERIA (Ingredientes)";
-    
-    if (lista == NULL || listad_vazia(lista)) {
-        printf("\n[Estoque] %s: Lista vazia.\n", titulo);
+    // Caso 2: Inserir antes da cabeça (novo item é o primeiro alfabeticamente)
+    if (strcmp(nome, loja->cabeca->nome) < 0) {
+        novoProduto->prox = loja->cabeca;
+        loja->cabeca->ant = novoProduto;
+        loja->cabeca = novoProduto;
+        loja->numProdutos++;
         return;
     }
 
-    printf("\n--- %s ---\n", titulo);
-    printf("| %-3s | %-20s | %-7s | %-5s |\n", "ID", "Ingrediente", "QTD", "Preco");
-    printf("|-----|----------------------|---------|-------|\n");
-
-    tp_no *atu = lista->ini;
-    while (atu != NULL) {
-        Produto *p = busca_produto_por_id(atu->info);
-        if (p != NULL) {
-            int quantidade = (tipo_estoque == 1) ? p->quantidade_loja : p->quantidade_hamb;
-            float preco_unitario = p->preco;
-            
-            if (quantidade > 0) {
-                printf("| %-3d | %-20s | %-7d | R$%.2f |\n",
-                       p->id, p->nome, quantidade, preco_unitario);
-            }
-        }
-        atu = atu->prox;
+    // Caso 3: Inserir no meio ou no fim
+    ProdutoLojaNode *atual = loja->cabeca;
+    // Procura o local correto para inserção
+    // (Avança enquanto 'atual->prox' existir E o 'nome' for maior que 'atual->prox->nome')
+    while (atual->prox != NULL && strcmp(nome, atual->prox->nome) > 0) {
+        atual = atual->prox;
     }
-    printf("----------------------------------------------------\n");
-}
 
+    // 'atual' é o nó ANTES do ponto de inserção
+    novoProduto->prox = atual->prox;
+    novoProduto->ant = atual;
+
+    if (atual->prox != NULL) { // Inserção no meio
+        atual->prox->ant = novoProduto;
+    } else { // Inserção no fim
+        loja->cauda = novoProduto;
+    }
+    
+    atual->prox = novoProduto;
+    loja->numProdutos++;
+}
 
 /**
- * @brief Simula a reposição/entrega aleatória de itens na LOJA.
+ * @brief Busca um produto na loja pelo ID.
+ * @return Ponteiro para o ProdutoLojaNode se encontrado, ou NULL.
  */
-void simular_reposicao_loja(tp_listad *lista_loja) {
-    printf("\n======================================================\n");
-    printf("            SIMULANDO REPOSICAO DA LOJA\n");
-    printf("======================================================\n");
-    
-    for (int i = 0; i < MAX_PRODUTOS; i++) {
-        Produto *p = &catalogo[i];
-        
-        // Define uma variação aleatória para a reposição (20% a 70% do máximo)
-        int min_reposicao = p->estoque_max_loja / 5; 
-        int max_reposicao = p->estoque_max_loja * 7 / 10; 
-        
-        if (min_reposicao > max_reposicao) min_reposicao = max_reposicao;
-        
-        int reposicao_aleatoria = (rand() % (max_reposicao - min_reposicao + 1)) + min_reposicao;
-        
-        // Adiciona a reposição, garantindo que não ultrapasse o máximo
-        int reposicao_efetiva = reposicao_aleatoria;
-        int nova_quantidade = p->quantidade_loja + reposicao_aleatoria;
-
-        if (nova_quantidade > p->estoque_max_loja) {
-             reposicao_efetiva = p->estoque_max_loja - p->quantidade_loja;
-             nova_quantidade = p->estoque_max_loja;
+static ProdutoLojaNode* _buscarProdutoPorID(Loja *loja, int id) {
+    ProdutoLojaNode *atual = loja->cabeca;
+    while (atual != NULL) {
+        if (atual->id == id) {
+            return atual;
         }
-
-        if (reposicao_efetiva > 0) {
-            p->quantidade_loja = nova_quantidade;
-            printf("Rep. %-20s: Reposicao de %d unidades. Novo estoque na Loja: %d\n", p->nome, reposicao_efetiva, p->quantidade_loja);
-        } else if (p->quantidade_loja == 0) {
-             printf("Rep. %-20s: Sem estoque na Loja e sem reposicao hoje.\n", p->nome);
-        }
-        
-        gerenciar_lista_dinamica(lista_loja, p, 1);
+        atual = atual->prox;
     }
-    printf("----------------------------------------------------\n");
-    listar_estoque(lista_loja, 1);
+    return NULL; // Não encontrado
+}
+
+/**
+ * @brief Tenta comprar um item.
+ */
+static void _comprarItem(Loja *loja, InventarioJogador *inv, int produtoID) {
+    ProdutoLojaNode *produto = _buscarProdutoPorID(loja, produtoID);
+
+    if (produto == NULL) {
+        printf("\n[ERRO] Produto com ID %d nao encontrado.\n", produtoID);
+        Sleep(1500);
+        return;
+    }
+
+    if (inv->dinheiro < produto->precoAtual) {
+        printf("\n[ERRO] Dinheiro insuficiente! Voce precisa de $%.2f.\n", produto->precoAtual);
+        Sleep(1500);
+        return;
+    }
+
+    // Acha a lista de inventário correta (ex: inv->queijos)
+    ListaIngrediente *listaDestino = getListaPorID(inv, produto->id);
+    if (listaDestino == NULL) {
+        printf("\n[ERRO] O produto '%s' nao pode ser armazenado (ID %d invalido).\n", produto->nome, produto->id);
+        Sleep(1500);
+        return;
+    }
+
+    // --- Transação ---
+    inv->dinheiro -= produto->precoAtual;
+    _adicionarNoIngrediente(listaDestino); // Adiciona 1 nó à lista do jogador
+
+    printf("\n[SUCESSO] Voce comprou 1 %s.\n", produto->nome);
+    printf("Novo saldo: $%.2f. Total no inventario: %d\n", inv->dinheiro, listaDestino->quantidade);
+    Sleep(1500);
 }
 
 
-// --- Função Principal e Menu ---
+/*
+ * ===================================================================
+ * FUNÇÕES PÚBLICAS (Implementação de loja.h)
+ * ===================================================================
+ */
 
-int main() {
-    srand(time(NULL));
-    
-    // 1. Lista Dinâmica 1: Estoque da LOJA (O que a Hamburgueria pode comprar)
-    tp_listad *estoque_loja = inicializa_listad();
+// --- Funções do Inventário ---
 
-    // 2. Lista Dinâmica 2: Estoque da HAMBURGUERIA (Ingredientes comprados)
-    tp_listad *estoque_hamburgueria = inicializa_listad(); 
-
-    // Inicializa a lista da loja com o estoque inicial do catálogo
-    for(int i = 0; i < MAX_PRODUTOS; i++) {
-        if (catalogo[i].quantidade_loja > 0) {
-            insere_listad_no_fim(estoque_loja, catalogo[i].id);
+void inicializarInventario(InventarioJogador *inv, double dinheiroInicial) {
+    // Itera por todos os IDs de ingredientes possíveis e zera suas listas
+    // IDs 1-13
+    for (int i = 1; i <= 13; i++) { 
+        ListaIngrediente *lista = getListaPorID(inv, i);
+        if (lista != NULL) {
+            lista->cabeca = NULL;
+            lista->cauda = NULL;
+            lista->quantidade = 0;
         }
     }
-    printf("Sistema iniciado. Estoque da Hamburgueria esta inicialmente vazio.\n");
+    inv->dinheiro = dinheiroInicial;
+}
 
-
-    int opcao, id, quantidade;
-
-    do {
-        printf("\n--- Menu de Gerenciamento do Jogo ---\n");
-        printf("1. Listar Estoque ATIVO da LOJA\n"); //IMPORTANTE.
-        printf("2. Listar Ingredientes da HAMBURGUERIA\n");
-        printf("3. COMPRAR Ingredientes (Loja -> Hamburgueria)\n"); //IMPORTANTE.
-        printf("4. Simular Producao (Usa Ingredientes - Em desenvolvimento)\n");
-        printf("5. Passar o Dia (Nova Reposicao Aleatoria da Loja)\n");
-        printf("0. Sair\n");
-        printf("Escolha uma opcao: ");
-        if (scanf("%d", &opcao) != 1) {
-             while(getchar() != '\n');
-             opcao = -1; 
+void liberarInventario(InventarioJogador *inv) {
+    // Itera e libera todas as listas
+    for (int i = 1; i <= 13; i++) {
+        ListaIngrediente *lista = getListaPorID(inv, i);
+        if (lista != NULL) {
+            _liberarListaIngrediente(lista);
         }
+    }
+}
 
-        switch (opcao) {
-            case 1:
-                listar_estoque(estoque_loja, 1);
-                break;
-                
-            case 2:
-                listar_estoque(estoque_hamburgueria, 2);
-                break;
+void adicionarItemInventario(InventarioJogador *inv, int ingredienteID) {
+    ListaIngrediente *lista = getListaPorID(inv, ingredienteID);
+    if (lista != NULL) {
+        _adicionarNoIngrediente(lista);
+    }
+}
 
-            case 3:
-                printf("\n--- Comprar Ingredientes ---\n");
-                listar_estoque(estoque_loja, 1);
-                printf("ID do Produto a comprar (1 a %d): ", MAX_PRODUTOS);
-                scanf("%d", &id);
-                if (!produto_existe(id)) {
-                    printf("[ERRO] ID de produto invalido.\n");
-                    break;
-                }
-                printf("Quantidade a comprar: ");
-                scanf("%d", &quantidade);
-                if (quantidade < 1) {
-                    printf("[ERRO] A quantidade deve ser maior que zero.\n");
-                    break;
-                }
-                comprar_para_hamburgueria(estoque_loja, estoque_hamburgueria, id, quantidade);
-                break;
+int usarItemInventario(InventarioJogador *inv, int ingredienteID) {
+    ListaIngrediente *lista = getListaPorID(inv, ingredienteID);
+    if (lista != NULL) {
+        return _removerNoIngrediente(lista); // Retorna 1 (sucesso) ou 0 (falha)
+    }
+    return 0; // Falha (ID inválido)
+}
 
-            case 4:
-                // Aqui entraria a função de montar o hamburguer
-                printf("\n--- Simular Producao ---\n");
-                printf("Funcao em desenvolvimento. Voce usaria ingredientes do Estoque da Hamburgueria aqui.\n");
-                
-                break;
-                
-            case 5:
-                // Aqui entraria o sistema de passar  o dia
-                simular_reposicao_loja(estoque_loja);
-                break;
-
-            case 0: 
-                printf("Saindo do sistema. Destruindo listas de estoque.\n");
-                estoque_loja = Destroi_listad(estoque_loja);
-                estoque_hamburgueria = Destroi_listad(estoque_hamburgueria);
-                break;
-
-            default:
-                printf("Opcao invalida. Tente novamente.\n");
-        }
-    } while (opcao != 0);
-
+int getQuantidadeInventario(InventarioJogador *inv, int ingredienteID) {
+    ListaIngrediente *lista = getListaPorID(inv, ingredienteID);
+    if (lista != NULL) {
+        return lista->quantidade;
+    }
     return 0;
+}
+
+
+// --- Funções da Loja ---
+
+void inicializarLoja(Loja *loja) {
+    loja->cabeca = NULL;
+    loja->cauda = NULL;
+    loja->numProdutos = 0;
+    // Inicializa o gerador de números aleatórios
+    srand((unsigned int)time(NULL));
+}
+
+void liberarLoja(Loja *loja) {
+    ProdutoLojaNode *atual = loja->cabeca;
+    ProdutoLojaNode *temp;
+    while (atual != NULL) {
+        temp = atual;
+        atual = atual->prox;
+        free(temp);
+    }
+    loja->cabeca = NULL;
+    loja->cauda = NULL;
+    loja->numProdutos = 0;
+}
+
+void popularLoja(Loja *loja) {
+    // Os produtos são inseridos aqui, sem uma variável global.
+    // A função _inserirProdutoOrdenado garante que a lista
+    // ficará ordenada alfabeticamente.
+    // IDs baseados em estoque.c
+    _inserirProdutoOrdenado(loja, 4, "Alface", 4.0);
+    _inserirProdutoOrdenado(loja, 6, "Bacon", 4.0);
+    _inserirProdutoOrdenado(loja, 2, "Carne", 5.0);
+    _inserirProdutoOrdenado(loja, 8, "Cebola", 3.0);
+    _inserirProdutoOrdenado(loja, 9, "Falafel", 7.0);
+    _inserirProdutoOrdenado(loja, 13, "Frango", 4.0);
+    _inserirProdutoOrdenado(loja, 12, "Maionese", 3.0);
+    _inserirProdutoOrdenado(loja, 10, "Molho do Pato", 2.0); // Nome de estoque.c
+    _inserirProdutoOrdenado(loja, 11, "Onion Rings", 6.0);
+    _inserirProdutoOrdenado(loja, 1, "Pao", 2.0);
+    _inserirProdutoOrdenado(loja, 7, "Picles", 4.0);
+    _inserirProdutoOrdenado(loja, 3, "Queijo", 3.0);
+    _inserirProdutoOrdenado(loja, 5, "Tomate", 3.0);
+}
+
+void flutuarPrecos(Loja *loja) {
+    ProdutoLojaNode *atual = loja->cabeca;
+    while (atual != NULL) {
+        // Gera variação de -20% a +20%
+        // (rand() % 41) -> 0 a 40
+        // (rand() % 41 - 20) -> -20 a 20
+        // (rand() % 41 - 20) / 100.0 -> -0.20 a +0.20
+        double variacao = ((rand() % 41) - 20) / 100.0;
+        double novoPreco = atual->precoBase * (1.0 + variacao);
+
+        // Garante que o preço não seja negativo (mínimo 0.10)
+        atual->precoAtual = (novoPreco < 0.10) ? 0.10 : novoPreco;
+        
+        atual = atual->prox;
+    }
+}
+
+/**
+ * @brief Exibe a interface da loja (itens, preços, inventário).
+ */
+static void _exibirInterfaceLoja(Loja *loja, InventarioJogador *inv) {
+    limparTela();
+    printf("=========================================================\n");
+    printf("                  BEM-VINDO A LOJA                       \n");
+    printf("         (Os precos de hoje sao uma loucura!)          \n");
+    printf("=========================================================\n\n");
+    printf("Seu saldo: $%.2f\n\n", inv->dinheiro);
+
+    printf("--- Seu Inventario Atual ---\n");
+    printf(" Paes: %-3d | Carnes: %-3d | Queijos: %-3d | Alfaces: %-3d\n",
+        getQuantidadeInventario(inv, 1), getQuantidadeInventario(inv, 2),
+        getQuantidadeInventario(inv, 3), getQuantidadeInventario(inv, 4));
+    printf(" Tomates: %-3d | Bacons: %-3d | Picles: %-3d | Cebolas: %-3d\n",
+        getQuantidadeInventario(inv, 5), getQuantidadeInventario(inv, 6),
+        getQuantidadeInventario(inv, 7), getQuantidadeInventario(inv, 8));
+    printf(" Falafels: %-3d | Molhos: %-3d | O.Rings: %-3d | Maioneses: %-3d\n",
+        getQuantidadeInventario(inv, 9), getQuantidadeInventario(inv, 10),
+        getQuantidadeInventario(inv, 11), getQuantidadeInventario(inv, 12));
+     printf(" Frangos: %-3d\n", getQuantidadeInventario(inv, 13));
+    printf("\n");
+
+    printf("--- Itens a Venda (Ordenados por Nome) ---\n");
+    ProdutoLojaNode *atual = loja->cabeca;
+    while (atual != NULL) {
+        // Ex: "[ 1] Alface          - $3.89"
+        printf(" [%2d] %-15s - $%.2f\n", atual->id, atual->nome, atual->precoAtual);
+        atual = atual->prox;
+    }
+    printf("\n=========================================================\n");
+}
+
+
+void loopPrincipalLoja(Loja *loja, InventarioJogador *inv) {
+    // Flutua os preços assim que o jogador entra na loja
+    flutuarPrecos(loja);
+
+    int running = 1;
+    int inputID = -1;
+
+    while (running) {
+        _exibirInterfaceLoja(loja, inv);
+        printf("Digite o ID do item para comprar, ou [0] para Sair: ");
+        
+        if (scanf("%d", &inputID) != 1) {
+            // Se o input não for um número
+            printf("\nEntrada invalida. Por favor, digite um numero.\n");
+            limparBufferInput(); // Limpa o buffer
+            Sleep(1500);
+            continue; // Volta ao início do loop
+        }
+        
+        limparBufferInput(); // Limpa o '\n' deixado pelo scanf
+
+        if (inputID == 0) {
+            running = 0; // Sair
+        } else {
+            // Tenta comprar o item
+            _comprarItem(loja, inv, inputID);
+            // A função _comprarItem já inclui um Sleep para feedback
+        }
+    }
+    limparTela();
+    printf("Voltando ao jogo...\n");
+    Sleep(1000);
 }
