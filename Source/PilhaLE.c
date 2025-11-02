@@ -59,7 +59,7 @@ int top (tp_pilha *pilha, tp_item *e){
 }        
 
 
-void imprime_pilha(tp_pilha *pilha) {
+void imprime_pilha_LE(tp_pilha *pilha) {
     
 	 tp_no *atu=pilha->topo;
      
@@ -86,7 +86,7 @@ void destroi_pilha(tp_pilha *pilha) {
 	free(pilha);
 }
 
-void imprime_pilha(tp_pilha *pilha) {
+void imprime_pilhaLE(tp_pilha *pilha) {
      tp_pilha *pilha_aux;
      tp_item e;
      //cria e inicializa uma pilha auxiliar
