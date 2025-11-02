@@ -127,10 +127,10 @@ float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedid
 
     //Ingredientes extras (A mais), na receita e não.
     for (int i = 0; i < burgerPlayer->ingredientes->tamanho; i++) {
-        if (noUsadoPlayer->info == 0) { // Ingrediente extra contido no burger do player.
+        if (noUsadoPlayer->info == 0) { // Ingrediente no burger do player não constado no pedido.
             int ingredienteExtraNaReceita = 0;
 
-            // Verifica se este ingrediente existe na receita original
+            // Verifica se este ingrediente existe na receita original.
             noPedido = burgerPedido->ingredientes->topo;
             while (noPedido != NULL) {
                 if (noPlayer->info == noPedido->info) {
@@ -141,9 +141,9 @@ float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedid
             }
 
             if (ingredienteExtraNaReceita) {
-                totalPenalidade += multiplicadorDeErro * penalidadeIngredienteErrado;
-            } else {
                 totalPenalidade += multiplicadorDeErro * penalidadeIngredienteExtra;
+            } else {
+                totalPenalidade += multiplicadorDeErro * penalidadeIngredienteErrado;
             }
         }
         noPlayer = noPlayer->prox;
@@ -164,6 +164,8 @@ float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedid
     destroi_pilha_LE(&ingredientesUsadosPlayer);
     destroi_pilha_LE(&ingredientesUsadosPedido);
 
+    destroi_pilha_LE(&(burgerPedido->ingredientes));
+    //deletaBurgerLE(&burgerPlayer); //Deleta apenas a pilha de ingredientes.
 
 
     float moedasFinais = moedas - totalPenalidade;
@@ -172,67 +174,67 @@ float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedid
     return roundf(moedasFinais * 100) / 100.f;
 }
 
-/*
 
-//Função para deletar o burguer --> Verificar.
-void deletaBurgerLE(BurgerLE_Player **burger)
+//Função para deletar o burger..
+
+/*
+void deletaBurgerLE(BurgerLE_Player *burger)
 {
-    if(*burger)
-{
-        if((*burger)->ingredientes)
-{
-        destroi_pilha_LE((*burger)->ingredientes);
-        }
-        free(*burger);
-        *burger = NULL;
+    if(pilha_vazia_LE(burger->ingredientes)){
+        return;
     }
+
+    destroi_pilha_LE((&burger->ingredientes));
+
 }
+*/
 
 //Função de inicializa o burguerLE
 void inicializa_BitAndBacon_LE(BurgerLE *burgerPedido) //{1, 2, 3, 6, 1};
 {
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 2);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 6);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 2);
+    push_pilha_LE(burgerPedido->ingredientes, 3);
+    push_pilha_LE(burgerPedido->ingredientes, 6);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
 void inicializaDuckCheese_LE(BurgerLE *burgerPedido) //{1, 3, 5, 4, 1}};
 {
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 5);
-    push_pilha_LE((*burgerPedido)->ingredientes, 4);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 3);
+    push_pilha_LE(burgerPedido->ingredientes, 5);
+    push_pilha_LE(burgerPedido->ingredientes, 4);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
 void inicializa_Quackteirao_LE(BurgerLE *burgerPedido)
 {
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 2);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 4);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 3);
+    push_pilha_LE(burgerPedido->ingredientes, 2);
+    push_pilha_LE(burgerPedido->ingredientes, 3);
+    push_pilha_LE(burgerPedido->ingredientes, 4);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
 void inicializa_BigPato_LE(BurgerLE *burgerPedido)
 {
-    (*burgerPedido)->ingredientes = inicializa_pilha_LE();
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 4);
-    push_pilha_LE((*burgerPedido)->ingredientes, 3);
-    push_pilha_LE((*burgerPedido)->ingredientes, 2);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
-    push_pilha_LE((*burgerPedido)->ingredientes, 4);
-    push_pilha_LE((*burgerPedido)->ingredientes, 2);
-    push_pilha_LE((*burgerPedido)->ingredientes, 1);
+    burgerPedido->ingredientes = inicializa_pilha_LE();
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 4);
+    push_pilha_LE(burgerPedido->ingredientes, 3);
+    push_pilha_LE(burgerPedido->ingredientes, 2);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
+    push_pilha_LE(burgerPedido->ingredientes, 4);
+    push_pilha_LE(burgerPedido->ingredientes, 2);
+    push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
+/*
 void inicializa_ZeroUm_LE(BurgerLE *burgerPedido)
 {
     (*burgerPedido)->ingredientes = inicializa_pilha_LE();
