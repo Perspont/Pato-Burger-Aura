@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include "../Header/burger.h"
-#include "../Header/estoque.h"
-#include "../Header/pedidos.h"
-#include "../Header/game.h"
-#include "../Header/gameplayEtapa2.h"
+#include "Header/burger.h"
+#include "Header/estoque.h"
+#include "Header/pedidos.h"
+#include "Header/game.h"
+#include "Header/gameplayEtapa2.h" // Incluído para a opção 2
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -14,14 +14,15 @@ int main()
 	char input[10] = {'~'};
 	char returnInput[10] = {'~'};
 
-	int valido = 0; //Usado para a validação do input inicial.
+	int valido = 0; //Usado para a validacao do input inicial.
 
 	while (input[0] != '0') {
 		//Loop principal.
 
 		valido = 0;
 
-		printf("Quer jogar a versão da etapa 1 ou 2?\n");
+        // --- TEXTO MODIFICADO ---
+		printf("Quer jogar a versao da etapa 1 ou 2?\n");
 		printf("Escreva [1] se 1 [2] se 2: \n");
 
 		while (!valido) {
@@ -32,6 +33,7 @@ int main()
 			if (strlen(input) == 1 && (input[0] == '1' || input[0] == '2')) { //Verifica se o input tem apenas 1 caractere,
 				valido = 1;																	//E se esse caractere é um dos que podem ser colocados ou não.
 			} else {
+                // --- TEXTO MODIFICADO ---
 				printf("Numero invalido, Selecione novamente:\n");
 			}
 		}
@@ -50,7 +52,8 @@ int main()
 	system("clear");
 	#endif
 
-	printf("Obrigado por jogar!");
+    // --- TEXTO MODIFICADO ---
+	printf("Obrigado por jogar!\n");
 
 
 	return 0;
