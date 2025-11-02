@@ -2,23 +2,14 @@
 #include <stdlib.h> 
 #include <time.h>   
 #include <string.h>
-
-/* --- HEADERS DO JOGO (Caminhos corrigidos) --- */
-#include "burger.h"  /* Usa PilhaLE.h (Dinâmico) */
+/*HEADERS DO JOGO */
+#include "burger.h"  
 #include "pedidos.h" 
-/* ------------------------------------------- */
-
-/* --- HEADER DA LOJA --- */
+/*HEADER DA LOJA*/
 #include "listade.h" 
-/* -------------------- */
-
-// ==================================================================
-// --- DEFINIÇÕES VINDAS DO 'game.h' (AGORA DENTRO DO MAIN) ---
-// ==================================================================
 
 /*
  * O 'game.h' não é mais necessário. 
- * A struct Estado foi movida para cá.
  */
 typedef struct
 {
