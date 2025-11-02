@@ -2,7 +2,7 @@
 #include <stdlib.h> 
 #include <time.h>   
 #include <string.h>
-#include "listade.h" // Sua biblioteca
+#include "../Header/listade.h"
 
 // --- Definição das Estruturas e Constantes ---
 
@@ -228,9 +228,9 @@ int main() {
 
     do {
         printf("\n--- Menu de Gerenciamento do Jogo ---\n");
-        printf("1. Listar Estoque ATIVO da LOJA\n");
+        printf("1. Listar Estoque ATIVO da LOJA\n"); //IMPORTANTE.
         printf("2. Listar Ingredientes da HAMBURGUERIA\n");
-        printf("3. COMPRAR Ingredientes (Loja -> Hamburgueria)\n");
+        printf("3. COMPRAR Ingredientes (Loja -> Hamburgueria)\n"); //IMPORTANTE.
         printf("4. Simular Producao (Usa Ingredientes - Em desenvolvimento)\n");
         printf("5. Passar o Dia (Nova Reposicao Aleatoria da Loja)\n");
         printf("0. Sair\n");

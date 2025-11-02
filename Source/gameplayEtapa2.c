@@ -6,6 +6,8 @@
 #include <string.h>
 #include <time.h>
 #include "../Header/burgerLE.h"
+#include "../Header/loja.h"
+#include "../Header/filaLE.h"
 
 // --- Game Constants ---
 #define MAX_COMMAND_LENGTH 50
@@ -67,6 +69,7 @@ typedef struct
     char *PilhaDeHamburguerLE_display[MAX_BURGER_STACK]; //Pilha de hambúrguer (Em texto).
     int stackSize;
     BurgerLE_Player burgerPlayer; //Hambúrguer do player.
+    FilaLEPedidos filaDePedidos; //Fila de pedidos.
 
     // Fila pros pedidos.
     int ordersPending;
@@ -207,7 +210,7 @@ void drawBox(GameContext *ctx, int left, int top, int right, int bottom, WORD at
 void drawOrders(GameContext *ctx, GameState *state, int left, int top, int right, int bottom)
 {
     drawBox(ctx, left, top, right, bottom, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-    writeToBuffer(ctx, left + 2, top, " ORDERS PENDING ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
+    writeToBuffer(ctx, left + 2, top, "PEDIDOS PENDENTES ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
 
     int drawX = left + 2;
     int drawY = top + 2;
@@ -248,7 +251,7 @@ void drawOrders(GameContext *ctx, GameState *state, int left, int top, int right
 void drawInput(GameContext *ctx, GameState *state, int left, int top, int right, int bottom)
 {
     drawBox(ctx, left, top, right, bottom, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-    writeToBuffer(ctx, left + 2, top, " COMMAND INPUT ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
+    writeToBuffer(ctx, left + 2, top, "INPUT ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
 
     // Draw the command prompt and the user's current command
     char prompt[MAX_COMMAND_LENGTH + 3];
@@ -265,7 +268,7 @@ void drawInput(GameContext *ctx, GameState *state, int left, int top, int right,
 void drawGrilling(GameContext *ctx, GameState *state, int left, int top, int right, int bottom)
 {
     drawBox(ctx, left, top, right, bottom, FOREGROUND_RED | FOREGROUND_INTENSITY);
-    writeToBuffer(ctx, left + 2, top, " GRILL STATION ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
+    writeToBuffer(ctx, left + 2, top, "GRELHA ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
 
     int width = right - left - 4;
     if (width < 10) width = 10; // Minimum width for progress bar
@@ -298,7 +301,7 @@ void drawGrilling(GameContext *ctx, GameState *state, int left, int top, int rig
 void drawInventory(GameContext *ctx, GameState *state, int left, int top, int right, int bottom)
 {
     drawBox(ctx, left, top, right, bottom, FOREGROUND_GREEN);
-    writeToBuffer(ctx, left + 2, top, " INVENTORY & CASH ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
+    writeToBuffer(ctx, left + 2, top, "INGREDIENTES E DINHEIRO ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
 
     char text[64];
     int y = top + 2;
@@ -306,15 +309,15 @@ void drawInventory(GameContext *ctx, GameState *state, int left, int top, int ri
     snprintf(text, sizeof(text), "dinheiro: $%d", state->dinheiro);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN);
 
-    snprintf(text, sizeof(text), "Buns:   %d", state->pao_count);
+    snprintf(text, sizeof(text), "Pao:   %d", state->pao_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Patties:%d", state->hamburguerCru_count);
+    snprintf(text, sizeof(text), "Hamburguer Cru:%d", state->hamburguerCru_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Lettuce:%d", state->alface_count);
+    snprintf(text, sizeof(text), "Alface:%d", state->alface_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Tomato: %d", state->tomate_count);
+    snprintf(text, sizeof(text), "Tomate: %d", state->tomate_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Cheese: %d", state->queijo_count);
+    snprintf(text, sizeof(text), "Queijo: %d", state->queijo_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 
     // --- NOVOS INGREDIENTES ADICIONADOS ---
@@ -322,7 +325,7 @@ void drawInventory(GameContext *ctx, GameState *state, int left, int top, int ri
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "Maionese:%d", state->maioneseDoPato_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "O.Rings:%d", state->onion_rings_count); // Abreviação para caber
+    snprintf(text, sizeof(text), "Onion Rings:%d", state->onion_rings_count); // Abreviação para caber
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "Cebola: %d", state->cebola_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
@@ -334,7 +337,7 @@ void drawInventory(GameContext *ctx, GameState *state, int left, int top, int ri
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     // --- FIM DA ADIÇÃO ---
 
-    snprintf(text, sizeof(text), "Grilled: %d", state->hamburguerGrelhado_count);
+    snprintf(text, sizeof(text), "Hamburguer Grelhado: %d", state->hamburguerGrelhado_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
 }
 
@@ -662,6 +665,11 @@ void initializeGame(GameContext *ctx, GameState *state)
     // --- FIM DA ADIÇÃO ---
 
     inicializar_BurgerLE_Player(&state->burgerPlayer);
+
+    //Sistema de fila de pedidos.
+    inicializaFilaLEPedidos(&state->filaDePedidos);
+    geraPedidos(&state->filaDePedidos, 1); //"initializeGame" roda apenas no 1o dia.
+
     state->stackSize = 0;
     state->ordersPending = 0; // Alterado de 5 para 0, para sincronizar com os patos/guaxinims
     state->isGrilling = FALSE;
@@ -671,7 +679,7 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->showEndScreen = FALSE;
     state->showCardapio = FALSE;
     state->showCardapio_2 = FALSE; // Inicia na página 2 como falso.
-    state->dia = 1;
+    state->dia = 1;    //Ler do save.
 
     // NEW: Initialize dynamic order state
     state->dynamicOrderCount = 0;
@@ -768,7 +776,7 @@ void empilharIngrediente_display(GameState *state, const char *item, int *invent
 }
 
 /**
- * @brief Clears the current burger stack, freeing memory.
+ * @brief Limpa o stack de hamburguer atual, limpando memória.
  */
 void clearStack(GameState *state)
 {
@@ -852,7 +860,28 @@ void processCommand(GameState *state)
         {
             clearStack(state);
             state->ordersPending--;
-            state->dinheiro += 10; // Simple reward
+
+            Pedido pedidoAtual;
+            desenfileiraPedido(&state->filaDePedidos, &pedidoAtual);
+
+            //Verifica o id do Pedido atual, e cria com o hambúrguer necessário.
+
+            BurgerLE burgerPedido;
+
+            switch (pedidoAtual.id) {
+                case 1:
+                    inicializa_BitAndBacon_LE(&burgerPedido);
+                case 2:
+                    inicializa_DuckCheese_LE(&burgerPedido);
+                case 3:
+                    inicializa_Quackteirao_LE(&burgerPedido);
+                case 4:
+                    inicializa_BigPato_LE(&burgerPedido);
+
+                default: ;
+            }
+
+            state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); // Comparar burger pedido com o do player, retornando moedas, e "deletando" os 2 (Do pedido é deletado, do player só esvaziado).
         }
     }
     else if (_stricmp(state->currentCommand, "lixo") == 0)
@@ -1174,6 +1203,14 @@ void initializeNextDay(GameState *state)
 
     //Aumenta o dia em 1.
     state->dia++;
+
+    //Deleta fila do dia anterior e popula nova fila.
+    while (state->filaDePedidos.tamanho != 0) {
+        Pedido pedido;
+
+        desenfileiraPedido(&state->filaDePedidos, &pedido);
+    }
+    geraPedidos(&state->filaDePedidos, state->dia);
 
     // NOTA: Não reseta dinheiro nem ingredientes.
 }

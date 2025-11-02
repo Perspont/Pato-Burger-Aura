@@ -14,7 +14,7 @@ void adicionarIngredienteLE(BurgerLE_Player *burger, tp_item_pilhaLE e) {
     if (burger == NULL) {
 
         printf("Erro: Tentativa de adicionar ingrediente a um hamburger nulo.\n");
-        return; // Aborta a operação com segurança
+        return;
 
     }
 
@@ -201,6 +201,8 @@ void deletaBurgerLE(BurgerLE_Player *burger)
 //Função de inicializa o burguerLE
 void inicializa_BitAndBacon_LE(BurgerLE *burgerPedido) //{1, 2, 3, 6, 1};
 {
+    burgerPedido->preco = 16;
+
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
     push_pilha_LE(burgerPedido->ingredientes, 2);
@@ -209,8 +211,10 @@ void inicializa_BitAndBacon_LE(BurgerLE *burgerPedido) //{1, 2, 3, 6, 1};
     push_pilha_LE(burgerPedido->ingredientes, 1);
 }
 
-void inicializaDuckCheese_LE(BurgerLE *burgerPedido) //{1, 3, 5, 4, 1}};
+void inicializa_DuckCheese_LE(BurgerLE *burgerPedido) //{1, 3, 5, 4, 1}};
 {
+    burgerPedido->preco = 16;
+
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
     push_pilha_LE(burgerPedido->ingredientes, 3);
@@ -221,6 +225,8 @@ void inicializaDuckCheese_LE(BurgerLE *burgerPedido) //{1, 3, 5, 4, 1}};
 
 void inicializa_Quackteirao_LE(BurgerLE *burgerPedido)
 {
+    burgerPedido->preco = 16;
+
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
     push_pilha_LE(burgerPedido->ingredientes, 3);
@@ -232,6 +238,8 @@ void inicializa_Quackteirao_LE(BurgerLE *burgerPedido)
 
 void inicializa_BigPato_LE(BurgerLE *burgerPedido)
 {
+    burgerPedido->preco = 27;
+
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
     push_pilha_LE(burgerPedido->ingredientes, 4);
