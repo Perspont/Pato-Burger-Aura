@@ -165,7 +165,7 @@ static ProdutoLojaNode* _buscarProdutoPorID(Loja *loja, int id) {
         }
         atual = atual->prox;
     }
-    return NULL; =
+    return NULL;
 }
 
 
