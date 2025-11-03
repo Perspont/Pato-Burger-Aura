@@ -211,7 +211,7 @@ static void _comprarItem(Loja *loja, InventarioJogador *inv, int produtoID) {
 
 // funcoes de inventario
 
-void inicializarInventario_loja(InventarioJogador *inv, double dinheiroInicial) {
+void inicializarInventario_loja(InventarioJogador *inv, float dinheiroInicial) {
     // Itera por todos os IDs de ingredientes possíveis e zera suas listas
     // IDs 1-13
     for (int i = 1; i <= 13; i++) { 
