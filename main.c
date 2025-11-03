@@ -14,8 +14,6 @@ int main()
 	char input[10] = {'~'};
 	char returnInput[10] = {'~'};
 
-	GameState state;
-
 	int valido = 0; //Usado para a validação do input inicial.
 
 	while (input[0] != '0') {
@@ -42,7 +40,7 @@ int main()
 			gameplayLoop();
 		}
 		else if (input[0] == '2') {
-			telaPrincipalEtapa2(&state);
+			telaPrincipalEtapa2();
 		}
 	}
 

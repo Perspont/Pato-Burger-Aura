@@ -1211,7 +1211,7 @@ void cleanup(GameContext *ctx, GameState *state)
 
     // Clear screen on exit
     system("cls");
-    printf("Burger Boss exited. Thanks for playing!\n");
+    printf("Obrigado por jogar!\n");
 }
 
 
