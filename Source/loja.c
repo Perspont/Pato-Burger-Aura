@@ -115,7 +115,6 @@ static void _inserirProdutoOrdenado(Loja *loja, int id, const char *nome, double
     // Isso previne um buffer overflow se 'nome' for maior que 49 caracteres.
     strncpy(novoProduto->nome, nome, 49);
     novoProduto->nome[49] = '\0'; // Garante que a string sempre termina com nulo
-    // ---------------------------------------------
     
     novoProduto->id = id;
     novoProduto->precoBase = preco;
