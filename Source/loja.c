@@ -111,11 +111,9 @@ static void _inserirProdutoOrdenado(Loja *loja, int id, const char *nome, double
         perror("Erro ao alocar memoria para produto da loja");
         return;
     }
-    // --- CORRIGIDO: Troca de strcpy por strncpy ---
-    // Isso previne um buffer overflow se 'nome' for maior que 49 caracteres.
+    // isso previne um problema de buffer se o nome for maior que 49 caracteres.
     strncpy(novoProduto->nome, nome, 49);
-    novoProduto->nome[49] = '\0'; // Garante que a string sempre termina com nulo
-    // ---------------------------------------------
+    novoProduto->nome[49] = '\0'; // faz a string sempre terminar nula
     
     novoProduto->id = id;
     novoProduto->precoBase = preco;
