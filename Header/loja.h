@@ -4,29 +4,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h> // Para flutuação de preços
+#include <time.h> 
 
-/*
- * ===================================================================
- * ESTRUTURAS DO INVENTÁRIO DO JOGADOR (1 NÓ = 1 ITEM)
- * ===================================================================
- */
+/*estruturas de inventario do jogador*/
 
-// Nó individual para um ingrediente (representa 1 unidade)
+// no para cada ingrediente
 typedef struct IngredienteNode {
     struct IngredienteNode *prox;
     struct IngredienteNode *ant;
 } IngredienteNode;
 
-// Estrutura que gerencia a lista de um tipo de ingrediente
+// struct para gerenciar a lista de ingredientes
 typedef struct ListaIngrediente {
     IngredienteNode *cabeca;
     IngredienteNode *cauda;
-    int quantidade; // Mantém a contagem para eficiência
+    int quantidade; 
 } ListaIngrediente;
 
-// Estrutura principal do inventário do jogador
-// Isto substitui os contadores 'int pao_count', 'int carne_count' etc.
+// struct do inventario principal do player
 typedef struct InventarioJogador {
     ListaIngrediente paes;        // ID 1
     ListaIngrediente carnes;       // ID 2
@@ -37,35 +32,29 @@ typedef struct InventarioJogador {
     ListaIngrediente picles;       // ID 7
     ListaIngrediente cebolas;      // ID 8
     ListaIngrediente falafels;     // ID 9
-    ListaIngrediente molhos;       // ID 10 ("Molho do Pato")
+    ListaIngrediente molhos;       // ID 10 (
     ListaIngrediente onionRings;   // ID 11
     ListaIngrediente maioneses;    // ID 12
     ListaIngrediente frangos;      // ID 13
-    
-    // O dinheiro agora é gerenciado aqui
-    double dinheiro;
+    float dinheiro;
 } InventarioJogador;
 
 
 /*
- * ===================================================================
- * ESTRUTURAS DA LOJA (LISTA ORDENADA)
- * (Implementa a regra: "lista duplamente encadeada de produtos em ordem")
- * ===================================================================
+ structs da loja
  */
 
-// Nó para um produto na loja (lista duplamente encadeada ordenada)
+//no para produto da loja
 typedef struct ProdutoLojaNode {
     int id;
     char nome[50];
-    double precoBase;
-    double precoAtual; // Preço após flutuação
-    struct ProdutoLojaNode *prox; // Próximo produto
-    struct ProdutoLojaNode *ant;  // Produto anterior
+    float precoBase;
+    float precoAtual; 
+    struct ProdutoLojaNode *prox; 
+    struct ProdutoLojaNode *ant; 
 } ProdutoLojaNode;
 
-// Estrutura principal da Loja (gerencia a lista de produtos)
-// (Implementa a regra: "sem variaveis globais")
+// struct principal da loja
 typedef struct Loja {
     ProdutoLojaNode *cabeca;
     ProdutoLojaNode *cauda;
@@ -84,7 +73,7 @@ typedef struct Loja {
 /**
  * @brief Inicializa o inventário do jogador (listas vazias, dinheiro inicial).
  */
-void inicializarInventario(InventarioJogador *inv, double dinheiroInicial);
+void inicializarInventario(InventarioJogador *inv, float dinheiroInicial);
 
 /**
  * @brief Libera toda a memória alocada para os nós de ingredientes.

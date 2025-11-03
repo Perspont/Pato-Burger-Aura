@@ -9,106 +9,7 @@
 #include "../Header/loja.h"
 #include "../Header/filaLE.h"
 
-// --- Game Constants ---
-#define MAX_COMMAND_LENGTH 50
-#define MAX_BURGER_STACK 20
-#define GRILL_TIME_MS 5000     // 5 seconds to grill a patty
-#define GAME_DURATION_MS 180000 // 3 minutes (3 * 60 * 1000)
 
-// --- Game State Structures ---
-
-/**
- * @brief Possui o contexto para o jogo, como Handles pro console e o buffer de input.
- *
- *"a task context is the minimal set of data used by a task
- *(which may be a process, thread, or fiber) that must be saved to allow a task to be interrupted, and later continued from the same point" - Wikipedia sobre "Task Context".
- */
-typedef struct
-{
-    HANDLE hConsoleIn;    //Handle para o input buffer do terminal.
-    HANDLE hConsoleOut;   //Handle para o screen buffer [ativo] do terminal.
-    COORD screenSize;     //Tamanho atual da tela ([COORD] -> "Defines the coordinates of a character cell in a console screen buffer. The origin of the coordinate system (0,0) is at the top, left cell of the buffer". - Microsoft).
-    CHAR_INFO *charBuffer; //Buffer off-screen.
-} GameContext;
-
-/**
- * @brief Holds one of the dynamic order strings ("pato", "guaxinim").
- */
-typedef struct
-{
-    char text[10]; // "pato" or "guaxinim"
-    ULONGLONG spawnTime;
-} DynamicOrder;
-
-#define MAX_DYNAMIC_ORDERS 10 // Max strings on screen (3 pato + 3 guaxinim is 6, 10 is safe)
-
-/**
- * @brief Holds the game's logical state, like inventory, timers, and scores.
- */
-typedef struct
-{
-    // Inventory
-    int dinheiro;
-    int pao_count;
-    int hamburguerCru_count;
-    int alface_count;
-    int tomate_count;
-    int queijo_count;
-    int hamburguerGrelhado_count;
-    // --- NOVOS INGREDIENTES ADICIONADOS ---
-    int bacon_count;
-    int maioneseDoPato_count;
-    int onion_rings_count;
-    int cebola_count;
-    int picles_count;
-    int falafel_count;
-    int frango_count;
-    // --- FIM DA ADIÇÃO ---
-																			//Substituir por arquivo externo de save.
-    // Pedido atual.
-    char *PilhaDeHamburguerLE_display[MAX_BURGER_STACK]; //Pilha de hambúrguer (Em texto).
-    int stackSize;
-    BurgerLE_Player burgerPlayer; //Hambúrguer do player.
-    FilaLEPedidos filaDePedidos; //Fila de pedidos.
-
-    // Fila pros pedidos.
-    int ordersPending;
-
-    // Grilling State
-    BOOL isGrilling;
-    ULONGLONG grillStartTime;
-    ULONGLONG gameStartTime; // Timer for the whole game
-
-    // Dynamic Orders (pato/guaxinim)
-    DynamicOrder dynamicOrders[MAX_DYNAMIC_ORDERS];
-    int dynamicOrderCount;
-    ULONGLONG lastDynamicOrderSpawn;
-    BOOL nextIsPato; // To track the pato/guaxinim cycle
-    int spawnCycleCount;
-
-    // Input State
-    char currentCommand[MAX_COMMAND_LENGTH]; //Input que jogador acabou de inserir (Enter).
-    int commandLength; //Tamanho do input inserido.
-
-    // Control
-    BOOL isRunning;
-    BOOL showEndScreen; //Flag para ativar a tela de "Game Over".
-    BOOL showCardapio;  //Flag para ativar a tela de "cardapio" (Página 1).
-    BOOL showCardapio_2; //Flag para a segunda página do cardápio.
-
-    //Dia.
-    int dia;
-
-} GameState;
-
-// --- Forward Declarations ---
-// We need to declare these functions up here so main and others can find them.
-void initializeGame(GameContext *ctx, GameState *state);
-void clearStack(GameState *state);
-void resizeBuffer(GameContext *ctx, int width, int height);
-void drawTimer(GameContext *ctx, GameState *state);
-void drawCardapioScreen(GameContext *ctx, GameState *state);
-void desenharCardapio_pagina2(GameContext *ctx, GameState *state); // Declarar a nova função
 
 
 // --- Utility Functions ---
@@ -298,7 +199,7 @@ void drawGrilling(GameContext *ctx, GameState *state, int left, int top, int rig
     }
 }
 
-void drawInventory(GameContext *ctx, GameState *state, int left, int top, int right, int bottom)
+void drawIngredientes(GameContext *ctx, GameState *state, int left, int top, int right, int bottom)
 {
     drawBox(ctx, left, top, right, bottom, FOREGROUND_GREEN);
     writeToBuffer(ctx, left + 2, top, "INGREDIENTES E DINHEIRO ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
@@ -669,6 +570,7 @@ void initializeGame(GameContext *ctx, GameState *state)
     //Sistema de fila de pedidos.
     inicializaFilaLEPedidos(&state->filaDePedidos);
     geraPedidos(&state->filaDePedidos, 1); //"initializeGame" roda apenas no 1o dia.
+
 
     state->stackSize = 0;
     state->ordersPending = 0; // Alterado de 5 para 0, para sincronizar com os patos/guaxinims
@@ -1164,7 +1066,7 @@ void renderGame(GameContext *ctx, GameState *state)
     int invB = ctx->screenSize.Y - 2;
     int invT = max(grillB + 1, invB - 10); // At least 10 high, or fill space
     int invR = orderBoxR;
-    drawInventory(ctx, state, invL, invT, invR, invB);
+    drawIngredientes(ctx, state, invL, invT, invR, invB);
 
     // Area 1: Burger Stack (Right side)
     int stackL = orderBoxR + 2;
@@ -1313,11 +1215,21 @@ void cleanup(GameContext *ctx, GameState *state)
 }
 
 
-// --- Main Function ---
+//Função principal.
 void telaPrincipalEtapa2()
 {
     GameContext gameContext = {0};
     GameState gameState = {0};
+
+
+    //Variáveis para a loja.
+    Loja loja;
+    InventarioJogador inventarioJogador;
+
+    inicializarInventario(&inventarioJogador, 100);
+    inicializarLoja(&loja);
+
+
 
     initializeGame(&gameContext, &gameState);
 
@@ -1326,7 +1238,7 @@ void telaPrincipalEtapa2()
     while (gameState.isRunning) {
         if (gameState.showEndScreen)
         {
-            // O dia acabou (timer ou dinheiro). O que fazemos?
+            // O dia acabou (timer ou dinheiro).
 
             if (gameState.dinheiro <= 0)
             {
@@ -1358,21 +1270,20 @@ void telaPrincipalEtapa2()
         }
         else if (showShopScreen)
         {
-            // --- CENA DA LOJA ---
 
-            // Chame sua função de loja (que deve ser bloqueante)
-            suaFuncaoPrincipalDaLoja(&gameContext, &gameState); // <--- SUBSTITUA PELO NOME REAL
+
+            loopPrincipalLoja(&loja, &inventarioJogador); //Função de loja (Bloqueante).
 
             // Quando o jogador sair da loja:
             showShopScreen = FALSE; // Desativa a flag da loja
 
             // Prepara o próximo dia
             clearStack(&gameState);
-            initializeNextDay(&gameState); // Reseta o timer/pedidos (NÃO o dinheiro)
+            initializeNextDay(&gameState); // Reseta o timer e pedidos (NÃO o dinheiro).
         }
         else
         {
-            // --- CENA DE GAMEPLAY (DIA NORMAL) ---
+            // --- CENA DE GAMEPLAY ---
 
             // 1. Processa input
             processInput(&gameContext, &gameState);
