@@ -73,7 +73,7 @@ typedef struct Loja {
 /**
  * @brief Inicializa o inventário do jogador (listas vazias, dinheiro inicial).
  */
-void inicializarInventario(InventarioJogador *inv, float dinheiroInicial);
+void inicializarInventario_loja(InventarioJogador *inv, float dinheiroInicial);
 
 /**
  * @brief Libera toda a memória alocada para os nós de ingredientes.
