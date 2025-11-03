@@ -1,33 +1,24 @@
-#include "../Header/loja.h" // Inclui o novo loja.h
+#include "../Header/loja.h" 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef _WIN32
-#include <windows.h> // Para system("cls") e Sleep
+#include <windows.h> 
 #else
-#include <unistd.h> // Para system("clear") e sleep
+#include <unistd.h> 
 #define Sleep(ms) usleep(ms * 1000)
 #endif
 
 
-/*
- * ===================================================================
- * FUNÇÕES AUXILIARES INTERNAS (static)
- * ===================================================================
- */
-
-/**
- * @brief Limpa o buffer de entrada (stdin) para scanf.
- */
+//funcoes internas
 static void limparBufferInput() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
-/**
- * @brief Limpa o terminal de forma cross-platform.
- */
+//liimpa o terminal 
+
 static void limparTela() {
     #ifdef _WIN32
     system("cls");
@@ -36,9 +27,8 @@ static void limparTela() {
     #endif
 }
 
-/**
- * @brief Libera todos os nós de uma lista de ingrediente específica.
- */
+// libera os nos de uma lista de ingredientes
+
 static void _liberarListaIngrediente(ListaIngrediente *lista) {
     IngredienteNode *atual = lista->cabeca;
     IngredienteNode *temp;
@@ -52,10 +42,7 @@ static void _liberarListaIngrediente(ListaIngrediente *lista) {
     lista->quantidade = 0;
 }
 
-/**
- * @brief Adiciona um nó (uma unidade) à lista de ingredientes do jogador.
- * (Esta é a lógica do "novo nó à lista de queijo")
- */
+//adiciona um no (uma unidade) a lista de ingredientes do jogador.
 static void _adicionarNoIngrediente(ListaIngrediente *lista) {
     IngredienteNode *novoNo = (IngredienteNode*) malloc(sizeof(IngredienteNode));
     if (novoNo == NULL) {
@@ -63,35 +50,32 @@ static void _adicionarNoIngrediente(ListaIngrediente *lista) {
         return;
     }
     novoNo->prox = NULL;
-    novoNo->ant = lista->cauda; // Aponta para a antiga cauda
+    novoNo->ant = lista->cauda; 
 
-    if (lista->cabeca == NULL) { // Se a lista está vazia
+    if (lista->cabeca == NULL) { 
         lista->cabeca = novoNo;
-    } else { // Se a lista já tem itens
-        lista->cauda->prox = novoNo; // A antiga cauda aponta para o novo nó
+    } else { 
+        lista->cauda->prox = novoNo; //
     }
-    lista->cauda = novoNo; // O novo nó é a nova cauda
+    lista->cauda = novoNo; //
     lista->quantidade++;
 }
 
-/**
- * @brief Remove um nó (uma unidade) da lista de ingredientes.
- * Remove da cauda (LIFO/FIFO não importa, cauda é eficiente).
- * @return 1 em sucesso, 0 se a lista estava vazia.
- */
+//remove um no (uma unidade) da lista de ingredientes.
+
 static int _removerNoIngrediente(ListaIngrediente *lista) {
     if (lista->quantidade == 0 || lista->cauda == NULL) {
-        return 0; // Falha, sem estoque
+        return 0; // sem estoquee
     }
 
     IngredienteNode *noRemovido = lista->cauda;
 
-    if (lista->cabeca == lista->cauda) { // Se for o último item
+    if (lista->cabeca == lista->cauda) { 
         lista->cabeca = NULL;
         lista->cauda = NULL;
-    } else { // Se houver mais itens
-        lista->cauda = noRemovido->ant; // A nova cauda é o item anterior
-        lista->cauda->prox = NULL; // A nova cauda não aponta para frente
+    } else { 
+        lista->cauda = noRemovido->ant; 
+        lista->cauda->prox = NULL; 
     }
 
     free(noRemovido);
@@ -100,11 +84,7 @@ static int _removerNoIngrediente(ListaIngrediente *lista) {
 }
 
 
-/**
- * @brief Retorna um ponteiro para a lista de ingredientes correta no inventário
- * com base no ID do produto.
- * @return Ponteiro para a ListaIngrediente, ou NULL se o ID for inválido.
- */
+//retorna um ponteiro para a lista de ingredientes correta no inventario com base no ID do produto
 static ListaIngrediente* getListaPorID(InventarioJogador *inv, int id) {
     switch (id) {
         case 1:  return &inv->paes;
@@ -124,10 +104,7 @@ static ListaIngrediente* getListaPorID(InventarioJogador *inv, int id) {
     }
 }
 
-/**
- * @brief Adiciona um produto à loja.
- * A inserção é feita em ORDEM ALFABÉTICA (por nome).
- */
+/**adiciona um produto a loja, a insercao eh feita em ordem alfebetica ok*/
 static void _inserirProdutoOrdenado(Loja *loja, int id, const char *nome, double preco) {
     ProdutoLojaNode *novoProduto = (ProdutoLojaNode*) malloc(sizeof(ProdutoLojaNode));
     if (novoProduto == NULL) {
@@ -141,7 +118,7 @@ static void _inserirProdutoOrdenado(Loja *loja, int id, const char *nome, double
     novoProduto->prox = NULL;
     novoProduto->ant = NULL;
 
-    // Caso 1: Lista vazia
+    // "case 1" lista vazia 
     if (loja->cabeca == NULL) {
         loja->cabeca = novoProduto;
         loja->cauda = novoProduto;
@@ -149,7 +126,7 @@ static void _inserirProdutoOrdenado(Loja *loja, int id, const char *nome, double
         return;
     }
 
-    // Caso 2: Inserir antes da cabeça (novo item é o primeiro alfabeticamente)
+    // "case 2" insere antes da cabeça, quando eh o primeiro do alfabeto
     if (strcmp(nome, loja->cabeca->nome) < 0) {
         novoProduto->prox = loja->cabeca;
         loja->cabeca->ant = novoProduto;
@@ -158,21 +135,20 @@ static void _inserirProdutoOrdenado(Loja *loja, int id, const char *nome, double
         return;
     }
 
-    // Caso 3: Inserir no meio ou no fim
+    // "case 3" insere no meio ou no fim
     ProdutoLojaNode *atual = loja->cabeca;
-    // Procura o local correto para inserção
-    // (Avança enquanto 'atual->prox' existir E o 'nome' for maior que 'atual->prox->nome')
+   
     while (atual->prox != NULL && strcmp(nome, atual->prox->nome) > 0) {
         atual = atual->prox;
     }
 
-    // 'atual' é o nó ANTES do ponto de inserção
+    // atual eh o no antes do ponto de que divide
     novoProduto->prox = atual->prox;
     novoProduto->ant = atual;
 
-    if (atual->prox != NULL) { // Inserção no meio
+    if (atual->prox != NULL) { 
         atual->prox->ant = novoProduto;
-    } else { // Inserção no fim
+    } else {
         loja->cauda = novoProduto;
     }
     
@@ -180,10 +156,7 @@ static void _inserirProdutoOrdenado(Loja *loja, int id, const char *nome, double
     loja->numProdutos++;
 }
 
-/**
- * @brief Busca um produto na loja pelo ID.
- * @return Ponteiro para o ProdutoLojaNode se encontrado, ou NULL.
- */
+//busca de produto na loja pelo ID
 static ProdutoLojaNode* _buscarProdutoPorID(Loja *loja, int id) {
     ProdutoLojaNode *atual = loja->cabeca;
     while (atual != NULL) {
@@ -192,12 +165,10 @@ static ProdutoLojaNode* _buscarProdutoPorID(Loja *loja, int id) {
         }
         atual = atual->prox;
     }
-    return NULL; // Não encontrado
+    return NULL; =
 }
 
-/**
- * @brief Tenta comprar um item.
- */
+
 static void _comprarItem(Loja *loja, InventarioJogador *inv, int produtoID) {
     ProdutoLojaNode *produto = _buscarProdutoPorID(loja, produtoID);
 
@@ -213,7 +184,7 @@ static void _comprarItem(Loja *loja, InventarioJogador *inv, int produtoID) {
         return;
     }
 
-    // Acha a lista de inventário correta (ex: inv->queijos)
+    // acha a lista de inventario certa
     ListaIngrediente *listaDestino = getListaPorID(inv, produto->id);
     if (listaDestino == NULL) {
         printf("\n[ERRO] O produto '%s' nao pode ser armazenado (ID %d invalido).\n", produto->nome, produto->id);
@@ -221,9 +192,9 @@ static void _comprarItem(Loja *loja, InventarioJogador *inv, int produtoID) {
         return;
     }
 
-    // --- Transação ---
+    // pagamento
     inv->dinheiro -= produto->precoAtual;
-    _adicionarNoIngrediente(listaDestino); // Adiciona 1 nó à lista do jogador
+    _adicionarNoIngrediente(listaDestino); // vai colocar outro no
 
     printf("\n[SUCESSO] Voce comprou 1 %s.\n", produto->nome);
     printf("Novo saldo: $%.2f. Total no inventario: %d\n", inv->dinheiro, listaDestino->quantidade);
@@ -231,13 +202,10 @@ static void _comprarItem(Loja *loja, InventarioJogador *inv, int produtoID) {
 }
 
 
-/*
- * ===================================================================
- * FUNÇÕES PÚBLICAS (Implementação de loja.h)
- * ===================================================================
- */
+//Implementação de loja.h)
 
-// --- Funções do Inventário ---
+
+// funcoes de inventario
 
 void inicializarInventario(InventarioJogador *inv, double dinheiroInicial) {
     // Itera por todos os IDs de ingredientes possíveis e zera suas listas
@@ -254,7 +222,7 @@ void inicializarInventario(InventarioJogador *inv, double dinheiroInicial) {
 }
 
 void liberarInventario(InventarioJogador *inv) {
-    // Itera e libera todas as listas
+    // itera e libera todas as listas
     for (int i = 1; i <= 13; i++) {
         ListaIngrediente *lista = getListaPorID(inv, i);
         if (lista != NULL) {
@@ -273,9 +241,9 @@ void adicionarItemInventario(InventarioJogador *inv, int ingredienteID) {
 int usarItemInventario(InventarioJogador *inv, int ingredienteID) {
     ListaIngrediente *lista = getListaPorID(inv, ingredienteID);
     if (lista != NULL) {
-        return _removerNoIngrediente(lista); // Retorna 1 (sucesso) ou 0 (falha)
+        return _removerNoIngrediente(lista); 
     }
-    return 0; // Falha (ID inválido)
+    return 0; 
 }
 
 int getQuantidadeInventario(InventarioJogador *inv, int ingredienteID) {
@@ -287,13 +255,12 @@ int getQuantidadeInventario(InventarioJogador *inv, int ingredienteID) {
 }
 
 
-// --- Funções da Loja ---
+// funcoes da loja
 
 void inicializarLoja(Loja *loja) {
     loja->cabeca = NULL;
     loja->cauda = NULL;
     loja->numProdutos = 0;
-    // Inicializa o gerador de números aleatórios
     srand((unsigned int)time(NULL));
 }
 
@@ -311,10 +278,7 @@ void liberarLoja(Loja *loja) {
 }
 
 void popularLoja(Loja *loja) {
-    // Os produtos são inseridos aqui, sem uma variável global.
-    // A função _inserirProdutoOrdenado garante que a lista
-    // ficará ordenada alfabeticamente.
-    // IDs baseados em estoque.c
+    // Os produtos sao inseridos aqui ok
     _inserirProdutoOrdenado(loja, 4, "Alface", 4.0);
     _inserirProdutoOrdenado(loja, 6, "Bacon", 4.0);
     _inserirProdutoOrdenado(loja, 2, "Carne", 5.0);
@@ -322,7 +286,7 @@ void popularLoja(Loja *loja) {
     _inserirProdutoOrdenado(loja, 9, "Falafel", 7.0);
     _inserirProdutoOrdenado(loja, 13, "Frango", 4.0);
     _inserirProdutoOrdenado(loja, 12, "Maionese", 3.0);
-    _inserirProdutoOrdenado(loja, 10, "Molho do Pato", 2.0); // Nome de estoque.c
+    _inserirProdutoOrdenado(loja, 10, "Molho do Pato", 2.0); 
     _inserirProdutoOrdenado(loja, 11, "Onion Rings", 6.0);
     _inserirProdutoOrdenado(loja, 1, "Pao", 2.0);
     _inserirProdutoOrdenado(loja, 7, "Picles", 4.0);
@@ -333,23 +297,14 @@ void popularLoja(Loja *loja) {
 void flutuarPrecos(Loja *loja) {
     ProdutoLojaNode *atual = loja->cabeca;
     while (atual != NULL) {
-        // Gera variação de -20% a +20%
-        // (rand() % 41) -> 0 a 40
-        // (rand() % 41 - 20) -> -20 a 20
-        // (rand() % 41 - 20) / 100.0 -> -0.20 a +0.20
         double variacao = ((rand() % 41) - 20) / 100.0;
         double novoPreco = atual->precoBase * (1.0 + variacao);
-
-        // Garante que o preço não seja negativo (mínimo 0.10)
         atual->precoAtual = (novoPreco < 0.10) ? 0.10 : novoPreco;
-        
         atual = atual->prox;
     }
 }
 
-/**
- * @brief Exibe a interface da loja (itens, preços, inventário).
- */
+// exibe interface da loja
 static void _exibirInterfaceLoja(Loja *loja, InventarioJogador *inv) {
     limparTela();
     printf("=========================================================\n");
@@ -374,7 +329,6 @@ static void _exibirInterfaceLoja(Loja *loja, InventarioJogador *inv) {
     printf("--- Itens a Venda (Ordenados por Nome) ---\n");
     ProdutoLojaNode *atual = loja->cabeca;
     while (atual != NULL) {
-        // Ex: "[ 1] Alface          - $3.89"
         printf(" [%2d] %-15s - $%.2f\n", atual->id, atual->nome, atual->precoAtual);
         atual = atual->prox;
     }
@@ -383,7 +337,6 @@ static void _exibirInterfaceLoja(Loja *loja, InventarioJogador *inv) {
 
 
 void loopPrincipalLoja(Loja *loja, InventarioJogador *inv) {
-    // Flutua os preços assim que o jogador entra na loja
     flutuarPrecos(loja);
 
     int running = 1;
@@ -394,21 +347,20 @@ void loopPrincipalLoja(Loja *loja, InventarioJogador *inv) {
         printf("Digite o ID do item para comprar, ou [0] para Sair: ");
         
         if (scanf("%d", &inputID) != 1) {
-            // Se o input não for um número
+            // se o input nao for numero
             printf("\nEntrada invalida. Por favor, digite um numero.\n");
-            limparBufferInput(); // Limpa o buffer
+            limparBufferInput(); 
             Sleep(1500);
-            continue; // Volta ao início do loop
+            continue; 
         }
         
-        limparBufferInput(); // Limpa o '\n' deixado pelo scanf
+        limparBufferInput(); // Limpa
 
         if (inputID == 0) {
-            running = 0; // Sair
+            running = 0; 
         } else {
-            // Tenta comprar o item
             _comprarItem(loja, inv, inputID);
-            // A função _comprarItem já inclui um Sleep para feedback
+
         }
     }
     limparTela();
