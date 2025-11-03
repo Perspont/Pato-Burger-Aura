@@ -824,7 +824,6 @@ void processCommand(GameState *state)
     {
         empilharIngrediente_display(state, "Hamburguer Grelhado", &state->hamburguerGrelhado_count);
     }
-    // --- NOVOS INGREDIENTES ADICIONADOS ---
     else if (_stricmp(state->currentCommand, "bacon") == 0)
     {
         empilharIngrediente_display(state, "Bacon", &state->bacon_count);
@@ -889,8 +888,6 @@ void processCommand(GameState *state)
                     inicializa_PatoVerde_LE(&burgerPedido);
                 case 10:
                     inicializa_PicklesAndMayo_LE(&burgerPedido);
-
-                default: ;
             }
 
             state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); // Comparar burger pedido com o do player, retornando moedas, e "deletando" os 2 (Do pedido é deletado, do player só esvaziado).
