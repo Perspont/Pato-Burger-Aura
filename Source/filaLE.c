@@ -73,9 +73,9 @@ void imprimeFilaLEPedidos(FilaLEPedidos *f, Burger *cardapio)
 	while (atual != NULL)
 	{
 		printf("Pedido #%d | Burger ID: %d | Quantidade: %d\n",
-					 atual->info.id,
-					 atual->info.id_burger,
-					 atual->info.quantidade);
+		atual->info.id,
+		atual->info.id_burger,
+		atual->info.quantidade);
 		atual = atual->prox;
 	}
 
