@@ -569,7 +569,7 @@ void initializeGame(GameContext *ctx, GameState *state)
 
     //Sistema de fila de pedidos.
     inicializaFilaLEPedidos(&state->filaDePedidos);
-    geraPedidos(&state->filaDePedidos, 1); //"initializeGame" roda apenas no 1o dia.
+    geraPedidos_FilaLE(&state->filaDePedidos, 1); //"initializeGame" roda apenas no 1o dia.
 
 
     state->stackSize = 0;
@@ -762,8 +762,8 @@ void processCommand(GameState *state)
             clearStack(state);
             state->ordersPending--;
 
-            Pedido pedidoAtual;
-            desenfileiraPedido(&state->filaDePedidos, &pedidoAtual);
+            Pedido_FilaLE pedidoAtual;
+            desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedidoAtual);
 
             //Verifica o id do Pedido atual, e cria com o hambúrguer necessário.
 
@@ -1118,11 +1118,11 @@ void initializeNextDay(GameState *state)
 
     //Deleta fila do dia anterior e popula nova fila.
     while (state->filaDePedidos.tamanho != 0) {
-        Pedido pedido;
+        Pedido_FilaLE pedido;
 
-        desenfileiraPedido(&state->filaDePedidos, &pedido);
+        desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedido);
     }
-    geraPedidos(&state->filaDePedidos, state->dia);
+    geraPedidos_FilaLE(&state->filaDePedidos, state->dia);
 
     // NOTA: Não reseta dinheiro nem ingredientes.
 }
