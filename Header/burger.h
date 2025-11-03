@@ -15,6 +15,7 @@ typedef struct
 
 void inicializarCardapio(Burger *cardapio);
 void exibirCardapio(Burger *cardapio);
+tp_pilha inicializa_BitAndBacon();
 tp_pilha inicializaDuckCheese();
 tp_pilha inicializa_Quackteirao();
 tp_pilha inicializa_BigPato();

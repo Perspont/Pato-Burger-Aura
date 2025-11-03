@@ -139,4 +139,14 @@ void gameplayLoop() {
 		}
 	}
 
+	#ifdef _WIN32
+	system("cls");
+	#else
+	system("clear");
+	#endif
+
+	printf("Obrigado por jogar!");
+
+	return;
+
 }
