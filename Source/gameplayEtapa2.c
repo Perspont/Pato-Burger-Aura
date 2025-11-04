@@ -555,7 +555,6 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->tomate_count = 30;
     state->queijo_count = 30;
     state->hamburguerGrelhado_count = 0;
-    // --- NOVOS INGREDIENTES ADICIONADOS ---                   //Usar arquivo .txt pra isso.
     state->bacon_count = 10;
     state->maioneseDoPato_count = 30;
     state->onion_rings_count = 20;
@@ -563,13 +562,14 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->picles_count = 30;
     state->falafel_count = 10;
     state->frango_count = 10;
-    // --- FIM DA ADIÇÃO ---
 
+    state->totalHamburgueresVendidos = 0; // inicializa a nova variável totalHamburgueresVendidos com o valor 0.
+    
     inicializar_BurgerLE_Player(&state->burgerPlayer);
 
     //Sistema de fila de pedidos.
     inicializaFilaLEPedidos(&state->filaDePedidos);
-    geraPedidos_FilaLE(&state->filaDePedidos, 1); //"initializeGame" roda apenas no 1o dia.
+    geraPedidos_FilaLE(&state->filaDePedidos, 1); // "initializeGame" roda apenas no 1o dia.
 
 
     state->stackSize = 0;
@@ -581,7 +581,7 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->showEndScreen = FALSE;
     state->showCardapio = FALSE;
     state->showCardapio_2 = FALSE; // Inicia na página 2 como falso.
-    state->dia = 1;    //Ler do save.
+    state->dia = 1; //Ler do save.
 
     // NEW: Initialize dynamic order state
     state->dynamicOrderCount = 0;
@@ -616,9 +616,7 @@ void initializeGame(GameContext *ctx, GameState *state)
     SetConsoleCursorInfo(ctx->hConsoleOut, &cursorInfo);
 }
 
-/**
- * @brief Adiciona ingrediente à pilha de hambúrguer.
- */
+// Adiciona ingrediente à pilha de hambúrguer.
 void empilharIngrediente_display(GameState *state, const char *item, int *inventory)
 {
     if (state->stackSize >= MAX_BURGER_STACK)
@@ -677,9 +675,7 @@ void empilharIngrediente_display(GameState *state, const char *item, int *invent
     }
 }
 
-/**
- * @brief Limpa o stack de hamburguer atual, limpando memória.
- */
+// Limpa o stack de hamburguer atual, limpando memória.
 void clearStack(GameState *state)
 {
     for (int i = 0; i < state->stackSize; i++)
@@ -759,6 +755,8 @@ void processCommand(GameState *state)
     {
         if (state->stackSize > 0 && state->ordersPending > 0)
         {
+            state->totalHamburgueresVendidos++; // Atualiza o save ANTES de limpar a pilha
+
             clearStack(state);
             state->ordersPending--;
 
@@ -806,7 +804,34 @@ void processCommand(GameState *state)
         state->showCardapio = TRUE; // Abre na página 1
         state->showCardapio_2 = FALSE;
     }
-    // --------------------
+
+	else if (_stricmp(state->currentCommand, "salvar") == 0) // para salvar o jogo no input (manualmente).
+    {
+        salvarJogo(state);
+        // Seria bom colocar um feedback visual para falar que o jogo foi salvo ou algo do tipo...
+    }
+    
+    else if (_stricmp(state->currentCommand, "carregar") == 0) // para carregar o jogo atualmente salvo (manualmente tbm).
+    {
+        clearStack(state); // limpa o hamburguer atual.
+        
+        carregarJogo(state); // carrega os dados do save_game.txt
+
+        // reinicia o estado do dia
+        state->gameStartTime = GetTickCount64();
+        state->isGrilling = FALSE;
+        state->ordersPending = 0;
+        state->dynamicOrderCount = 0;
+        state->lastDynamicOrderSpawn = GetTickCount64();
+
+        // limpa a fila de pedidos antiga e gera uma nova para o dia que tiver sido salvo.
+        while (state->filaDePedidos.tamanho != 0) {
+            Pedido_FilaLE pedido;
+            desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedido);
+        }
+        geraPedidos_FilaLE(&state->filaDePedidos, state->dia); // recomeca a gerar pedidos e volta ao jogo normal.
+    } // nota: para carregar o jogo, tem que limpar e reiniciar o progresso atual pelo salvo nos arquivos (se nn tiver save, reseta tudo).
+    
     else if (_stricmp(state->currentCommand, "sair") == 0)
     {
         state->isRunning = FALSE;
@@ -1037,39 +1062,40 @@ void renderGame(GameContext *ctx, GameState *state)
     clearBuffer(ctx);
 
     // --- Define UI Layout (Dynamically) ---
-    // This is the core of the responsive UI. All positions are
-    // relative to the screen size.
+    // Lógica de cima para baixo com caixas de tamanho fixo no topo.
+    
+    int leftColR = ctx->screenSize.X / 3; // Borda direita da coluna esquerda
 
     // Area 2: Orders (Top-Left)
     int orderBoxL = 1;
     int orderBoxT = 1;
-    int orderBoxR = ctx->screenSize.X / 3;
-    int orderBoxB = ctx->screenSize.Y / 3;
+    int orderBoxR = leftColR;
+    int orderBoxB = 8; // Altura fixa de 8 linhas
     drawOrders(ctx, state, orderBoxL, orderBoxT, orderBoxR, orderBoxB);
 
     // Area 3: Input (Below Orders)
     int inputL = 1;
-    int inputT = orderBoxB + 1;
-    int inputR = orderBoxR;
-    int inputB = inputT + 4;
+    int inputT = orderBoxB + 1; // Começa abaixo de 'Orders'
+    int inputR = leftColR;
+    int inputB = inputT + 4;   // Altura fixa de 4 linhas
     drawInput(ctx, state, inputL, inputT, inputR, inputB);
 
     // Area 4: Grilling (Below Input)
     int grillL = 1;
-    int grillT = inputB + 1;
-    int grillR = orderBoxR;
-    int grillB = grillT + 6;
+    int grillT = inputB + 1; // Começa abaixo de 'Input'
+    int grillR = leftColR;
+    int grillB = grillT + 6;   // Altura fixa de 6 linhas
     drawGrilling(ctx, state, grillL, grillT, grillR, grillB);
 
-    // Area 5: Inventory (Bottom-Left)
+    // Area 5: Inventory (Bottom-Left, preenche o resto)
     int invL = 1;
-    int invB = ctx->screenSize.Y - 2;
-    int invT = max(grillB + 1, invB - 10); // At least 10 high, or fill space
-    int invR = orderBoxR;
-    drawIngredientes(ctx, state, invL, invT, invR, invB);
+    int invB = ctx->screenSize.Y - 2; // Borda de baixo
+    int invT = grillB + 1;            // Começa abaixo de 'Grill'
+    int invR = leftColR;
+    drawIngredientes(ctx, state, invL, invT, invR, invB); // Usa todo o espaço restante
 
     // Area 1: Burger Stack (Right side)
-    int stackL = orderBoxR + 2;
+    int stackL = leftColR + 2;
     int stackT = 1;
     int stackR = ctx->screenSize.X - 2;
     int stackB = ctx->screenSize.Y - 2;
@@ -1219,6 +1245,126 @@ void cleanup(GameContext *ctx, GameState *state)
     printf("Obrigado por jogar!\n");
 }
 
+void salvarJogo(GameState *state) { // funcao de save do jogo
+    FILE *arquivo; // ponteiro de arquivo generico
+    
+    // salva as moedas
+    arquivo = fopen("Saves/coins.txt", "w"); //salvamento "w" para write and read (escrever e ler)
+    if (arquivo != NULL) {
+        fprintf(arquivo, "%d", state->dinheiro);
+        fclose(arquivo);
+    }
+
+    // salva os dias
+    arquivo = fopen("Saves/days.txt", "w");
+    if (arquivo != NULL) {
+        fprintf(arquivo, "%d", state->dia);
+        fclose(arquivo);
+    }
+
+    // salva os ingredientes / inventario atual
+    arquivo = fopen("Saves/ingredientes.txt", "w");
+    if (arquivo != NULL) {
+        fprintf(arquivo, "%d\n", state->pao_count);
+        fprintf(arquivo, "%d\n", state->hamburguerCru_count);
+        fprintf(arquivo, "%d\n", state->alface_count);
+        fprintf(arquivo, "%d\n", state->tomate_count);
+        fprintf(arquivo, "%d\n", state->queijo_count);
+        fprintf(arquivo, "%d\n", state->bacon_count);
+        fprintf(arquivo, "%d\n", state->maioneseDoPato_count);
+        fprintf(arquivo, "%d\n", state->onion_rings_count);
+        fprintf(arquivo, "%d\n", state->cebola_count);
+        fprintf(arquivo, "%d\n", state->picles_count);
+        fprintf(arquivo, "%d\n", state->falafel_count);
+        fprintf(arquivo, "%d\n", state->frango_count);
+        fclose(arquivo);
+    }
+
+    // salva os burgers vendidos
+    arquivo = fopen("Saves/burgers.txt", "w");
+    if (arquivo != NULL) {
+        fprintf(arquivo, "%d\n", state->totalHamburgueresVendidos);
+        
+        fprintf(arquivo, "\n");
+        
+        fclose(arquivo);
+    }
+    //salvamento "w" para write and read (escrever e ler)
+    arquivo = fopen("Saves/save_game.txt", "w"); // junta tudo que eu salvei para o arquivo principal de progresso.
+    if (arquivo == NULL) { 
+        return; // nn pode salvar pois algum dos arquivos esta vazio (nulo)
+    }
+
+    fprintf(arquivo, "[Moedas]\n");
+    fprintf(arquivo, "%d\n", state->dinheiro);
+
+	// salva days.txt
+    fprintf(arquivo, "[Dia]\n");
+    fprintf(arquivo, "%d\n", state->dia);
+
+    // salva ingredientes.txt
+    fprintf(arquivo, "[IngredientesAtuais]\n");
+    fprintf(arquivo, "%d\n", state->pao_count);
+    fprintf(arquivo, "%d\n", state->hamburguerCru_count);
+    fprintf(arquivo, "%d\n", state->alface_count);
+    fprintf(arquivo, "%d\n", state->tomate_count);
+    fprintf(arquivo, "%d\n", state->queijo_count);
+    fprintf(arquivo, "%d\n", state->bacon_count);
+    fprintf(arquivo, "%d\n", state->maioneseDoPato_count);
+    fprintf(arquivo, "%d\n", state->onion_rings_count);
+    fprintf(arquivo, "%d\n", state->cebola_count);
+    fprintf(arquivo, "%d\n", state->picles_count);
+    fprintf(arquivo, "%d\n", state->falafel_count);
+    fprintf(arquivo, "%d\n", state->frango_count);
+
+    // salva burgers.txt
+    fprintf(arquivo, "[HamburgueresVendidos]\n");
+    fprintf(arquivo, "%d\n", state->totalHamburgueresVendidos);
+    
+    fprintf(arquivo, "\n");
+
+    fclose(arquivo); // fecha o save_game.txt
+} // fim da funcao salvar jogo
+
+void carregarJogo(GameState *state) {
+    FILE *arquivo;
+    //carregamento "r" para read (ler)
+    arquivo = fopen("Saves/save_game.txt", "r"); // detalhe: como tudo esta dentro do save_game, ele so carrega esse save_game.txt
+    if (arquivo == NULL) {
+        return; // nn existe o save_game.txt
+    }
+
+    // carrega coins.txt
+    fscanf(arquivo, "[Moedas]\n");
+    fscanf(arquivo, "%d\n", &state->dinheiro);
+
+    // carrega days.txt
+    fscanf(arquivo, "[Dia]\n");
+    fscanf(arquivo, "%d\n", &state->dia);
+
+    // carrega ingredientes.txt
+    fscanf(arquivo, "[IngredientesAtuais]\n");
+    fscanf(arquivo, "%d\n", &state->pao_count);
+    fscanf(arquivo, "%d\n", &state->hamburguerCru_count);
+    fscanf(arquivo, "%d\n", &state->alface_count);
+    fscanf(arquivo, "%d\n", &state->tomate_count);
+    fscanf(arquivo, "%d\n", &state->queijo_count);
+    fscanf(arquivo, "%d\n", &state->bacon_count);
+    fscanf(arquivo, "%d\n", &state->maioneseDoPato_count);
+    fscanf(arquivo, "%d\n", &state->onion_rings_count);
+    fscanf(arquivo, "%d\n", &state->cebola_count);
+    fscanf(arquivo, "%d\n", &state->picles_count);
+    fscanf(arquivo, "%d\n", &state->falafel_count);
+    fscanf(arquivo, "%d\n", &state->frango_count);
+
+    // carrega burgers.txt
+    fscanf(arquivo, "[HamburgueresVendidos]\n");
+    fscanf(arquivo, "%d\n", &state->totalHamburgueresVendidos);
+    
+    fscanf(arquivo, "\n");
+    
+    fclose(arquivo);
+} // fim da funcao de carregar jogo
 
 //Função principal.
 void telaPrincipalEtapa2()
@@ -1226,17 +1372,16 @@ void telaPrincipalEtapa2()
     GameContext gameContext = {0};
     GameState gameState = {0};
 
-
     //Variáveis para a loja.
     Loja loja;
     Inventarioplayer inventarioJogador;
 
-    inicializarinvloja(&inventarioJogador, 100);
+    inicializarInventario_loja(&inventarioJogador, 100);
     inicializarLoja(&loja);
 
-
-
     initializeGame(&gameContext, &gameState);
+    
+    carregarJogo(&gameState); // carrega o jogo automaticamente
 
     BOOL showShopScreen = FALSE; // Flag para controlar a cena da loja
 
@@ -1275,7 +1420,8 @@ void telaPrincipalEtapa2()
         }
         else if (showShopScreen)
         {
-
+			salvarJogo(&gameState); // salva o jogo automaticamente
+			
             loopfuncionaloja(&loja, &inventarioJogador); //Função de loja (Bloqueante).
 
             // Quando o jogador sair da loja:
