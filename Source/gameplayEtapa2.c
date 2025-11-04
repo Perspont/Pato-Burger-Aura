@@ -1231,7 +1231,7 @@ void telaPrincipalEtapa2()
     Loja loja;
     Inventarioplayer inventarioJogador;
 
-    inicializarInventario_loja(&inventarioJogador, 100);
+    inicializarinvloja(&inventarioJogador, 100);
     inicializarLoja(&loja);
 
 
