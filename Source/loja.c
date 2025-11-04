@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h> // <-- ERRO 2 CORRIGIDO
+#include <time.h> 
 
 #ifdef _WIN32
 #include <windows.h> 
