@@ -5,23 +5,23 @@
 
 #define MAX_PEDIDOS 20
 
-typedef struct pedido
+typedef struct pedido_FilaLE
 {
 	int id;
 	int id_burger;
 	int quantidade;
-} Pedido;
+} Pedido_FilaLE;
 
-typedef struct noPedido
+typedef struct noPedido_FilaLE
 {
-	Pedido info;
-	struct noPedido *prox;
-} NoPedido;
+	Pedido_FilaLE info;
+	struct noPedido_FilaLE *prox;
+} NoPedido_FilaLE;
 
 typedef struct filaLEPedidos
 {
-	NoPedido *inicio;
-	NoPedido *fim;
+	NoPedido_FilaLE *inicio;
+	NoPedido_FilaLE *fim;
 	int tamanho;
 } FilaLEPedidos;
 
@@ -29,16 +29,9 @@ typedef struct filaLEPedidos
 void inicializaFilaLEPedidos(FilaLEPedidos *f);
 int filaLEPedidosVazia(FilaLEPedidos *f);
 int filaLEPedidosCheia(FilaLEPedidos *f);
-
-// --- RENOMEADO ---
-int enfileiraPedido_LE(FilaLEPedidos *f, Pedido elem);
-
-// --- RENOMEADO ---
-int desenfileiraPedido_LE(FilaLEPedidos *f, Pedido *elem);
-
+int enfileiraPedido_FilaLE(FilaLEPedidos *f, Pedido_FilaLE elem);
+int desenfileiraPedido_FilaLE(FilaLEPedidos *f, Pedido_FilaLE *elem);
 void imprimeFilaLEPedidos(FilaLEPedidos *f, Burger *cardapio);
-
-// --- RENOMEADO ---
-void geraPedidos_LE(FilaLEPedidos *f, int num_dia);
+void geraPedidos_FilaLE(FilaLEPedidos *f, int num_dia);
 
 #endif

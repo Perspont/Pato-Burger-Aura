@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "../Header/filaLE.h" // Corrigido para ../Header/
-#include "../Header/burger.h" // Corrigido para ../Header/
+#include "../Header/filaLE.h"
+#include "../Header/burger.h"
 
 // Inicializa a fila encadeada
 void inicializaFilaLEPedidos(FilaLEPedidos *f)
@@ -26,10 +26,9 @@ int filaLEPedidosCheia(FilaLEPedidos *f)
 }
 
 // Insere no final da fila
-// --- RENOMEADO ---
-int enfileiraPedido_LE(FilaLEPedidos *f, Pedido elem)
+int enfileiraPedido_FilaLE(FilaLEPedidos *f, Pedido_FilaLE elem)
 {
-	NoPedido *novo = (NoPedido *)malloc(sizeof(NoPedido));
+	NoPedido_FilaLE *novo = (NoPedido_FilaLE *)malloc(sizeof(NoPedido_FilaLE));
 	if (novo == NULL)
 		return 0; // erro de alocação
 
@@ -47,13 +46,12 @@ int enfileiraPedido_LE(FilaLEPedidos *f, Pedido elem)
 }
 
 // Remove do início da fila
-// --- RENOMEADO ---
-int desenfileiraPedido_LE(FilaLEPedidos *f, Pedido *elem)
+int desenfileiraPedido_FilaLE(FilaLEPedidos *f, Pedido_FilaLE *elem)
 {
 	if (filaLEPedidosVazia(f))
 		return 0;
 
-	NoPedido *removido = f->inicio;
+	NoPedido_FilaLE *removido = f->inicio;
 	*elem = removido->info;
 
 	f->inicio = removido->prox;
@@ -67,18 +65,17 @@ int desenfileiraPedido_LE(FilaLEPedidos *f, Pedido *elem)
 }
 
 // Imprime os pedidos
-// (Nome já estava correto no .h, apenas garantindo consistência)
 void imprimeFilaLEPedidos(FilaLEPedidos *f, Burger *cardapio)
 {
-	NoPedido *atual = f->inicio;
+	NoPedido_FilaLE *atual = f->inicio;
 	printf("\n--- FILA DE PEDIDOS ---\n");
 
 	while (atual != NULL)
 	{
 		printf("Pedido #%d | Burger ID: %d | Quantidade: %d\n",
-					 atual->info.id,
-					 atual->info.id_burger,
-					 atual->info.quantidade);
+		atual->info.id,
+		atual->info.id_burger,
+		atual->info.quantidade);
 		atual = atual->prox;
 	}
 
@@ -87,20 +84,18 @@ void imprimeFilaLEPedidos(FilaLEPedidos *f, Burger *cardapio)
 }
 
 // Gera pedidos aleatórios e insere na fila
-// --- RENOMEADO ---
-void geraPedidos_LE(FilaLEPedidos *f, int num_dia)
+void geraPedidos_FilaLE(FilaLEPedidos *f, int num_dia)
 {
 	srand(time(NULL));
 
-	int qtd_pedidos = rand() % 5 + 3; // entre 3 e 7 pedidos
-	for (int i = 0; i < qtd_pedidos; i++)
+	int qtd_pedidos_FilaLE = rand() % 5 + 3; // entre 3 e 7 pedidos
+	for (int i = 0; i < qtd_pedidos_FilaLE; i++)
 	{
-		Pedido p;
+		Pedido_FilaLE p;
 		p.id = num_dia * 100 + i + 1;
 		p.id_burger = rand() % 5 + 1;	 // assume 5 tipos no cardápio
 		p.quantidade = rand() % 3 + 1; // entre 1 e 3 unidades
 
-		// Chama a função renomeada
-		enfileiraPedido_LE(f, p);
+		enfileiraPedido_FilaLE(f, p);
 	}
 }

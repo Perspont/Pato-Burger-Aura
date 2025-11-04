@@ -144,7 +144,15 @@ void gameplayLoop() {
 			fgets(input, sizeof(input), stdin);
 		}
 	}
-    
-    // --- O main.c já limpa a tela e imprime "Obrigado por jogar!" ---
-    // --- Esta parte foi removida para evitar duplicatas ---
+
+	#ifdef _WIN32
+	system("cls");
+	#else
+	system("clear");
+	#endif
+
+	printf("Obrigado por jogar!");
+
+	return;
+
 }
