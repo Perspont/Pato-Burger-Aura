@@ -1,7 +1,8 @@
-#include "../Header/loja.h" 
+#include "loja.h" 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h> // <-- ERRO 2 CORRIGIDO
 
 #ifdef _WIN32
 #include <windows.h> 
@@ -10,16 +11,16 @@
 #define Sleep(ms) usleep(ms * 1000)
 #endif
 
-
 //funcoes internas
-static void limparBufferInput() {
+static void limparBufferInput() 
+{
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
-//liimpa o terminal 
-
-static void limparTela() {
+//limpa o terminal 
+static void limparTela() 
+{
     #ifdef _WIN32
     system("cls");
     #else
@@ -27,230 +28,218 @@ static void limparTela() {
     #endif
 }
 
-// libera os nos de uma lista de ingredientes
-
-static void _liberarListaIngrediente(ListaIngrediente *lista) {
-    IngredienteNode *atual = lista->cabeca;
-    IngredienteNode *temp;
+// libera os nos da lista de ingredientes
+static void liberaringredilista(listaingredientes *lista) 
+{
+    ingredino *atual = lista->topo; 
+    ingredino *temp;
     while (atual != NULL) {
         temp = atual;
         atual = atual->prox;
         free(temp);
     }
-    lista->cabeca = NULL;
-    lista->cauda = NULL;
+    lista->base = NULL; 
+    lista->topo = NULL; 
     lista->quantidade = 0;
 }
-
 //adiciona um no (uma unidade) a lista de ingredientes do jogador.
-static void _adicionarNoIngrediente(ListaIngrediente *lista) {
-    IngredienteNode *novoNo = (IngredienteNode*) malloc(sizeof(IngredienteNode));
+static void adicionaingredino(listaingredientes *lista) 
+{
+    ingredino *novoNo = (ingredino*) malloc(sizeof(ingredino));
     if (novoNo == NULL) {
         perror("Erro ao alocar memoria para ingrediente");
         return;
     }
     novoNo->prox = NULL;
-    novoNo->ant = lista->cauda; 
-
-    if (lista->cabeca == NULL) { 
-        lista->cabeca = novoNo;
+    novoNo->ant = lista->base; 
+    if (lista->topo == NULL) { 
+        lista->topo = novoNo; 
     } else { 
-        lista->cauda->prox = novoNo; //
+        lista->base->prox = novoNo; 
     }
-    lista->cauda = novoNo; //
+    lista->base = novoNo; 
     lista->quantidade++;
 }
-
 //remove um no (uma unidade) da lista de ingredientes.
-
-static int _removerNoIngrediente(ListaIngrediente *lista) {
-    if (lista->quantidade == 0 || lista->cauda == NULL) {
-        return 0; // sem estoquee
+static int removeringredino(listaingredientes *lista) 
+{
+    if (lista->quantidade == 0 || lista->base == NULL) { 
+        return 0; 
     }
-
-    IngredienteNode *noRemovido = lista->cauda;
-
-    if (lista->cabeca == lista->cauda) { 
-        lista->cabeca = NULL;
-        lista->cauda = NULL;
+    ingredino *noRemovido = lista->base; 
+    if (lista->topo == lista->base) { 
+        lista->topo = NULL; 
+        lista->base = NULL; 
     } else { 
-        lista->cauda = noRemovido->ant; 
-        lista->cauda->prox = NULL; 
+        lista->base = noRemovido->ant; 
+        lista->base->prox = NULL; 
     }
-
     free(noRemovido);
     lista->quantidade--;
-    return 1; // Sucesso
+    return 1;
 }
-
-
-//retorna um ponteiro para a lista de ingredientes correta no inventario com base no ID do produto
-static ListaIngrediente* getListaPorID(InventarioJogador *inv, int id) {
+//aponta um ponteiro para a lista de ingredientes no inventario com base no ID do produto
+static listaingredientes* ListaPorID(Inventarioplayer *inv, int id) 
+{ 
     switch (id) {
-        case 1:  return &inv->paes;
-        case 2:  return &inv->carnes;
-        case 3:  return &inv->queijos;
-        case 4:  return &inv->alfaces;
-        case 5:  return &inv->tomates;
-        case 6:  return &inv->bacons;
-        case 7:  return &inv->picles;
-        case 8:  return &inv->cebolas;
-        case 9:  return &inv->falafels;
-        case 10: return &inv->molhos;
-        case 11: return &inv->onionRings;
-        case 12: return &inv->maioneses;
-        case 13: return &inv->frangos;
+        case 1:  return &inv->paes; // ID 1
+        case 2:  return &inv->carnes; // ID 2
+        case 3:  return &inv->queijos; // ID 3
+        case 4:  return &inv->alfaces; // ID 4
+        case 5:  return &inv->tomates; // ID 5
+        case 6:  return &inv->bacons; // ID 6
+        case 7:  return &inv->picles; // ID 7
+        case 8:  return &inv->cebolas; // ID 8
+        case 9:  return &inv->falafels; // ID 9
+        case 10: return &inv->maionese_de_pato; // ID 10
+        case 11: return &inv->onionRings; // ID 11
+        case 12: return &inv->maioneses; // ID 12
+        case 13: return &inv->frangos; // ID 13
         default: return NULL;
     }
 }
 
-/**adiciona um produto a loja, a insercao eh feita em ordem alfebetica ok*/
-static void _inserirProdutoOrdenado(Loja *loja, int id, const char *nome, double preco) {
-    ProdutoLojaNode *novoProduto = (ProdutoLojaNode*) malloc(sizeof(ProdutoLojaNode));
+//adiciona um produto a loja, a insercao eh feita em ordem alfebetica ok
+static void inserereproduto(Loja *loja, int id, const char *nome, float preco) { 
+    noprodutoloja *novoProduto = (noprodutoloja*) malloc(sizeof(noprodutoloja));
     if (novoProduto == NULL) {
-        perror("Erro ao alocar memoria para produto da loja");
+        perror("Erro ao inserir produto");
         return;
     }
-    // isso previne um problema de buffer se o nome for maior que 49 caracteres.
+    // isso previne dar problema se for maior que 49 caracteres.
     strncpy(novoProduto->nome, nome, 49);
-    novoProduto->nome[49] = '\0'; // faz a string sempre terminar nula
-    
+    novoProduto->nome[49] = '\0'; 
+    //
+
     novoProduto->id = id;
     novoProduto->precoBase = preco;
-    novoProduto->precoAtual = preco;
     novoProduto->prox = NULL;
     novoProduto->ant = NULL;
 
     // "case 1" lista vazia 
-    if (loja->cabeca == NULL) {
-        loja->cabeca = novoProduto;
-        loja->cauda = novoProduto;
-        loja->numProdutos++;
+    if (loja->topo == NULL) { 
+        loja->topo = novoProduto; 
+        loja->base = novoProduto; 
+        loja->numprodutos++;
         return;
     }
-
-    // "case 2" insere antes da cabeça, quando eh o primeiro do alfabeto
-    if (strcmp(nome, loja->cabeca->nome) < 0) {
-        novoProduto->prox = loja->cabeca;
-        loja->cabeca->ant = novoProduto;
-        loja->cabeca = novoProduto;
-        loja->numProdutos++;
+    // "case 2" insere antes do topo, quando eh o primeiro do alfabeto
+    if (strcmp(nome, loja->topo->nome) < 0) { 
+        novoProduto->prox = loja->topo; 
+        loja->topo->ant = novoProduto; 
+        loja->topo = novoProduto; 
+        loja->numprodutos++;
         return;
     }
 
     // "case 3" insere no meio ou no fim
-    ProdutoLojaNode *atual = loja->cabeca;
+    noprodutoloja *atual = loja->topo; 
    
     while (atual->prox != NULL && strcmp(nome, atual->prox->nome) > 0) {
         atual = atual->prox;
     }
-
-    // atual eh o no antes do ponto de que divide
     novoProduto->prox = atual->prox;
     novoProduto->ant = atual;
 
     if (atual->prox != NULL) { 
         atual->prox->ant = novoProduto;
     } else {
-        loja->cauda = novoProduto;
+        loja->base = novoProduto; 
     }
     
     atual->prox = novoProduto;
-    loja->numProdutos++;
+    loja->numprodutos++;
 }
 
 //busca de produto na loja pelo ID
-static ProdutoLojaNode* _buscarProdutoPorID(Loja *loja, int id) {
-    ProdutoLojaNode *atual = loja->cabeca;
+static noprodutoloja* buscarID(Loja *loja, int id) 
+{ 
+    noprodutoloja *atual = loja->topo; 
     while (atual != NULL) {
         if (atual->id == id) {
             return atual;
         }
         atual = atual->prox;
-    }
+        }
     return NULL;
-}
+}   
 
-
-static void _comprarItem(Loja *loja, InventarioJogador *inv, int produtoID) {
-    ProdutoLojaNode *produto = _buscarProdutoPorID(loja, produtoID);
-
+static void compraritem(Loja *loja, Inventarioplayer *inv, int produtoID) 
+{
+    noprodutoloja *produto = buscarID(loja, produtoID); 
     if (produto == NULL) {
         printf("\n[ERRO] Produto com ID %d nao encontrado.\n", produtoID);
         Sleep(1500);
         return;
     }
 
-    if (inv->dinheiro < produto->precoAtual) {
-        printf("\n[ERRO] Dinheiro insuficiente! Voce precisa de $%.2f.\n", produto->precoAtual);
+    if (inv->dinheiro < produto->precoBase) { 
+        printf("\n[ERRO] Dinheiro insuficiente! Voce precisa de $%.2f.\n", produto->precoBase); 
         Sleep(1500);
         return;
     }
 
     // acha a lista de inventario certa
-    ListaIngrediente *listaDestino = getListaPorID(inv, produto->id);
+    listaingredientes *listaDestino = ListaPorID(inv, produto->id);
     if (listaDestino == NULL) {
         printf("\n[ERRO] O produto '%s' nao pode ser armazenado (ID %d invalido).\n", produto->nome, produto->id);
         Sleep(1500);
         return;
     }
 
-    // pagamento
-    inv->dinheiro -= produto->precoAtual;
-    _adicionarNoIngrediente(listaDestino); // vai colocar outro no
-
+    // pagamento feito de maneira certa
+    inv->dinheiro -= produto->precoBase;
+    adicionaingredino(listaDestino); 
     printf("\n[SUCESSO] Voce comprou 1 %s.\n", produto->nome);
     printf("Novo saldo: $%.2f. Total no inventario: %d\n", inv->dinheiro, listaDestino->quantidade);
     Sleep(1500);
 }
 
-
-//Implementação de loja.h)
-
-
 // funcoes de inventario
-
-void inicializarInventario(InventarioJogador *inv, double dinheiroInicial) {
-    // Itera por todos os IDs de ingredientes possíveis e zera suas listas
-    // IDs 1-13
-    for (int i = 1; i <= 13; i++) { 
-        ListaIngrediente *lista = getListaPorID(inv, i);
+void inicializarinvloja(Inventarioplayer *inv, float dinheiroInicial) 
+{ 
+    for (int i = 1; i <= 13; i++) { // passa pelos ids
+        listaingredientes *lista = ListaPorID(inv, i);
         if (lista != NULL) {
-            lista->cabeca = NULL;
-            lista->cauda = NULL;
+            lista->topo = NULL; 
+            lista->base = NULL; 
             lista->quantidade = 0;
         }
     }
     inv->dinheiro = dinheiroInicial;
 }
 
-void liberarInventario(InventarioJogador *inv) {
-    // itera e libera todas as listas
+void liberarInventario(Inventarioplayer *inv) 
+{ 
+    //libera tudo
     for (int i = 1; i <= 13; i++) {
-        ListaIngrediente *lista = getListaPorID(inv, i);
+        listaingredientes *lista = ListaPorID(inv, i);
         if (lista != NULL) {
-            _liberarListaIngrediente(lista);
+            liberaringredilista(lista); 
         }
     }
 }
 
-void adicionarItemInventario(InventarioJogador *inv, int ingredienteID) {
-    ListaIngrediente *lista = getListaPorID(inv, ingredienteID);
+void adicionarItemInventario(Inventarioplayer *inv, int ingredienteID) 
+{ 
+    listaingredientes *lista = ListaPorID(inv, ingredienteID); 
     if (lista != NULL) {
-        _adicionarNoIngrediente(lista);
+        adicionaingredino(lista);
     }
 }
 
-int usarItemInventario(InventarioJogador *inv, int ingredienteID) {
-    ListaIngrediente *lista = getListaPorID(inv, ingredienteID);
+int usarItemInventario(Inventarioplayer *inv, int ingredienteID) 
+{ 
+    listaingredientes *lista = ListaPorID(inv, ingredienteID); 
     if (lista != NULL) {
-        return _removerNoIngrediente(lista); 
+        return removeringredino(lista); 
     }
     return 0; 
 }
 
-int getQuantidadeInventario(InventarioJogador *inv, int ingredienteID) {
-    ListaIngrediente *lista = getListaPorID(inv, ingredienteID);
+int qntitem(Inventarioplayer *inv, int ingredienteID) 
+{ 
+    listaingredientes *lista = ListaPorID(inv, ingredienteID); 
     if (lista != NULL) {
         return lista->quantidade;
     }
@@ -261,108 +250,93 @@ int getQuantidadeInventario(InventarioJogador *inv, int ingredienteID) {
 // funcoes da loja
 
 void inicializarLoja(Loja *loja) {
-    loja->cabeca = NULL;
-    loja->cauda = NULL;
-    loja->numProdutos = 0;
+    loja->base = NULL;
+    loja->topo = NULL; 
+    loja->numprodutos = 0;
     srand((unsigned int)time(NULL));
 }
 
+void organizaloja(Loja *loja) { 
+    // informacoes dos produtos para serem inseridos
+    inserereproduto(loja, 4, "Alface", 4.0);
+    inserereproduto(loja, 6, "Bacon", 4.0);
+    inserereproduto(loja, 2, "Carne", 5.0);
+    inserereproduto(loja, 8, "Cebola", 3.0);
+    inserereproduto(loja, 9, "Falafel", 7.0);
+    inserereproduto(loja, 13, "Frango", 4.0);
+    inserereproduto(loja, 12, "Maionese", 3.0);
+    inserereproduto(loja, 10, "Maionese de Pato", 2.0); 
+    inserereproduto(loja, 11, "Onion Rings", 6.0);
+    inserereproduto(loja, 1, "Pao", 2.0);
+    inserereproduto(loja, 7, "Picles", 4.0);
+    inserereproduto(loja, 3, "Queijo", 3.0);
+    inserereproduto(loja, 5, "Tomate", 3.0);
+}
+
 void liberarLoja(Loja *loja) {
-    ProdutoLojaNode *atual = loja->cabeca;
-    ProdutoLojaNode *temp;
+    noprodutoloja *atual = loja->topo; 
+    noprodutoloja *temp; //ponteiro temporario para ir liberando a loja
     while (atual != NULL) {
         temp = atual;
         atual = atual->prox;
         free(temp);
     }
-    loja->cabeca = NULL;
-    loja->cauda = NULL;
-    loja->numProdutos = 0;
+    loja->topo = NULL; 
+    loja->base = NULL; 
+    loja->numprodutos = 0;
 }
 
-void popularLoja(Loja *loja) {
-    // Os produtos sao inseridos aqui ok
-    _inserirProdutoOrdenado(loja, 4, "Alface", 4.0);
-    _inserirProdutoOrdenado(loja, 6, "Bacon", 4.0);
-    _inserirProdutoOrdenado(loja, 2, "Carne", 5.0);
-    _inserirProdutoOrdenado(loja, 8, "Cebola", 3.0);
-    _inserirProdutoOrdenado(loja, 9, "Falafel", 7.0);
-    _inserirProdutoOrdenado(loja, 13, "Frango", 4.0);
-    _inserirProdutoOrdenado(loja, 12, "Maionese", 3.0);
-    _inserirProdutoOrdenado(loja, 10, "Molho do Pato", 2.0); 
-    _inserirProdutoOrdenado(loja, 11, "Onion Rings", 6.0);
-    _inserirProdutoOrdenado(loja, 1, "Pao", 2.0);
-    _inserirProdutoOrdenado(loja, 7, "Picles", 4.0);
-    _inserirProdutoOrdenado(loja, 3, "Queijo", 3.0);
-    _inserirProdutoOrdenado(loja, 5, "Tomate", 3.0);
-}
 
-void flutuarPrecos(Loja *loja) {
-    ProdutoLojaNode *atual = loja->cabeca;
-    while (atual != NULL) {
-        double variacao = ((rand() % 41) - 20) / 100.0;
-        double novoPreco = atual->precoBase * (1.0 + variacao);
-        atual->precoAtual = (novoPreco < 0.10) ? 0.10 : novoPreco;
-        atual = atual->prox;
-    }
-}
-
-// exibe interface da loja
-static void _exibirInterfaceLoja(Loja *loja, InventarioJogador *inv) {
+static void exibirinterfaceloja(Loja *loja, Inventarioplayer *inv) 
+{ 
     limparTela();
     printf("=========================================================\n");
-    printf("                  BEM-VINDO A LOJA                       \n");
-    printf("         (Os precos de hoje sao uma loucura!)          \n");
-    printf("=========================================================\n\n");
+    printf("https://www.lojapatonica.com.br/app/30901f2ef9998ef3    .\n");         
+    printf(".                                                       .\n");
+    printf(".                  BEM-VINDO A LOJA.                     .\n");
+    printf(".                                                       .\n");
+    printf("=========================================================\n");
     printf("Seu saldo: $%.2f\n\n", inv->dinheiro);
-
     printf("--- Seu Inventario Atual ---\n");
     printf(" Paes: %-3d | Carnes: %-3d | Queijos: %-3d | Alfaces: %-3d\n",
-        getQuantidadeInventario(inv, 1), getQuantidadeInventario(inv, 2),
-        getQuantidadeInventario(inv, 3), getQuantidadeInventario(inv, 4));
+        qntitem(inv, 1), qntitem(inv, 2),
+        qntitem(inv, 3), qntitem(inv, 4)); 
     printf(" Tomates: %-3d | Bacons: %-3d | Picles: %-3d | Cebolas: %-3d\n",
-        getQuantidadeInventario(inv, 5), getQuantidadeInventario(inv, 6),
-        getQuantidadeInventario(inv, 7), getQuantidadeInventario(inv, 8));
-    printf(" Falafels: %-3d | Molhos: %-3d | O.Rings: %-3d | Maioneses: %-3d\n",
-        getQuantidadeInventario(inv, 9), getQuantidadeInventario(inv, 10),
-        getQuantidadeInventario(inv, 11), getQuantidadeInventario(inv, 12));
-     printf(" Frangos: %-3d\n", getQuantidadeInventario(inv, 13));
+        qntitem(inv, 5), qntitem(inv, 6),
+        qntitem(inv, 7), qntitem(inv, 8)); 
+    printf(" Falafels: %-3d | M. Pato: %-3d | O.Rings: %-3d | Maioneses: %-3d\n", 
+        qntitem(inv, 9), qntitem(inv, 10), 
+        qntitem(inv, 11), qntitem(inv, 12)); 
+     printf(" Frangos: %-3d\n", qntitem(inv, 13)); 
     printf("\n");
-
-    printf("--- Itens a Venda (Ordenados por Nome) ---\n");
-    ProdutoLojaNode *atual = loja->cabeca;
+    printf("---Itens a Venda---\n");
+    noprodutoloja *atual = loja->topo; 
     while (atual != NULL) {
-        printf(" [%2d] %-15s - $%.2f\n", atual->id, atual->nome, atual->precoAtual);
+        printf(" [%2d] %-15s - $%.2f\n", atual->id, atual->nome, atual->precoBase); 
         atual = atual->prox;
     }
-    printf("\n=========================================================\n");
 }
 
-
-void loopPrincipalLoja(Loja *loja, InventarioJogador *inv) {
-    flutuarPrecos(loja);
-
-    int running = 1;
-    int inputID = -1;
-
-    while (running) {
-        _exibirInterfaceLoja(loja, inv);
+void loopfuncionaloja(Loja *loja, Inventarioplayer *inv) 
+{
+    int funcionando = 1;
+    int IDselecionado = -1;
+    while (funcionando) {
+        exibirinterfaceloja(loja, inv);
         printf("Digite o ID do item para comprar, ou [0] para Sair: ");
         
-        if (scanf("%d", &inputID) != 1) {
+        if (scanf("%d", &IDselecionado) != 1) {
             // se o input nao for numero
             printf("\nEntrada invalida. Por favor, digite um numero.\n");
             limparBufferInput(); 
             Sleep(1500);
             continue; 
         }
-        
-        limparBufferInput(); // Limpa
-
-        if (inputID == 0) {
-            running = 0; 
+        limparBufferInput();
+        if (IDselecionado == 0) {
+            funcionando = 0; 
         } else {
-            _comprarItem(loja, inv, inputID);
+            compraritem(loja, inv, IDselecionado);
 
         }
     }

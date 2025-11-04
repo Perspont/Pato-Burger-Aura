@@ -1,134 +1,91 @@
 #ifndef LOJA_H
 #define LOJA_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h> 
+//estruturas de inventario
 
-/*estruturas de inventario do jogador*/
+//no para cada ingrediente
+typedef struct ingredino {
+    struct ingredino *prox;
+    struct ingredino *ant;
+} ingredino;
 
-// no para cada ingrediente
-typedef struct IngredienteNode {
-    struct IngredienteNode *prox;
-    struct IngredienteNode *ant;
-} IngredienteNode;
-
-// struct para gerenciar a lista de ingredientes
-typedef struct ListaIngrediente {
-    IngredienteNode *cabeca;
-    IngredienteNode *cauda;
+//struct para gerenciar a lista de ingredientes
+typedef struct listaingredientes {
+    ingredino *topo;
+    ingredino *base;
     int quantidade; 
-} ListaIngrediente;
-
-// struct do inventario principal do player
-typedef struct InventarioJogador {
-    ListaIngrediente paes;        // ID 1
-    ListaIngrediente carnes;       // ID 2
-    ListaIngrediente queijos;      // ID 3
-    ListaIngrediente alfaces;     // ID 4
-    ListaIngrediente tomates;      // ID 5
-    ListaIngrediente bacons;       // ID 6
-    ListaIngrediente picles;       // ID 7
-    ListaIngrediente cebolas;      // ID 8
-    ListaIngrediente falafels;     // ID 9
-    ListaIngrediente molhos;       // ID 10 (
-    ListaIngrediente onionRings;   // ID 11
-    ListaIngrediente maioneses;    // ID 12
-    ListaIngrediente frangos;      // ID 13
-    double dinheiro;
-} InventarioJogador;
-
-
-/*
- structs da loja
- */
+} listaingredientes;
 
 //no para produto da loja
-typedef struct ProdutoLojaNode {
+typedef struct noprodutoloja {
     int id;
-    char nome[50];
-    double precoBase;
-    double precoAtual; 
-    struct ProdutoLojaNode *prox; 
-    struct ProdutoLojaNode *ant; 
-} ProdutoLojaNode;
+    char nome[50]; // menos que isso tava dando problema
+    float precoBase; 
+    struct noprodutoloja *prox; 
+    struct noprodutoloja *ant; 
+} noprodutoloja;
 
-// struct princiupal da loja
+//struct principal da loja
 typedef struct Loja {
-    ProdutoLojaNode *cabeca;
-    ProdutoLojaNode *cauda;
-    int numProdutos;
+    noprodutoloja *topo;
+    noprodutoloja *base;
+    int numprodutos;
 } Loja;
 
+// struct do inventario principal do player
+typedef struct Inventarioplayer {
+    listaingredientes paes;        // ID 1
+    listaingredientes carnes;       // ID 2
+    listaingredientes queijos;      // ID 3
+    listaingredientes alfaces;     // ID 4
+    listaingredientes tomates;      // ID 5
+    listaingredientes bacons;       // ID 6
+    listaingredientes picles;       // ID 7
+    listaingredientes cebolas;      // ID 8
+    listaingredientes falafels;     // ID 9
+    listaingredientes maionese_de_pato;       // ID 10 
+    listaingredientes onionRings;   // ID 11
+    listaingredientes maioneses;    // ID 12
+    listaingredientes frangos;      // ID 13
+    float dinheiro;
+} Inventarioplayer;
 
-/*
- * ===================================================================
- * PROTÓTIPOS DAS FUNÇÕES PÚBLICAS
- * ===================================================================
- */
-
-// --- Funções do Inventário ---
-
-/**
- * @brief Inicializa o inventário do jogador (listas vazias, dinheiro inicial).
- */
-void inicializarInventario(InventarioJogador *inv, double dinheiroInicial);
-
-/**
- * @brief Libera toda a memória alocada para os nós de ingredientes.
- */
-void liberarInventario(InventarioJogador *inv);
-
-/**
- * @brief Adiciona um item (1 nó) ao inventário do jogador.
- * Usado pela função de compra.
- */
-void adicionarItemInventario(InventarioJogador *inv, int ingredienteID);
-
-/**
- * @brief Remove um item (1 nó) do inventário do jogador.
- * Deve ser usado pela lógica do jogo (ex: 'processCommand').
- * @return 1 se o item foi usado com sucesso, 0 se não havia estoque.
- */
-int usarItemInventario(InventarioJogador *inv, int ingredienteID);
-
-/**
- * @brief Retorna a quantidade atual de um ingrediente.
- * Substitui o acesso direto a 'state->pao_count'.
- * @return A quantidade de itens.
- */
-int getQuantidadeInventario(InventarioJogador *inv, int ingredienteID);
+//funcoes de inventario
 
 
-// --- Funções da Loja ---
 
-/**
- * @brief Inicializa a loja (lista vazia).
- */
+
+void inicializarInventario_loja(Inventarioplayer *inv, float dinheiroInicial);
+
+//libera a memoria alocada dos nos no inventario
+void liberarInventario(Inventarioplayer *inv);
+
+//adicionai item ao inventario do player
+void adicionarItemInventario(Inventarioplayer *inv, int ingredienteID);
+
+// pra remover o item do inventario
+int usarItemInventario(Inventarioplayer *inv, int ingredienteID);
+
+//retorna a quantidade atual de um ingrediente.
+int qntitem(Inventarioplayer *inv, int ingredienteID);
+
+
+//funcoes pra loja
+
+
+
+
+
 void inicializarLoja(Loja *loja);
 
-/**
- * @brief Libera toda a memória alocada para os produtos da loja.
- */
+// libera a memoria dos nos da loja
 void liberarLoja(Loja *loja);
 
-/**
- * @brief Adiciona todos os produtos à loja em ORDEM ALFABÉTICA.
- * Não usa variáveis globais.
- */
-void popularLoja(Loja *loja);
+//vai adicionar os produtos na loja em ordem alfabetica
+void organizaloja(Loja *loja);
 
-/**
- * @brief Altera os preços dos produtos na loja aleatoriamente (flutuação).
- */
-void flutuarPrecos(Loja *loja);
-
-/**
- * @brief Ponto de entrada principal para a interface da loja.
- * Esta é a função que 'gameplayEtapa2.c' deve chamar quando o dia acabar.
- */
-void loopPrincipalLoja(Loja *loja, InventarioJogador *inv);
+//em tese vai ser usado pra a loja funcionar
+void loopfuncionaloja(Loja *loja, Inventarioplayer *inv);
 
 
 #endif // LOJA_H
