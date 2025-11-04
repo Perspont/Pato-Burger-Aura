@@ -64,7 +64,7 @@ typedef struct
     int falafel_count;
     int frango_count;
     // --- FIM DA ADIÇÃO ---
-																			//Substituir por arquivo externo de save.
+	int totalHamburgueresVendidos;
     // Pedido atual.
     char *PilhaDeHamburguerLE_display[MAX_BURGER_STACK]; //Pilha de hambúrguer (Em texto).
     int stackSize;
