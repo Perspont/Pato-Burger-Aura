@@ -15,10 +15,10 @@
 // --- Utility Functions ---
 
 /**
- * @brief Resizes the global off-screen buffer (ctx->charBuffer).
+ * @Descrição: Resizes the global off-screen buffer (ctx->charBuffer).
  * Called when the console window size changes.
- * @param width New width of the console.
- * @param height New height of the console.
+ * (width): New width of the console.
+ * (height): New height of the console.
  */
 void resizeBuffer(GameContext *ctx, int width, int height)
 {
@@ -38,7 +38,7 @@ void resizeBuffer(GameContext *ctx, int width, int height)
 }
 
 /**
- * @brief Clears the off-screen buffer (fills with spaces).
+ * @Descrição: Clears the off-screen buffer (fills with spaces).
  */
 void clearBuffer(GameContext *ctx)
 {
@@ -51,11 +51,11 @@ void clearBuffer(GameContext *ctx)
 }
 
 /**
- * @brief: Escreve uma string para o buffer off-screen na posição (x, y).
- * @param (x): Coordenada no X.
- * @param (y): Coordenada no Y.
- * @param (text): String à ser escrita.
- * @param (attributes): Atributos do texto no console (No caso, cor).
+ * @Descrição: Escreve uma string para o buffer off-screen na posição (x, y).
+ * (x): Coordenada no X.
+ * (y): Coordenada no Y.
+ * (text): String à ser escrita.
+ * (attributes): Atributos do texto no console (No caso, cor).
  */
 void writeToBuffer(GameContext *ctx, int x, int y, const char *texto, WORD atributos)
 {
@@ -77,7 +77,7 @@ void writeToBuffer(GameContext *ctx, int x, int y, const char *texto, WORD atrib
 }
 
 /**
- * @brief Draws a box in the off-screen buffer using line-drawing characters.
+ * @Descrição: Draws a box in the off-screen buffer using line-drawing characters.
  */
 void drawBox(GameContext *ctx, int left, int top, int right, int bottom, WORD attributes)
 {
@@ -280,7 +280,7 @@ void drawTimer(GameContext *ctx, GameState *state)
     int seconds = (int)((remaining % 60000) / 1000);
 
     char timerText[32];
-    snprintf(timerText, sizeof(timerText), " TIME: %02d:%02d ", minutes, seconds);
+    snprintf(timerText, sizeof(timerText), " TEMPO: %02d:%02d ", minutes, seconds);
 
     int x = ctx->screenSize.X - (int)strlen(timerText) - 2; // Top-right corner
     int y = 1;
@@ -693,7 +693,7 @@ void clearStack(GameState *state)
 }
 
 /**
- * @brief Processa o que for escrito pelo player.
+ * - Descrição: Processa o que for escrito pelo player.
  */
 void processCommand(GameState *state)
 {
@@ -754,7 +754,7 @@ void processCommand(GameState *state)
     {
         empilharIngrediente_display(state, "Frango", &state->frango_count);
     }
-    // --- FIM DA ADIÇÃO ---
+
     else if (_stricmp(state->currentCommand, "servir") == 0)
     {
         if (state->stackSize > 0 && state->ordersPending > 0)
@@ -763,7 +763,7 @@ void processCommand(GameState *state)
             state->ordersPending--;
 
             Pedido_FilaLE pedidoAtual;
-            desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedidoAtual);
+            desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedidoAtual); //Desenfileira pedido na frente da fila, e insere seu valor em pedidoAtual.
 
             //Verifica o id do Pedido atual, e cria com o hambúrguer necessário.
 
@@ -798,7 +798,7 @@ void processCommand(GameState *state)
     else if (_stricmp(state->currentCommand, "lixo") == 0)
     {
         clearStack(state);
-        deletaBurgerLE(&state->burgerPlayer); //Deleta hambúrguer (Itens dentro dele).
+        deletaBurgerLE(&state->burgerPlayer); //Deleta hambúrguer do player (Apenas os ingredientes dentro dele).
     }
 
     else if (_stricmp(state->currentCommand, "cardapio") == 0)
@@ -1122,7 +1122,7 @@ void initializeNextDay(GameState *state)
 
         desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedido);
     }
-    geraPedidos_FilaLE(&state->filaDePedidos, state->dia);
+    geraPedidos_FilaLE(&state->filaDePedidos, state->dia); //Gera nova fila pro dia atual.
 
     // NOTA: Não reseta dinheiro nem ingredientes.
 }
@@ -1134,6 +1134,9 @@ void initializeNextDay(GameState *state)
 BOOL runEndScreen(GameContext *ctx, GameState *state)
 {
     BOOL inEndScreen = TRUE;
+
+    deletaBurgerLE(&state->burgerPlayer); //Deleta hambúrguer do player (Apenas os ingredientes dentro dele).
+                                          //No momento que você entra nessa tela, o jogo já acabou (Ou seja, é necessário deletar os itens do hambúrguer).
     while (inEndScreen)
     {
         // Draw the screen
@@ -1271,6 +1274,8 @@ void telaPrincipalEtapa2()
         else if (showShopScreen)
         {
 
+            deletaBurgerLE(&state->burgerPlayer); //Deleta hambúrguer do player (Apenas os ingredientes dentro dele).
+                                                  //Se o jogador entra na loja, quer dizer que passou 1 dia (Ou seja, hambúrguer do dia atual tem que ser jogado fora).
 
             loopPrincipalLoja(&loja, &inventarioJogador); //Função de loja (Bloqueante).
 
