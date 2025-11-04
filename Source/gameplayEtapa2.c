@@ -1227,7 +1227,7 @@ void telaPrincipalEtapa2()
 
     //Variáveis para a loja.
     Loja loja;
-    InventarioJogador inventarioJogador;
+    Inventarioplayer inventarioJogador;
 
     inicializarInventario_loja(&inventarioJogador, 100);
     inicializarLoja(&loja);
