@@ -196,7 +196,7 @@ static void compraritem(Loja *loja, Inventarioplayer *inv, int produtoID)
 }
 
 // funcoes de inventario
-void inicializarinvloja(Inventarioplayer *inv, float dinheiroInicial) 
+void inicializarInventario_loja(Inventarioplayer *inv, float dinheiroInicial) 
 { 
     for (int i = 1; i <= 13; i++) { // passa pelos ids
         listaingredientes *lista = ListaPorID(inv, i);
