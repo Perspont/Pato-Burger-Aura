@@ -22,7 +22,7 @@ int filaPedidosVazia(FilaPedidos *f)
 // retorna 1 se fila cheia
 int filaPedidosCheia(FilaPedidos *f)
 {
-	return (f->tamanho == MAX);
+	return (f->tamanho == MAX_PEDIDOS); // Corrigido de MAX para MAX_PEDIDOS
 }
 
 // insere no final da fila
@@ -30,7 +30,7 @@ int enfileiraPedido(FilaPedidos *f, Pedido elem)
 {
 	if (filaPedidosCheia(f))
 		return 0;
-	f->tras = (f->tras + 1) % MAX; // avanço circular
+	f->tras = (f->tras + 1) % MAX_PEDIDOS; // Corrigido de MAX para MAX_PEDIDOS
 	f->pedidos[f->tras] = elem;
 	f->tamanho++;
 	return 1;
@@ -41,7 +41,7 @@ int desenfileiraPedido(FilaPedidos *f, Pedido *elem)
 	if (filaPedidosVazia(f))
 		return 0;
 	*elem = f->pedidos[f->frente];
-	f->frente = (f->frente + 1) % MAX;
+	f->frente = (f->frente + 1) % MAX_PEDIDOS; // Corrigido de MAX para MAX_PEDIDOS
 	f->tamanho--;
 	return 1;
 }
@@ -50,9 +50,11 @@ void imprimeFilaPedidos(FilaPedidos *f, Burger *cardapio)
 {
 	if (filaPedidosVazia(f))
 	{
+        // --- TEXTO MODIFICADO ---
 		printf("Fila vazia!\n");
 		return;
 	}
+    // --- TEXTO MODIFICADO ---
 	printf("\n======= Fila de pedidos ======\n\n");
 	int i = f->frente;
 	for (int count = 0; count < f->tamanho; count++)
@@ -67,7 +69,7 @@ void imprimeFilaPedidos(FilaPedidos *f, Burger *cardapio)
 				break;
 			}
 		}
-		i = (i + 1) % MAX;
+		i = (i + 1) % MAX_PEDIDOS; // Corrigido de MAX para MAX_PEDIDOS
 	}
 }
 

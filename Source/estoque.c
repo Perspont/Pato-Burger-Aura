@@ -5,6 +5,7 @@
 // inicializa a fila
 void inicializarEstoque(Estoque *estoque)
 {
+    // --- TEXTO MODIFICADO ---
 	estoque->ingredientes[0] = (Ingrediente){1, "Pao", 2.0, 10};
 	estoque->ingredientes[1] = (Ingrediente){2, "Carne", 5.0, 10};
 	estoque->ingredientes[2] = (Ingrediente){3, "Queijo", 3.0, 10};
@@ -24,7 +25,8 @@ void adicionarIngrediente(Estoque *estoque, int id, int quantidade) {
 	int i = id - 1;
 
 	if (i < 0 || i >= MAX_INGREDIENTES) {
-		printf("Erro: ID do ingrediente %d é inválido.\n", id);
+        // --- TEXTO MODIFICADO ---
+		printf("Erro: ID do ingrediente %d e invalido.\n", id);
 		return;
 	}
 
@@ -32,7 +34,8 @@ void adicionarIngrediente(Estoque *estoque, int id, int quantidade) {
 	{
 		estoque->ingredientes[i].quantidade += quantidade;
 	} else {
-		printf("Ingrediente com ID %d não encontrado no estoque.\n", id);
+        // --- TEXTO MODIFICADO ---
+		printf("Ingrediente com ID %d nao encontrado no estoque.\n", id);
 	}
 }
 
@@ -55,7 +58,8 @@ void removerIngrediente(Estoque *estoque, int id, int quantidade) {
 	int i = id - 1;
 
 	if (i < 0 || i >= MAX_INGREDIENTES) {
-		printf("Erro: ID do ingrediente %d é inválido.\n", id);
+        // --- TEXTO MODIFICADO ---
+		printf("Erro: ID do ingrediente %d e invalido.\n", id);
 		return;
 	}
 
@@ -64,9 +68,11 @@ void removerIngrediente(Estoque *estoque, int id, int quantidade) {
 		if (estoque->ingredientes[i].quantidade >= quantidade) {
 			estoque->ingredientes[i].quantidade -= quantidade;
 		} else {
+            // --- TEXTO MODIFICADO ---
 			printf("Erro: Quantidade insuficiente do ingrediente %s no estoque.\n", estoque->ingredientes[i].nome);
 		}
 	} else {
-		printf("Ingrediente com ID %d não encontrado no estoque.\n", id);
+        // --- TEXTO MODIFICADO ---
+		printf("Ingrediente com ID %d nao encontrado no estoque.\n", id);
 	}
 }

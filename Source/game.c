@@ -14,7 +14,7 @@ void inicializarEstado(Estado *estado)
 	estado->dinheiro = 100.0;
 }
 
-//Menu de pedidos. Gera pedidos aleatórios.
+//Menu de pedidos. Gera pedidos aleatorios.
 void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 
 	inicializarCardapio(cardapio);
@@ -24,6 +24,7 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 	char input[10] = {'~'};
 
 	while (input[0] != 's') { //Loop principal.
+        // --- TEXTO MODIFICADO ---
 		printf("\nDigite (f) para gerar os pedidos de 1 semana, e (s) para voltar ao menu inicial.\n");
 
 		fgets(input, sizeof(input), stdin);
@@ -37,6 +38,7 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 				inicializarCardapio(cardapio);
 				inicializaFilaPedidos(pedidos);
 
+                // --- TEXTO MODIFICADO ---
 				printf("\nIniciando Dia %d\n", estado->dia);
 
 				geraPedidos(pedidos, estado->dia);
@@ -45,6 +47,7 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 
 				estado->dia++;
 
+                // --- TEXTO MODIFICADO ---
 				printf("\nDigite qualquer tecla ou ENTER para continuar para o proximo dia ");
 
 				fgets(input, sizeof(input), stdin);
@@ -58,6 +61,7 @@ void telaDePedidos(Estado *estado, Burger *cardapio, FilaPedidos *pedidos) {
 			return;
 		}
 		else {
+            // --- TEXTO MODIFICADO ---
 			printf("Comando invalido\n\n");
 		}
 	}
@@ -77,12 +81,13 @@ void gameplayLoop() {
 	char input[10] = {'~'};
 	char returnInput[10] = {'~'};
 
-	int valido = 0; //Usado para a validação do input inicial.
+	int valido = 0; //Usado para a validacao do input inicial.
 
 	while (input[0] != '0') { //Loop principal.
 
 		valido = 0;
 
+        // --- TEXTOS MODIFICADOS ---
 		printf("\nBem vindo ao Pato Burger! Os melhores burgers de Salvador!\n");
 		printf("\nVoce deseja...\n");
 		printf("\n(1) -> Iniciar o jogo.\n");
@@ -98,6 +103,7 @@ void gameplayLoop() {
 			if (strlen(input) == 1 && (input[0] == '1' || input[0] == '2' || input[0] == '3' || input[0] == '0')) { //Verifica se o input tem apenas 1 caractere,
 				valido = 1;																	//E se esse caractere é um dos que podem ser colocados ou não.
 			} else {
+                // --- TEXTO MODIFICADO ---
 				printf("Numero invalido, Selecione novamente:\n");
 			}
 		}
