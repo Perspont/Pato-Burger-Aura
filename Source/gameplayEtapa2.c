@@ -189,13 +189,13 @@ void drawGrilling(GameContext *ctx, GameState *state, int left, int top, int rig
         for(int i = 0; i < barLength; i++) progressBar[i] = '\xDB';
         for(int i = barLength; i < width; i++) progressBar[i] = '\xB0';
 
-        writeToBuffer(ctx, left + 2, top + 2, "Grilling patty...", FOREGROUND_RED | FOREGROUND_INTENSITY);
+        writeToBuffer(ctx, left + 2, top + 2, "Grelhando hamburguer...", FOREGROUND_RED | FOREGROUND_INTENSITY);
         writeToBuffer(ctx, left + 2, top + 4, progressBar, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     }
     else
     {
-        writeToBuffer(ctx, left + 2, top + 2, "Grill is idle.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-        writeToBuffer(ctx, left + 2, top + 3, "Type 'grill' to start.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+        writeToBuffer(ctx, left + 2, top + 2, "Grelha está vazia.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+        writeToBuffer(ctx, left + 2, top + 3, "Escreva 'grelhar' para grelhar um hamburguer.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     }
 }
 
@@ -533,7 +533,7 @@ void drawEndScreen(GameContext *ctx, GameState *state)
     writeToBuffer(ctx, (width - (int)strlen(restart)) / 2, y, restart, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     y += 2;
 
-    const char *exitCmd = "[E]xit";
+    const char *exitCmd = "[S]air";
     writeToBuffer(ctx, (width - (int)strlen(exitCmd)) / 2, y, exitCmd, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 
     blitToScreen(ctx);
@@ -1099,6 +1099,8 @@ void initializeNextDay(GameState *state)
     state->showCardapio = FALSE;
     state->showCardapio_2 = FALSE;
 
+    deletaBurgerLE(&state->burgerPlayer); //Reinicia hambúrguer do player (Deleta os ingredientes dentro dele).
+
     // Reseta os pedidos dinâmicos (pato/guaxinim)
     state->dynamicOrderCount = 0;
     state->lastDynamicOrderSpawn = GetTickCount64();
@@ -1274,10 +1276,7 @@ void telaPrincipalEtapa2()
         else if (showShopScreen)
         {
 
-            deletaBurgerLE(&state->burgerPlayer); //Deleta hambúrguer do player (Apenas os ingredientes dentro dele).
-                                                  //Se o jogador entra na loja, quer dizer que passou 1 dia (Ou seja, hambúrguer do dia atual tem que ser jogado fora).
-
-            loopPrincipalLoja(&loja, &inventarioJogador); //Função de loja (Bloqueante).
+            loopfuncionaloja(&loja, &inventarioJogador); //Função de loja (Bloqueante).
 
             // Quando o jogador sair da loja:
             showShopScreen = FALSE; // Desativa a flag da loja
