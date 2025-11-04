@@ -1,28 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef int tp_item_pilhaLE; 
+typedef int tp_item; 
 
 typedef struct tp_no_aux {   
-  tp_item_pilhaLE info;   
+  tp_item info;   
   struct tp_no_aux *prox;   
-} tp_no_pilha;
+} tp_no; 
 
 
-typedef struct {
-  int tamanho;
-  tp_no_pilha *topo;
-} tp_pilhaLE;
+typedef struct {   
+  tp_no *topo;   
+} tp_pilha;
 
 
-tp_pilhaLE *inicializa_pilha_LE();
-tp_no_pilha *alocaPilhaLE();
-int pilha_vazia_LE(tp_pilhaLE *pilha);
-int push_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE e);
-int pop_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE *e);
-int top_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE *e);
-void destroi_pilha_LE(tp_pilhaLE **pilha);
-void imprime_pilha_LE(tp_pilhaLE *pilha);
+tp_pilha *inicializa_pilha ();
+int pilha_vazia (tp_pilha *pilha);
+tp_no *aloca();
+int push (tp_pilha *pilha, tp_item e);
+int pop (tp_pilha *pilha, tp_item *e);
+int top (tp_pilha *pilha, tp_item *e);
+tp_pilha *destroi_pilha(tp_pilha *pilha);
+void imprime_pilha(tp_pilha *pilha);
 
 
 
