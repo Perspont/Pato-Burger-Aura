@@ -173,6 +173,9 @@ float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedid
         noUsadoPlayer = noUsadoPlayer->prox;
     }
 
+    noPedido = burgerPedido->ingredientes->topo;
+    noUsadoPedido = ingredientesUsadosPedido->topo;
+
     //Ingredientes faltantes.
     for (int i = 0; i < burgerPedido->ingredientes->tamanho; i++) {
         if (noUsadoPedido->info == 0) {

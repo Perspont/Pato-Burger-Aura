@@ -756,8 +756,6 @@ void processCommand(GameState *state)
         if (state->stackSize > 0 && state->ordersPending > 0)
         {
             state->totalHamburgueresVendidos++; // Atualiza o save ANTES de limpar a pilha
-
-            clearStack(state);
             state->ordersPending--;
 
             Pedido_FilaLE pedidoAtual;
@@ -770,27 +768,38 @@ void processCommand(GameState *state)
             switch (pedidoAtual.id) {
                 case 1:
                     inicializa_BitAndBacon_LE(&burgerPedido);
+                    break;
                 case 2:
                     inicializa_DuckCheese_LE(&burgerPedido);
+                    break;
                 case 3:
                     inicializa_Quackteirao_LE(&burgerPedido);
+                    break;
                 case 4:
                     inicializa_BigPato_LE(&burgerPedido);
+                    break;
                 case 5:
                     inicializa_ZeroUm_LE(&burgerPedido);
+                    break;
                 case 6:
                     inicializa_ChickenDuckey_LE(&burgerPedido);
+                    break;
                 case 7:
                     inicializa_PatoSobreRodas_LE(&burgerPedido);
+                    break;
                 case 8:
                     inicializa_Recursivo_LE(&burgerPedido);
+                    break;
                 case 9:
                     inicializa_PatoVerde_LE(&burgerPedido);
+                    break;
                 case 10:
                     inicializa_PicklesAndMayo_LE(&burgerPedido);
+                    break;
             }
 
             state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); // Comparar burger pedido com o do player, retornando moedas, e "deletando" os 2 (Do pedido é deletado, do player só esvaziado).
+
         }
     }
     else if (_stricmp(state->currentCommand, "lixo") == 0)
