@@ -765,6 +765,9 @@ void processCommand(GameState *state)
 
             BurgerLE burgerPedido;
 
+            burgerPedido.ingredientes = NULL; //Define o ponteiro como NULO e zera o preço.
+            burgerPedido.preco = 0;
+
             switch (pedidoAtual.id) {
                 case 1:
                     inicializa_BitAndBacon_LE(&burgerPedido);
@@ -796,10 +799,17 @@ void processCommand(GameState *state)
                 case 10:
                     inicializa_PicklesAndMayo_LE(&burgerPedido);
                     break;
+                default:
+                    printf("ERRO: ID de pedido não consta no cardápio. ID em questão: %d", pedidoAtual.id);
             }
 
-            state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); // Comparar burger pedido com o do player, retornando moedas, e "deletando" os 2 (Do pedido é deletado, do player só esvaziado).
-
+            if (burgerPedido.ingredientes != NULL) //Se burgerPedido possui alguma pilha válida de ingredientes para comparação.
+            {
+                state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); // Comparar burger pedido com o do player, retornando moedas, e "deletando" os 2 (Do pedido é deletado, do player só esvaziado).
+            }
+            else {
+                clearStack(state); //melhorar isso aqui. Adicionar mensagem de erro.
+            }
         }
     }
     else if (_stricmp(state->currentCommand, "lixo") == 0)
