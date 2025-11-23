@@ -63,17 +63,19 @@ int top_pilha_LE(tp_pilhaLE *pilha, tp_item_pilhaLE *e){
 
 
 void destroi_pilha_LE(tp_pilhaLE **pilha) {
-	 tp_no_pilha *atu=(*pilha)->topo, *aux;
-     tp_item_pilhaLE e;
-	 while (atu != NULL)
-	       {
-			aux = atu->prox;
-            pop_pilha_LE(*pilha, &e);
-			atu= aux;
-            }
-	(*pilha)->topo = NULL;
-	(*pilha)->tamanho = 0;
-	free(pilha);
+	//Se a pilha não existe, não fazer nada.
+	if (pilha == NULL || *pilha == NULL) return;
+
+	tp_item_pilhaLE e;
+
+	//Enquanto o topo não for NULL, retira o item.
+	while ((*pilha)->topo != NULL) {
+		pop_pilha_LE(*pilha, &e);
+	}
+
+	//Liberar pilha vazia.
+	free(*pilha);
+	*pilha = NULL;
 }
 
 void imprime_pilha_LE(tp_pilhaLE *pilha) {
