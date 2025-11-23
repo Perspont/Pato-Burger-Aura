@@ -126,6 +126,8 @@ void renderGame(GameContext *ctx, GameState *state);
 void initializeNextDay(GameState *state);
 BOOL runEndScreen(GameContext *ctx, GameState *state);
 void cleanup(GameContext *ctx, GameState *state);
+void salvarJogo(GameState *state);
+void carregarJogo(GameState *state);
 void telaPrincipalEtapa2();
 
 
