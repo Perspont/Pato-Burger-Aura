@@ -854,6 +854,11 @@ void processCommand(GameState *state)
     {
         state->isRunning = FALSE;
     }
+    else if (_stricmp(state->currentCommand, "finalizar") == 0)
+    {
+        // Força o fim do dia simulando que o tempo acabou
+        state->gameStartTime = (ULONGLONG)GetTickCount() - GAME_DURATION_MS;
+    }
 
     // Clear command buffer
     state->commandLength = 0;
@@ -1364,7 +1369,9 @@ void telaPrincipalEtapa2()
         {
 			salvarJogo(&gameState); // salva o jogo automaticamente
 			
+            inventarioJogador.dinheiro = gameState.dinheiro; // Sincroniza dinheiro do jogo para a loja
             loopfuncionaloja(&loja, &inventarioJogador); //Função de loja (Bloqueante).
+            gameState.dinheiro = inventarioJogador.dinheiro; // Sincroniza dinheiro da loja para o jogo
 
             // Quando o jogador sair da loja:
             showShopScreen = FALSE; // Desativa a flag da loja
