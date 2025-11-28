@@ -1,5 +1,16 @@
 //Aqui teremos o jogo principal. Isto inclui montagem de hamburgueres, tela, recebimento de pedidos, e sistema de passagem de dias INTERCONECTADO com o sistema de loja.
 
+/*
+
+Falta colocar um sistema claro de dias (Um display do dia atual em cima na tela).
+
+Além disso, os pedidos só estão podendo ser entregues durante sua aparição no display.
+Mesmo com o pedido desaparecido do display, ele ainda deve poder ser entregue (Em ordem de aparição).
+
+Além além disso, o invnetário da loja está desalinhado com o do jogo principal, e isso é culpa do sistema de SAVE.
+
+*/
+
 #include "../Header/gameplayEtapa2.h"
 #include <windows.h>
 #include <stdio.h>
@@ -129,32 +140,33 @@ void drawBox(GameContext *ctx, int left, int top, int right, int bottom, WORD at
 
 void drawOrders(GameContext *ctx, GameState *state, int left, int top, int right, int bottom)
 {
+    // Desenha a caixa verde
     drawBox(ctx, left, top, right, bottom, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-    writeToBuffer(ctx, left + 2, top, "PEDIDOS PENDENTES ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
+    writeToBuffer(ctx, left + 2, top, "PEDIDOS PENDENTES ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
 
-    int drawX = left + 2;
-    int drawY = top + 2;
-
-//Analisar.
-
-    //Iterar pela lista de pedidos, introduzindo-os 1 a 1.
-    NoPedido_FilaLE *atual = state->filaDePedidos.inicio;
-    int count = 0;
-
-    while (atual != NULL && drawY < bottom - 1)
+    // Itera apenas sobre os pedidos que existem atualmente no display
+    for (int i = 0; i < state->contadorDisplayPedidos; i++)
     {
-        char nomeDoPedido[64];
-        snprintf(nomeDoPedido, sizeof(nomeDoPedido), "%d. %s", count + 1, getNomeDoBurger(atual->info.id_burger));
-        
-        writeToBuffer(ctx, drawX, drawY, nomeDoPedido, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE); // White
-        
-        drawY++;
-        atual = atual->prox;
-        count++;
-    }
+        // Calcula a posição Y (um embaixo do outro)
+        int yPos = top + 2 + i;
 
-    if (state->filaDePedidos.tamanho == 0) {
-         writeToBuffer(ctx, drawX, drawY, "Nenhum pedido.", FOREGROUND_RED | FOREGROUND_INTENSITY);
+        // Proteção para não desenhar fora da caixa
+        if (yPos >= bottom) break;
+
+        // Define a cor baseada no tempo restante (opcional: fica vermelho se estiver quase sumindo)
+        WORD cor = FOREGROUND_GREEN | FOREGROUND_INTENSITY; // Verde claro
+
+        ULONGLONG tempoDeVida = GetTickCount64() - state->pedidosDisplay[i].spawnTime;
+        if (tempoDeVida > 7000) { // Se já passou 7 segundos (faltam 3)
+            cor = FOREGROUND_RED | FOREGROUND_INTENSITY; // Fica vermelho piscando ou fixo
+        }
+
+        // Desenha o nome do hambúrguer
+        // Formato: "> Nome do Burger"
+        char buffer[64];
+        snprintf(buffer, sizeof(buffer), "> %s", state->pedidosDisplay[i].text);
+
+        writeToBuffer(ctx, left + 2, yPos, buffer, cor);
     }
 
 //------
@@ -258,7 +270,7 @@ void drawPilhaDeHamburguerLE_display(GameContext *ctx, GameState *state, int lef
     int width = ctx->screenSize.X;
     int height = ctx->screenSize.Y;
 
-    int y = height / 2 - 4;
+    //int y = height / 2 - 4;
 
     drawBox(ctx, left, top, right, bottom, FOREGROUND_GREEN | FOREGROUND_RED); // Brown-ish
     writeToBuffer(ctx, left + 2, top, " HAMBURGUER ATUAL ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
@@ -597,10 +609,11 @@ void initializeGame(GameContext *ctx, GameState *state)
     //Sistema de fila de pedidos.
     inicializaFilaLEPedidos(&state->filaDePedidos);
     geraPedidos_FilaLE(&state->filaDePedidos, 1); // "initializeGame" roda apenas no 1o dia.
+    state->totalPedidosNoDia = state->filaDePedidos.tamanho;
 
 
     state->stackSize = 0;
-    state->ordersPending = 0; // Alterado de 5 para 0, para sincronizar com os patos/guaxinims
+    state->ordersPending = state->totalPedidosNoDia; //Número de pedidos pendentes.
     state->isGrilling = FALSE;
     state->commandLength = 0;
     state->currentCommand[0] = '\0';
@@ -653,7 +666,7 @@ void empilharIngrediente_display(GameState *state, const char *item, int *invent
         if (strcmp(item, "Pao") == 0) {
             adicionarIngredienteLE(&state->burgerPlayer, 1);
         }
-        else if (strcmp(item, "Carne") == 0) {
+        else if (strcmp(item, "Hamburguer Grelhado") == 0) {
             adicionarIngredienteLE(&state->burgerPlayer, 2);
         }
         else if (strcmp(item, "Queijo") == 0) {
@@ -677,7 +690,7 @@ void empilharIngrediente_display(GameState *state, const char *item, int *invent
         else if (strcmp(item, "Falafel") == 0) {
             adicionarIngredienteLE(&state->burgerPlayer, 9);
         }
-        else if (strcmp(item, "Maionese de Pato") == 0) { // Corrected name
+        else if (strcmp(item, "Maionese do Pato") == 0) {
             adicionarIngredienteLE(&state->burgerPlayer, 10);
         }
         else if (strcmp(item, "Onion Rings") == 0) {
@@ -778,18 +791,19 @@ void processCommand(GameContext *ctx, GameState *state)
 
     else if (_stricmp(state->currentCommand, "servir") == 0)
     {
-        if (state->stackSize > 0 && state->ordersPending > 0)
+        if (state->stackSize > 0 && state->contadorDisplayPedidos > 0)
         {
             state->totalHamburgueresVendidos++; //Atualiza o save ANTES de limpar a pilha
 
-            Pedido_FilaLE pedidoAtual;
-            desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedidoAtual); //Desenfileira pedido na frente da fila, e insere seu valor em pedidoAtual.
+            //Pegar pedido mais antigo (Que é o último do array, considerando a lógica do updateGame()).
+            int indexPedido = state->contadorDisplayPedidos - 1;
+            int idDoPedidoNaTela = state->pedidosDisplay[indexPedido].id_burger;
 
             //Verifica o id do Pedido atual, e cria com o hambúrguer necessário.
-//Analisar.
-            BurgerLE burgerPedido = {0}; //Inicializa no 0.
 
-            switch (pedidoAtual.id_burger) { // Fix: Switch on burger ID, not order ID
+            BurgerLE burgerPedido = {0}; //Inicializa no index 0.
+
+            switch (idDoPedidoNaTela) {
                 case 1:
                     inicializa_BitAndBacon_LE(&burgerPedido);
                     break;
@@ -825,10 +839,18 @@ void processCommand(GameContext *ctx, GameState *state)
                     break;
             }
 
-            state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); // Comparar burger pedido com o do player, retornando moedas, e "deletando" os 2 (Do pedido é deletado, do player só esvaziado).
-            
-            clearStack(state); // Move clearStack to AFTER comparison
-            state->ordersPending--;
+            state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); //Comparar burger pedido com o do player, retornando moedas, e "deletando" os 2 (Do pedido é deletado, do player só esvaziado).
+
+            state->contadorDisplayPedidos--; //Limpar pedido da tela.
+
+            //Limpeza manual do display.
+            for (int i = 0; i < state->stackSize; i++)
+            {
+                if (state->PilhaDeHamburguerLE_display[i] != NULL) {
+                    free(state->PilhaDeHamburguerLE_display[i]);
+                }
+            }
+            state->stackSize = 0;
         }
         else if (state->stackSize <= 0){ //Quando não há hambúrguer montado.
             state->hamburguerVazio = 1; //Exibir mensagem de hambúrguer vazio.
@@ -1033,73 +1055,68 @@ void updateGame(GameState *state)
         }
     }
 
-    //Aqui que aparecem os pedidos.
+   //Lógica de spawn de pedidos:
     ULONGLONG now = GetTickCount64();
 
-    // 1. Check for 10-second lifetime expiry
-    int numeroDePedidosEmTela = 0;
-    while (numeroDePedidosEmTela < state->contadorDisplayPedidos)
+    //Remoção por tempo.
+    int timerPedidoAtual = 0;
+    while (timerPedidoAtual < state->contadorDisplayPedidos)
     {
-        if (now - state->pedidosDisplay[numeroDePedidosEmTela].spawnTime >= 10000) // 10 seconds
+        //Se passou 10.000ms (10s) desde que o pedido apareceu
+        if (now - state->pedidosDisplay[timerPedidoAtual].spawnTime >= 10000)
         {
-            // Remove this order. Shift all subsequent orders down.
-            for (int j = numeroDePedidosEmTela; j < state->contadorDisplayPedidos - 1; j++)
+            //Remove e desloca
+            for (int j = timerPedidoAtual; j < state->contadorDisplayPedidos - 1; j++)
             {
                 state->pedidosDisplay[j] = state->pedidosDisplay[j + 1];
             }
             state->contadorDisplayPedidos--;
-            // Don't increment 'i' since the next item is now at index 'i'
+            //Não incrementa 'i' pois o próximo elemento ocupou o lugar atual
         }
         else
         {
-            i++; // Move to the next item
+            timerPedidoAtual++;
         }
     }
 
-    // 2. Check for 2-second spawn interval
-    if (now - state->ultimoSpawnDisplayPedidos >= 2000) // 2 seconds
+    //Intervalo de spawn
+    ULONGLONG intervaloSpawn = GAME_DURATION_MS / state->totalPedidosNoDia;
+
+    //Segurança mínima de 1 segundo entre pedidos
+    if (intervaloSpawn < 1000) intervaloSpawn = 1000;
+
+    //Agora, o spawn de pedidos.
+    // Verifica:
+    // 1. Se passou o tempo do intervalo calculado
+    // 2. Se ainda tem hambúrguer na filaDePedidos.
+    // 3. Se a tela não está cheia (Máximo 3).
+    if ((now - state->ultimoSpawnDisplayPedidos >= intervaloSpawn) &&
+        (state->filaDePedidos.inicio != NULL) &&
+        (state->contadorDisplayPedidos < 3))
     {
         state->ultimoSpawnDisplayPedidos = now;
 
-        // Remove oldest if count is 3 or more (to make space)
-        if (state->contadorDisplayPedidos >= 3)
-        {
-            // This effectively removes the item at index 2 (the 3rd item),
-            // as it will be overwritten by the shift.
-            state->contadorDisplayPedidos = 2;
-        }
-
-        // Shift all existing orders down by one
+        //Empurra os pedidos atuais para baixo para abrir espaço no índice [0]
         for (int j = state->contadorDisplayPedidos; j > 0; j--)
         {
             state->pedidosDisplay[j] = state->pedidosDisplay[j - 1];
         }
 
-        // Add the new order at the top (index 0)
+        //Mover para o próximo item da fila (Sem remover).
+        NoPedido_FilaLE *primeiroDaFila = state->filaDePedidos.inicio;
+        Pedido_FilaLE infoPedido = primeiroDaFila->info;
+
+        //Configura o novo item no topo do display
         state->pedidosDisplay[0].spawnTime = now;
+        strcpy(state->pedidosDisplay[0].text, getNomeDoBurger(infoPedido.id_burger));
 
-        if (state->nextIsPato)
-        {
-            strcpy(state->pedidosDisplay[0].text, "pato");
-            state->spawnCycleCount++;
-            if (state->spawnCycleCount >= 3)
-            {
-                state->nextIsPato = FALSE;
-                state->spawnCycleCount = 0; // Reset for guaxinim
-            }
-        }
-        else // next is guaxinim
-        {
-            strcpy(state->pedidosDisplay[0].text, "guaxinim");
-            state->spawnCycleCount++;
-            if (state->spawnCycleCount >= 3)
-            {
-                state->nextIsPato = TRUE;
-                state->spawnCycleCount = 0; // Reset for pato
-            }
-        }
+        Pedido_FilaLE lixo; // Variável temporária
+        desenfileiraPedido_FilaLE(&state->filaDePedidos, &lixo);
 
-        // Increment count
+        state->pedidosDisplay[0].id_burger = infoPedido.id_burger;
+        // Agora o display sabe que o pedido [0] é o hambúrguer ID X.
+
+        // Incrementa itens na tela
         state->contadorDisplayPedidos++;
     }
 
@@ -1218,7 +1235,12 @@ void initializeNextDay(GameState *state)
 
     // NOTA: Não reseta dinheiro nem ingredientes.
 
-    state->tempoDeSpawnPedidos = state->tempoDoJogo/state->filaDePedidos.tamanho; //Este é o tempo de spawn para cada pedido.
+    // --- ALTERAÇÃO AQUI ---
+    // Salvamos o total inicial para calcular o intervalo de tempo corretamente
+    state->totalPedidosNoDia = state->filaDePedidos.tamanho;
+
+    // Debug de segurança para evitar divisão por zero
+    if (state->totalPedidosNoDia == 0) state->totalPedidosNoDia = 1; //Este é o tempo de spawn para cada pedido.
 }
 
 /**

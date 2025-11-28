@@ -34,10 +34,11 @@ typedef struct
 /**
  * @brief Holds one of the dynamic order strings ("pato", "guaxinim").
  */
-typedef struct
-{
-    char text[10]; // "pato" or "guaxinim"
+
+typedef struct {
+    char text[30];
     ULONGLONG spawnTime;
+    int id_burger;
 } pedidoDisplay;
 
 #define MAX_PEDIDOS_DISPLAY 10 //Máximo de strings possíveis em tela.
@@ -68,10 +69,10 @@ typedef struct
     char *PilhaDeHamburguerLE_display[MAX_BURGER_STACK]; //Pilha de hambúrguer (Em texto).
     int stackSize;
     BurgerLE_Player burgerPlayer; //Hambúrguer do player.
-    FilaLEPedidos filaDePedidos; //Fila de pedidos.
 
 
     // Fila pros pedidos.
+    FilaLEPedidos filaDePedidos; //Fila de pedidos.
     int ordersPending;
     int hamburguerVazio;
     int semPedidos;
@@ -86,9 +87,10 @@ typedef struct
     pedidoDisplay pedidosDisplay[MAX_PEDIDOS_DISPLAY];
     int contadorDisplayPedidos;
     ULONGLONG ultimoSpawnDisplayPedidos;
-    BOOL nextIsPato; // To track the pato/guaxinim cycle
     int spawnCycleCount;
     float tempoDeSpawnPedidos;
+
+    int totalPedidosNoDia; //Número de pedidos do dia.
 
     // Input State
     char currentCommand[MAX_COMMAND_LENGTH]; //Input que jogador acabou de inserir (Enter).
