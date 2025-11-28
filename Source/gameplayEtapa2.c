@@ -1,17 +1,5 @@
 //Aqui teremos o jogo principal. Isto inclui montagem de hamburgueres, tela, recebimento de pedidos, e sistema de passagem de dias INTERCONECTADO com o sistema de loja.
 
-/*
-
-Além disso, os pedidos só estão podendo ser entregues durante sua aparição no display.
-Mesmo com o pedido desaparecido do display, ele ainda deve poder ser entregue (Em ordem de aparição).
-Talvez salvar os pedidos em uma fila, e remove-los um a um, separado da fila do display?
-
-Além além disso, o invnetário da loja está desalinhado com o do jogo principal, e isso é culpa do sistema de SAVE.
-
-Morram todos
-
-*/
-
 #include "../Header/gameplayEtapa2.h"
 #include <windows.h>
 #include <stdio.h>
@@ -915,7 +903,7 @@ void processCommand(GameContext *ctx, GameState *state)
     else if (_stricmp(state->currentCommand, "finalizar") == 0)
     {
         // Força o fim do dia simulando que o tempo acabou
-        state->gameStartTime = (ULONGLONG)GetTickCount() - GAME_DURATION_MS;
+        state->tempoDoJogo = (ULONGLONG)GetTickCount() - GAME_DURATION_MS;
     }
 
     // Clear command buffer
