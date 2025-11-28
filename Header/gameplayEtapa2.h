@@ -73,6 +73,7 @@ typedef struct
 
     // Fila pros pedidos.
     FilaLEPedidos filaDePedidos; //Fila de pedidos.
+    FilaLEPedidos filaAtiva; //Fila com os pedidos ativos (Que já apareceram na tela).
     int ordersPending;
     int hamburguerVazio;
     int semPedidos;

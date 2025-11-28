@@ -2,12 +2,13 @@
 
 /*
 
-Falta colocar um sistema claro de dias (Um display do dia atual em cima na tela).
-
 Além disso, os pedidos só estão podendo ser entregues durante sua aparição no display.
 Mesmo com o pedido desaparecido do display, ele ainda deve poder ser entregue (Em ordem de aparição).
+Talvez salvar os pedidos em uma fila, e remove-los um a um, separado da fila do display?
 
 Além além disso, o invnetário da loja está desalinhado com o do jogo principal, e isso é culpa do sistema de SAVE.
+
+Morram todos
 
 */
 
@@ -332,6 +333,12 @@ void drawTimer(GameContext *ctx, GameState *state)
     }
 
     writeToBuffer(ctx, x, y, timerText, attributes);
+
+    // --- CÓDIGO NOVO: Desenhar o Dia ---
+    char diaText[32];
+    snprintf(diaText, sizeof(diaText), "DIA: %d", state->dia);
+    // Desenha no canto superior esquerdo ou centro (exemplo: x=2, y=0)
+    writeToBuffer(ctx, 2, 0, diaText, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
 }
 
 /**
@@ -610,6 +617,7 @@ void initializeGame(GameContext *ctx, GameState *state)
     inicializaFilaLEPedidos(&state->filaDePedidos);
     geraPedidos_FilaLE(&state->filaDePedidos, 1); // "initializeGame" roda apenas no 1o dia.
     state->totalPedidosNoDia = state->filaDePedidos.tamanho;
+    inicializaFilaLEPedidos(&state->filaAtiva);
 
 
     state->stackSize = 0;
@@ -791,19 +799,20 @@ void processCommand(GameContext *ctx, GameState *state)
 
     else if (_stricmp(state->currentCommand, "servir") == 0)
     {
-        if (state->stackSize > 0 && state->contadorDisplayPedidos > 0)
+        if (state->stackSize > 0 && state->filaAtiva.tamanho > 0)
         {
             state->totalHamburgueresVendidos++; //Atualiza o save ANTES de limpar a pilha
 
             //Pegar pedido mais antigo (Que é o último do array, considerando a lógica do updateGame()).
-            int indexPedido = state->contadorDisplayPedidos - 1;
-            int idDoPedidoNaTela = state->pedidosDisplay[indexPedido].id_burger;
+
+            Pedido_FilaLE pedidoAlvo;
+            desenfileiraPedido_FilaLE(&state->filaAtiva, &pedidoAlvo); //pedidoAlvo == Pedido Atual.
 
             //Verifica o id do Pedido atual, e cria com o hambúrguer necessário.
 
             BurgerLE burgerPedido = {0}; //Inicializa no index 0.
 
-            switch (idDoPedidoNaTela) {
+            switch (pedidoAlvo.id) {
                 case 1:
                     inicializa_BitAndBacon_LE(&burgerPedido);
                     break;
@@ -857,7 +866,7 @@ void processCommand(GameContext *ctx, GameState *state)
             state->tempoDeNotificacao = (ULONGLONG)GetTickCount();
 
         }
-        else if (state->ordersPending <= 0) { //Quando acabam os pedidos.
+        else if (state->filaAtiva.tamanho > 0) { //Quando acabam os pedidos.
             state->semPedidos = 1; //Exibir mensagem de sem pedido.
             state->tempoDeNotificacao = (ULONGLONG)GetTickCount(); //Inicia timer para a notificação.
         }
@@ -1103,18 +1112,17 @@ void updateGame(GameState *state)
         }
 
         //Mover para o próximo item da fila (Sem remover).
-        NoPedido_FilaLE *primeiroDaFila = state->filaDePedidos.inicio;
-        Pedido_FilaLE infoPedido = primeiroDaFila->info;
+        Pedido_FilaLE pedidoAtual; // Variável temporária
+        desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedidoAtual);
 
         //Configura o novo item no topo do display
         state->pedidosDisplay[0].spawnTime = now;
-        strcpy(state->pedidosDisplay[0].text, getNomeDoBurger(infoPedido.id_burger));
+        strcpy(state->pedidosDisplay[0].text, getNomeDoBurger(pedidoAtual.id_burger));
 
-        Pedido_FilaLE lixo; // Variável temporária
-        desenfileiraPedido_FilaLE(&state->filaDePedidos, &lixo);
-
-        state->pedidosDisplay[0].id_burger = infoPedido.id_burger;
+        state->pedidosDisplay[0].id_burger = pedidoAtual.id_burger;
         // Agora o display sabe que o pedido [0] é o hambúrguer ID X.
+
+        enfileiraPedido_FilaLE(&state->filaAtiva, pedidoAtual); //Insere pedido na fila de pedidos ativos.
 
         // Incrementa itens na tela
         state->contadorDisplayPedidos++;
