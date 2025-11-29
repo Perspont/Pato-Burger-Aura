@@ -8,7 +8,7 @@
 #include "../Header/burgerLE.h"
 #include "../Header/loja.h"
 #include "../Header/filaLE.h"
-#include "../Header/historico.h"
+#include "../Header/historico.h" 
 
 #define MAX_COMMAND_LENGTH 50
 #define MAX_BURGER_STACK 20
@@ -50,7 +50,9 @@ typedef struct
     int picles_count;
     int falafel_count;
     int frango_count;
-	int totalHamburgueresVendidos; 
+    
+	int totalHamburgueresVendidos; // Total geral para o save
+    int vendasNoDiaAtual;          // Contador do dia (reseta quando dorme)
     
     char *PilhaDeHamburguerLE_display[MAX_BURGER_STACK]; 
     int stackSize;
@@ -90,7 +92,8 @@ typedef struct
 
     int dia;
 
-    NoHistorico *historicoVendas; // feat: arv de historico (apagar esse comment dps)
+    // Arvore de Historico
+    NoHistorico *historicoVendas;
 
 } GameState;
 
@@ -119,6 +122,7 @@ BOOL runEndScreen(GameContext *ctx, GameState *state);
 void cleanup(GameContext *ctx, GameState *state);
 void salvarJogo(GameState *state);
 void carregarJogo(GameState *state);
-void telaPrincipalEtapa2(); // marcelo vai mudar isso aqui em breve (creio eu)
+void telaPrincipalEtapa2(); // marcelo tem que mudar isso (ou burity) pro menu novo ok
+void salvarRelatorioDiario(int dia, int vendas);
 
 #endif
