@@ -122,12 +122,14 @@ void empilharIngrediente_display(GameState *state, const char *item, int *invent
 void processCommand(GameContext *ctx, GameState *state);
 void processInput(GameContext *ctx, GameState *state);
 void renderGame(GameContext *ctx, GameState *state);
+void salvarRelatorioDiario(int dia, int vendas);
 void initializeNextDay(GameState *state);
 BOOL runEndScreen(GameContext *ctx, GameState *state);
 void cleanup(GameContext *ctx, GameState *state);
 void salvarJogo(GameState *state);
 void carregarJogo(GameState *state);
-void telaPrincipalEtapa2(); // marcelo tem que mudar isso (ou burity) pro menu novo ok
-void salvarRelatorioDiario(int dia, int vendas);
+drawMainMenu(GameContext *ctx, int selectedOption);
+int runMainMenu(GameContext *ctx);
+void telaPrincipalEtapa2();
 
 #endif
