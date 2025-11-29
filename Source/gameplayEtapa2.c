@@ -6,10 +6,9 @@
 #include "../Header/burgerLE.h"
 #include "../Header/loja.h"
 #include "../Header/filaLE.h"
-#include "../Header/historico.h"
+#include "../Header/historico.h" 
 #include <ctype.h> 
 
-// Funcao auxiliar para pegar nome do burger pelo ID
 const char* getNomeDoBurger(int id) {
     switch (id) {
         case 1: return "Bit and Bacon";
@@ -139,13 +138,13 @@ void drawGrilling(GameContext *ctx, GameState *state, int left, int top, int rig
         for(int i = 0; i < barLength; i++) progressBar[i] = '\xDB';
         for(int i = barLength; i < width; i++) progressBar[i] = '\xB0';
 
-        writeToBuffer(ctx, left + 2, top + 2, "Grelhando hamburger...", FOREGROUND_RED | FOREGROUND_INTENSITY);
+        writeToBuffer(ctx, left + 2, top + 2, "Grelhando hamburguer...", FOREGROUND_RED | FOREGROUND_INTENSITY);
         writeToBuffer(ctx, left + 2, top + 4, progressBar, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     }
     else
     {
-        writeToBuffer(ctx, left + 2, top + 2, "Grelha esta vazia.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-        writeToBuffer(ctx, left + 2, top + 3, "Escreva 'grelhar' para grelhar um hamburger.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+        writeToBuffer(ctx, left + 2, top + 2, "Grelha está vazia.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+        writeToBuffer(ctx, left + 2, top + 3, "Escreva 'grelhar' para grelhar um hamburguer.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     }
 }
 
@@ -160,33 +159,33 @@ void drawIngredientes(GameContext *ctx, GameState *state, int left, int top, int
     snprintf(text, sizeof(text), "dinheiro: $%d", state->dinheiro);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN);
 
-    snprintf(text, sizeof(text), "Pao: %d", state->pao_count);
+    snprintf(text, sizeof(text), "Pao:   %d", state->pao_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Hamburger Cru: %d", state->hamburguerCru_count);
+    snprintf(text, sizeof(text), "Hamburguer Cru:%d", state->hamburguerCru_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Alface: %d", state->alface_count);
+    snprintf(text, sizeof(text), "Alface:%d", state->alface_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "Tomate: %d", state->tomate_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "Queijo: %d", state->queijo_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 
-    snprintf(text, sizeof(text), "Bacon: %d", state->bacon_count);
+    snprintf(text, sizeof(text), "Bacon:  %d", state->bacon_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Maionese: %d", state->maioneseDoPato_count);
+    snprintf(text, sizeof(text), "Maionese:%d", state->maioneseDoPato_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Onion Rings: %d", state->onion_rings_count); 
+    snprintf(text, sizeof(text), "Onion Rings:%d", state->onion_rings_count); 
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "Cebola: %d", state->cebola_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "Picles: %d", state->picles_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    snprintf(text, sizeof(text), "Falafel: %d", state->falafel_count);
+    snprintf(text, sizeof(text), "Falafel:%d", state->falafel_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     snprintf(text, sizeof(text), "Frango: %d", state->frango_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 
-    snprintf(text, sizeof(text), "Hamburger Grelhado: %d", state->hamburguerGrelhado_count);
+    snprintf(text, sizeof(text), "Hamburguer Grelhado: %d", state->hamburguerGrelhado_count);
     writeToBuffer(ctx, left + 2, y++, text, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); 
 }
 
@@ -195,7 +194,7 @@ void drawPilhaDeHamburguerLE_display(GameContext *ctx, GameState *state, int lef
     int width = ctx->screenSize.X;
     
     drawBox(ctx, left, top, right, bottom, FOREGROUND_GREEN | FOREGROUND_RED); 
-    writeToBuffer(ctx, left + 2, top, " HAMBURGER ATUAL ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); 
+    writeToBuffer(ctx, left + 2, top, " HAMBURGUER ATUAL ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); 
 
     int y = bottom - 2; 
 
@@ -472,6 +471,7 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->falafel_count = 10;
     state->frango_count = 10;
     state->totalHamburgueresVendidos = 0; 
+    state->vendasNoDiaAtual = 0; // zera o contador diario
     
     inicializar_BurgerLE_Player(&state->burgerPlayer);
     inicializaFilaLEPedidos(&state->filaDePedidos);
@@ -577,6 +577,7 @@ void processCommand(GameContext *ctx, GameState *state)
         if (state->stackSize > 0 && state->filaAtiva.tamanho > 0)
         {
             state->totalHamburgueresVendidos++; 
+            state->vendasNoDiaAtual++; // conta venda do dia
 
             Pedido_FilaLE pedidoAlvo;
             desenfileiraPedido_FilaLE(&state->filaAtiva, &pedidoAlvo); 
@@ -645,6 +646,7 @@ void processCommand(GameContext *ctx, GameState *state)
         state->tempoDoJogo = (ULONGLONG)GetTickCount();
         state->isGrilling = FALSE;
         state->ordersPending = 0;
+        state->vendasNoDiaAtual = 0; // ao carregar, reseta contador do dia atual (assumindo inicio do dia)
 
         while (state->filaDePedidos.tamanho != 0) {
             Pedido_FilaLE pedido;
@@ -848,26 +850,21 @@ void renderGame(GameContext *ctx, GameState *state)
     blitToScreen(ctx);
 }
 
-void initializeNextDay(GameState *state) // burity, se tiver mt comentario pode tirar basicamente metade disso, foi so pra vcs se acharem ok ok
+// save diario
+void salvarRelatorioDiario(int dia, int vendas) {
+    // abre o arquivo com "a" (append) pra nn apagar o historico anterior
+    FILE *f = fopen("Saves/vendas_diarias.txt", "a");
+    if (f == NULL) return;
+
+    fprintf(f, "Dia %d: %d ingredientes/hamburgueres vendidos.\n", dia, vendas);
+    fclose(f);
+}
+
+void initializeNextDay(GameState *state)
 {
-    // multa por clientes na fila (Pedidos não entregues)
-    int pedidosRestantes = state->filaDePedidos.tamanho;
-    int multaFila = 0;
-    if (pedidosRestantes > 0) {
-        multaFila = pedidosRestantes * 10; // $10 por cliente esquecido
-        state->dinheiro -= multaFila;
-        // printf("Multa por fila: -%d\n", multaFila);
-    }
+    salvarRelatorioDiario(state->dia, state->vendasNoDiaAtual);
+    state->vendasNoDiaAtual = 0;
 
-    // multa por desperdício (Pedidos não finalizados/montados pela metade)
-    int multaDesperdicio = 0; // Se o dia acabou e tinha itens na pilha (stackSize > 0), isso é lixo
-    if (state->stackSize > 0) {
-        multaDesperdicio = state->stackSize * 2; // $5 por ingrediente jogado fora / esquecido
-        state->dinheiro -= multaDesperdicio;
-        // printf("Multa por desperdicio: -%d\n", multaDesperdicio);
-    }
-
-    // reseta o estado para o dia seguinte
     state->stackSize = 0;
     state->ordersPending = 0;
     state->isGrilling = FALSE;
@@ -879,11 +876,17 @@ void initializeNextDay(GameState *state) // burity, se tiver mt comentario pode 
     state->hamburguerVazio = 0;
     state->semPedidos = 0;
 
-    deletaBurgerLE(&state->burgerPlayer); // limpa o burger da memoria
+    deletaBurgerLE(&state->burgerPlayer); 
     state->tempoDoJogo = (ULONGLONG)GetTickCount();
     state->dia++;
 
-    // limpa a fila antiga e gera a nova
+    // Multa se sobrou pedido ou pedido incompleto
+    int pedidosRestantes = state->filaDePedidos.tamanho;
+    if (pedidosRestantes > 0) {
+        int multa = pedidosRestantes * 10; 
+        state->dinheiro -= multa;
+    }
+
     while (state->filaDePedidos.tamanho != 0) {
         Pedido_FilaLE pedido;
         desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedido);
