@@ -24,6 +24,11 @@ typedef struct
     CHAR_INFO *charBuffer; 
 } GameContext;
 
+/**
+
+  Possui variáveis para o display de pedidos.
+
+**/
 typedef struct {
     char text[30];
     ULONGLONG spawnTime;

@@ -86,15 +86,25 @@ void drawOrders(GameContext *ctx, GameState *state, int left, int top, int right
 {
     drawBox(ctx, left, top, right, bottom, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     writeToBuffer(ctx, left + 2, top, "PEDIDOS PENDENTES ", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+    
+    // --- NEW: Pending Count Indicator ---
+    char pendingText[32];
+    snprintf(pendingText, sizeof(pendingText), "PENDENTES: %d", state->ordersPending);
+    writeToBuffer(ctx, left + 2, bottom - 1, pendingText, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    // ------------------------------------
 
     for (int i = 0; i < state->contadorDisplayPedidos; i++)
     {
         int yPos = top + 2 + i;
         if (yPos >= bottom) break;
 
-        WORD cor = FOREGROUND_GREEN | FOREGROUND_INTENSITY; 
-        ULONGLONG tempoDeVida = GetTickCount64() - state->pedidosDisplay[i].spawnTime;
-        if (tempoDeVida > 7000) cor = FOREGROUND_RED | FOREGROUND_INTENSITY; 
+        // Define a cor baseada no tempo restante (opcional: fica vermelho se estiver quase sumindo)
+        WORD cor = FOREGROUND_GREEN | FOREGROUND_INTENSITY; // Verde claro
+
+        ULONGLONG tempoDeVida = (ULONGLONG)GetTickCount() - state->pedidosDisplay[i].spawnTime;
+        if (tempoDeVida > 7000) { // Se já passou 7 segundos (faltam 3)
+            cor = FOREGROUND_RED | FOREGROUND_INTENSITY; // Fica vermelho piscando ou fixo
+        }
 
         char buffer[64];
         snprintf(buffer, sizeof(buffer), "> %s", state->pedidosDisplay[i].text);
@@ -580,22 +590,46 @@ void processCommand(GameContext *ctx, GameState *state)
             state->vendasNoDiaAtual++; // conta venda do dia
 
             Pedido_FilaLE pedidoAlvo;
-            desenfileiraPedido_FilaLE(&state->filaAtiva, &pedidoAlvo); 
+            desenfileiraPedido_FilaLE(&state->filaAtiva, &pedidoAlvo); //pedidoAlvo == Pedido Atual.
 
-            BurgerLE burgerPedido = {0}; 
+            //Verifica o id do Pedido atual, e cria com o hambúrguer necessário.
+
+            BurgerLE burgerPedido = {0}; //Inicializa no index 0.
 
             switch (pedidoAlvo.id_burger) {
-                case 1: inicializa_BitAndBacon_LE(&burgerPedido); break;
-                case 2: inicializa_DuckCheese_LE(&burgerPedido); break;
-                case 3: inicializa_Quackteirao_LE(&burgerPedido); break;
-                case 4: inicializa_BigPato_LE(&burgerPedido); break;
-                case 5: inicializa_ZeroUm_LE(&burgerPedido); break;
-                case 6: inicializa_ChickenDuckey_LE(&burgerPedido); break;
-                case 7: inicializa_PatoSobreRodas_LE(&burgerPedido); break;
-                case 8: inicializa_Recursivo_LE(&burgerPedido); break;
-                case 9: inicializa_PatoVerde_LE(&burgerPedido); break;
-                case 10: inicializa_PicklesAndMayo_LE(&burgerPedido); break;
-                default: break;
+                case 1:
+                    inicializa_BitAndBacon_LE(&burgerPedido);
+                    break;
+                case 2:
+                    inicializa_DuckCheese_LE(&burgerPedido);
+                    break;
+                case 3:
+                    inicializa_Quackteirao_LE(&burgerPedido);
+                    break;
+                case 4:
+                    inicializa_BigPato_LE(&burgerPedido);
+                    break;
+                case 5:
+                    inicializa_ZeroUm_LE(&burgerPedido);
+                    break;
+                case 6:
+                    inicializa_ChickenDuckey_LE(&burgerPedido);
+                    break;
+                case 7:
+                    inicializa_PatoSobreRodas_LE(&burgerPedido);
+                    break;
+                case 8:
+                    inicializa_Recursivo_LE(&burgerPedido);
+                    break;
+                case 9:
+                    inicializa_PatoVerde_LE(&burgerPedido);
+                    break;
+                case 10:
+                    inicializa_PicklesAndMayo_LE(&burgerPedido);
+                    break;
+                default:
+                    // Handle unknown burger ID if necessary
+                    break;
             }
 
             state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); 
@@ -603,7 +637,65 @@ void processCommand(GameContext *ctx, GameState *state)
             // --- Unidade 3: Registrar venda na arvore ---
             registrar_venda_arvore(&state->historicoVendas, burgerPedido.id);
 
-            state->contadorDisplayPedidos--; 
+            // --- FIX: Clear player's burger and free temporary burger ---
+            deletaBurgerLE(&state->burgerPlayer); 
+            destroi_pilha_LE(&burgerPedido.ingredientes);
+            // -----------------------------------------------------------
+
+
+
+            // --- FIX: Only decrement display count if the order was actually on screen ---
+            // If we have more active orders than what's shown, it means we might be serving one that already scrolled off.
+            // However, the logic here assumes we ALWAYS serve the oldest active order (head of filaAtiva).
+            // If the head of filaAtiva is NOT in the display array (because it timed out visually),
+            // then we should NOT decrement contadorDisplayPedidos.
+            
+            // Logic: The display shows the first 'contadorDisplayPedidos' items of 'filaAtiva'.
+            // If an item times out, it is removed from 'pedidosDisplay' but REMAINS in 'filaAtiva'.
+            // So, 'filaAtiva' contains ALL active orders, including invisible ones.
+            // The invisible ones are at the BEGINNING of 'filaAtiva' (because they are older).
+            // Wait, if they time out, they are removed from display but still in queue.
+            // So if we serve, we serve the HEAD of filaAtiva.
+            // If the HEAD is NOT on screen, we shouldn't touch the screen counter.
+            
+            // How do we know if the HEAD is on screen?
+            // 'contadorDisplayPedidos' tracks how many are on screen.
+            // 'filaAtiva.tamanho' tracks total active.
+            // If 'filaAtiva.tamanho' > 'contadorDisplayPedidos', it means there are (Total - Display) invisible orders.
+            // Since invisible orders are always the oldest, they are at the front of the queue.
+            // So if (Total > Display), the one we just served was invisible.
+            
+            if (state->filaAtiva.tamanho >= state->contadorDisplayPedidos) {
+                 // We served an invisible order (or the counts matched exactly before decrement).
+                 // Wait, if Total > Display, we served an invisible one. Count shouldn't change.
+                 // If Total == Display, we served a visible one. Count should decrement.
+                 // Note: We already dequeued, so 'filaAtiva.tamanho' is now 1 less than before.
+                 // Let's use the pre-decrement logic or just check:
+                 // If we still have enough orders to fill the display, don't reduce display count?
+                 // No, that's complex.
+                 
+                 // Simpler:
+                 // We just served an order.
+                 // If that order was OFF-SCREEN, 'contadorDisplayPedidos' should remain the same.
+                 // If that order was ON-SCREEN, 'contadorDisplayPedidos' should decrease.
+                 
+                 // The order served was the HEAD.
+                 // Was the HEAD on screen?
+                 // If (OldTotal > OldDisplay), then HEAD was off-screen.
+                 // OldTotal = state->filaAtiva.tamanho + 1 (since we just dequeued)
+                 // So if ((state->filaAtiva.tamanho + 1) > state->contadorDisplayPedidos) -> Off-screen.
+                 
+                 if ((state->filaAtiva.tamanho + 1) > state->contadorDisplayPedidos) {
+                     // Served off-screen order. Do NOT decrement display count.
+                 } else {
+                     // Served on-screen order.
+                     state->contadorDisplayPedidos--; 
+                 }
+            } else {
+                // Should not happen normally unless state is weird, but safe to decrement if we think it was on screen.
+                state->contadorDisplayPedidos--;
+            }
+            // -----------------------------------------------------------------------------
 
             for (int i = 0; i < state->stackSize; i++)
             {
@@ -760,12 +852,14 @@ void updateGame(GameState *state)
         if (now - state->tempoDeNotificacao >= TEMPO_PARA_NOTIFICACAO_MS) state->hamburguerVazio = 0;
     }
 
-    ULONGLONG now = GetTickCount64();
+   //Lógica de spawn de pedidos:
+    ULONGLONG now = (ULONGLONG)GetTickCount();
 
     int timerPedidoAtual = 0;
     while (timerPedidoAtual < state->contadorDisplayPedidos)
     {
-        if (now - state->pedidosDisplay[timerPedidoAtual].spawnTime >= 10000)
+        //Se passou 15.000ms (15s) desde que o pedido apareceu
+        if (now - state->pedidosDisplay[timerPedidoAtual].spawnTime >= 15000)
         {
             for (int j = timerPedidoAtual; j < state->contadorDisplayPedidos - 1; j++)
             {
@@ -797,7 +891,9 @@ void updateGame(GameState *state)
         state->contadorDisplayPedidos++;
     }
 
-    state->ordersPending = state->filaDePedidos.tamanho;
+    // 3. Sync ordersPending
+    state->ordersPending = state->filaAtiva.tamanho;
+    // --- End of NEW Logic ---
 
     if (state->dinheiro <= 0)
     {
@@ -1055,6 +1151,128 @@ void carregarJogo(GameState *state) {
     fclose(arquivo);
 } 
 
+/**
+ * @brief Draws the Main Menu screen.
+ */
+void drawMainMenu(GameContext *ctx, int selectedOption)
+{
+    clearBuffer(ctx);
+
+    int width = ctx->screenSize.X;
+    int height = ctx->screenSize.Y;
+
+    // Draw border
+    drawBox(ctx, 0, 0, width - 1, height - 1, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+
+    // Title
+    const char *title = "BEM VINDO AO PATO BURGUER";
+    int titleX = (width - (int)strlen(title)) / 2;
+    int titleY = height / 4;
+    writeToBuffer(ctx, titleX, titleY, title, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY); // Yellow
+
+    // Options
+    const char *opt1 = "Carregar Jogo";
+    const char *opt2 = "Novo Jogo";
+
+    int optX = (width - 20) / 2; // Approximate centering
+    int optY = height / 2;
+
+    WORD colorSelected = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+    WORD colorNormal = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
+
+    // Option 1: Carregar Jogo
+    char buffer1[64];
+    if (selectedOption == 0) {
+        snprintf(buffer1, sizeof(buffer1), "> %s <", opt1);
+        writeToBuffer(ctx, optX - 2, optY, buffer1, colorSelected);
+    } else {
+        writeToBuffer(ctx, optX, optY, opt1, colorNormal);
+    }
+
+    // Option 2: Novo Jogo
+    char buffer2[64];
+    if (selectedOption == 1) {
+        snprintf(buffer2, sizeof(buffer2), "> %s <", opt2);
+        writeToBuffer(ctx, optX - 2, optY + 2, buffer2, colorSelected);
+    } else {
+        writeToBuffer(ctx, optX, optY + 2, opt2, colorNormal);
+    }
+
+    // Instructions
+    const char *instr = "Use W/S para navegar e ENTER para selecionar";
+    writeToBuffer(ctx, (width - (int)strlen(instr)) / 2, height - 4, instr, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
+    blitToScreen(ctx);
+}
+
+/**
+ * @brief Runs the Main Menu loop.
+ * @return 0 for "Carregar Jogo", 1 for "Novo Jogo".
+ */
+int runMainMenu(GameContext *ctx)
+{
+    int selectedOption = 0;
+    BOOL inMenu = TRUE;
+    
+    // Clear input buffer first
+    FlushConsoleInputBuffer(ctx->hConsoleIn);
+
+    while (inMenu)
+    {
+        drawMainMenu(ctx, selectedOption);
+
+        DWORD numEvents = 0;
+        GetNumberOfConsoleInputEvents(ctx->hConsoleIn, &numEvents);
+
+        if (numEvents > 0)
+        {
+            INPUT_RECORD *eventBuffer = (INPUT_RECORD *)malloc(sizeof(INPUT_RECORD) * numEvents);
+            DWORD eventsRead = 0;
+            ReadConsoleInput(ctx->hConsoleIn, eventBuffer, numEvents, &eventsRead);
+
+            for (DWORD i = 0; i < eventsRead; ++i)
+            {
+                if (eventBuffer[i].EventType == KEY_EVENT && eventBuffer[i].Event.KeyEvent.bKeyDown)
+                {
+                    WORD vk = eventBuffer[i].Event.KeyEvent.wVirtualKeyCode;
+                    char ch = eventBuffer[i].Event.KeyEvent.uChar.AsciiChar;
+
+                    if (vk == VK_UP || ch == 'w' || ch == 'W')
+                    {
+                        selectedOption--;
+                        if (selectedOption < 0) selectedOption = 1;
+                    }
+                    else if (vk == VK_DOWN || ch == 's' || ch == 'S')
+                    {
+                        selectedOption++;
+                        if (selectedOption > 1) selectedOption = 0;
+                    }
+                    else if (vk == VK_RETURN)
+                    {
+                        free(eventBuffer);
+                        return selectedOption;
+                    }
+                }
+                else if (eventBuffer[i].EventType == WINDOW_BUFFER_SIZE_EVENT)
+                {
+                    CONSOLE_SCREEN_BUFFER_INFO csbi;
+                    GetConsoleScreenBufferInfo(ctx->hConsoleOut, &csbi);
+                    int newWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+                    int newHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+                    if (newWidth != ctx->screenSize.X || newHeight != ctx->screenSize.Y)
+                    {
+                        resizeBuffer(ctx, newWidth, newHeight);
+                    }
+                }
+            }
+            free(eventBuffer);
+        }
+        Sleep(33);
+    }
+    return 1; // Default to New Game if something breaks
+}
+
+//Função principal.
 void telaPrincipalEtapa2()
 {
     GameContext gameContext = {0};
@@ -1063,12 +1281,39 @@ void telaPrincipalEtapa2()
     Loja loja;
     Inventarioplayer inventarioJogador;
 
+    // Get console handles manually for the menu before initialization
+    gameContext.hConsoleIn = GetStdHandle(STD_INPUT_HANDLE);
+    gameContext.hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    
+    // Set console mode
+    SetConsoleMode(gameContext.hConsoleIn, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_PROCESSED_INPUT);
+
+    // Initial buffer setup
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(gameContext.hConsoleOut, &csbi);
+    resizeBuffer(&gameContext, csbi.srWindow.Right - csbi.srWindow.Left + 1, csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
+    
+    // Hide cursor
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(gameContext.hConsoleOut, &cursorInfo);
+    cursorInfo.bVisible = FALSE;
+    SetConsoleCursorInfo(gameContext.hConsoleOut, &cursorInfo);
+
+    // --- MAIN MENU ---
+    int choice = runMainMenu(&gameContext);
+    
+    // --- GAME START ---
+
     inicializarInventario_loja(&inventarioJogador, 100);
     inicializarLoja(&loja);
     organizaloja(&loja);
 
     initializeGame(&gameContext, &gameState);
-    carregarJogo(&gameState); 
+    
+    if (choice == 0) {
+        carregarJogo(&gameState); // carrega o jogo APENAS se o usuário escolheu "Carregar Jogo"
+    }
+    // Se choice == 1 (Novo Jogo), initializeGame já configurou os defaults (Dia 1, $100, etc.)
 
     BOOL showShopScreen = FALSE; 
 
