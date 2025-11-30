@@ -891,38 +891,33 @@ void updateGame(GameState *state)
         state->contadorDisplayPedidos++;
     }*/
 
-    // Verifica se já passou o tempo E se tem pedidos aguardando para entrar
-    // REMOVIDA a verificação (state->contadorDisplayPedidos < 3) para não travar o spawn
+    //Verifica se já passou o tempo E se tem pedidos aguardando para entrar
+    //Removida a verificação (state->contadorDisplayPedidos < 3) para não travar o spawn
     if ((now - state->ultimoSpawnDisplayPedidos >= intervaloSpawn) &&
         (state->filaDePedidos.inicio != NULL))
     {
         state->ultimoSpawnDisplayPedidos = now; // Reseta o timer imediatamente
 
-        // Lógica para atualizar o DISPLAY (Visual)
-        // Se tivermos 3 pedidos, o loop vai de 2 até 1.
-        // O item em [2] (o mais antigo visualmente) será sobrescrito pelo [1].
-        // Isso faz o pedido antigo "sumir" da tela, criando o desafio de memória.
+        //Se tivermos 3 pedidos, o loop vai de 2 até 1.
+        //O item em [2] (o mais antigo visualmente) será sobrescrito pelo [1].
         int limiteShift = (state->contadorDisplayPedidos < 3) ? state->contadorDisplayPedidos : 2;
 
         for (int j = limiteShift; j > 0; j--) {
             state->pedidosDisplay[j] = state->pedidosDisplay[j - 1];
         }
 
-        // Tira o pedido da fila de "backstage" (pedidos do dia)
         Pedido_FilaLE pedidoAtual;
         desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedidoAtual);
 
-        // Coloca o NOVO pedido na posição 0 (Topo/Mais recente no visual)
+        //Coloca o NOVO pedido na posição 0 (Topo)
         state->pedidosDisplay[0].spawnTime = now;
         strcpy(state->pedidosDisplay[0].text, getNomeDoBurger(pedidoAtual.id_burger));
         state->pedidosDisplay[0].id_burger = pedidoAtual.id_burger;
 
-        // CRUCIAL: Adiciona na Fila Ativa (Lógica do jogo)
-        // Mesmo que o pedido antigo tenha sumido visualmente no "for" acima,
-        // ele CONTINUA nesta fila aqui. O jogador precisa entregar esse primeiro.
+        //Adiciona na Fila Ativa
         enfileiraPedido_FilaLE(&state->filaAtiva, pedidoAtual);
 
-        // Só aumenta o contador visual se ainda não estiver cheio
+        //Só aumenta o contador visual se ainda não estiver cheio
         if (state->contadorDisplayPedidos < 3) {
             state->contadorDisplayPedidos++;
         }
