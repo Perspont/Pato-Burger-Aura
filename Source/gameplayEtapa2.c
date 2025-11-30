@@ -60,6 +60,60 @@ void writeToBuffer(GameContext *ctx, int x, int y, const char *texto, WORD atrib
     }
 }
 
+WORD obterCorDoIngrediente(const char* nomeIngrediente) {
+    // Pao = Marrom (Amarelo Escuro no Console)
+    if (strcmp(nomeIngrediente, "Pao") == 0) {
+        return FOREGROUND_RED | FOREGROUND_GREEN;
+    }
+    // Hamburguer = Marrom mais escuro (Vermelho Escuro simulando carne)
+    else if (strcmp(nomeIngrediente, "Hamburguer") == 0) {
+        return FOREGROUND_RED;
+    }
+    // Queijo = Amarelo Brilhante
+    else if (strcmp(nomeIngrediente, "Queijo") == 0) {
+        return FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+    }
+    // Alface = Verde Claro/Brilhante
+    else if (strcmp(nomeIngrediente, "Alface") == 0) {
+        return FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+    }
+    // Tomate = Vermelho Brilhante
+    else if (strcmp(nomeIngrediente, "Tomate") == 0) {
+        return FOREGROUND_RED | FOREGROUND_INTENSITY;
+    }
+    // Bacon = Vermelho Escuro
+    else if (strcmp(nomeIngrediente, "Bacon") == 0) {
+        return FOREGROUND_RED;
+    }
+    // Picles = Verde Escuro
+    else if (strcmp(nomeIngrediente, "Picles") == 0) {
+        return FOREGROUND_GREEN;
+    }
+    // Cebola = Roxo (Magenta)
+    else if (strcmp(nomeIngrediente, "Cebola") == 0) {
+        return FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+    }
+    // Falafel = Verde Claro (Cyan para diferenciar do Alface)
+    else if (strcmp(nomeIngrediente, "Falafel") == 0) {
+        return FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+    }
+    // Maionese do Pato = Branco Brilhante
+    else if (strcmp(nomeIngrediente, "Maionese do Pato") == 0) {
+        return FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+    }
+    // Onion Rings = Laranja (Simulado com Marrom/Dourado)
+    else if (strcmp(nomeIngrediente, "Onion Rings") == 0) {
+        return FOREGROUND_RED | FOREGROUND_GREEN;
+    }
+    // Frango = Marrom claro/Bege (Cinza Claro Padrão)
+    else if (strcmp(nomeIngrediente, "Frango") == 0) {
+        return FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+    }
+
+    // Default: Branco/Cinza padrão se não encontrar o ingrediente
+    return FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+}
+
 void drawBox(GameContext *ctx, int left, int top, int right, int bottom, WORD attributes)
 {
     if (right >= ctx->screenSize.X) right = ctx->screenSize.X - 1;
@@ -210,17 +264,22 @@ void drawPilhaDeHamburguerLE_display(GameContext *ctx, GameState *state, int lef
 
     for (int i = 0; i < state->stackSize; ++i) 
     {
-        if (y <= top) break; 
+        if (y <= top) break;
+
+        const char *nomeIngrediente = state->PilhaDeHamburguerLE_display[i];
 
         char textoDoIngrediente_noHamburguer[64]; 
-        snprintf(textoDoIngrediente_noHamburguer, sizeof(textoDoIngrediente_noHamburguer), " - %s - ", state->PilhaDeHamburguerLE_display[i]);
+        snprintf(textoDoIngrediente_noHamburguer, sizeof(textoDoIngrediente_noHamburguer), " - %s - ", nomeIngrediente);
 
         int textLen = strlen(textoDoIngrediente_noHamburguer);
         int boxWidth = right - left;
         int textX = left + (boxWidth - textLen) / 2;
         if (textX < left + 1) textX = left + 1;
 
-        writeToBuffer(ctx, textX, y, textoDoIngrediente_noHamburguer, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+        WORD corDoIngrediente = obterCorDoIngrediente(nomeIngrediente);
+
+
+        writeToBuffer(ctx, textX, y, textoDoIngrediente_noHamburguer, corDoIngrediente);
         y--;
     }
 
@@ -292,48 +351,48 @@ void drawCardapioScreen(GameContext *ctx, GameState *state)
     int y = 3; 
 
     writeToBuffer(ctx, x_col1, y++, "1. Bit and Bacon (16)", verde);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Bacon", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "bacon", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
     y += 2;
 
     writeToBuffer(ctx, x_col1, y++, "2. Duck Cheese (16)", verde);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Alface", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Tomate", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "alface", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "tomate", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
     y += 2;
 
     writeToBuffer(ctx, x_col1, y++, "3. Quackteirao (16)", verde);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Alface", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "alface", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
     y += 2;
 
     y = 3; 
 
     writeToBuffer(ctx, x_col2, y++, "4. Big Pato (27)", verde);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Alface", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Alface", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Pao", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "alface", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "alface", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
     y += 2;
 
     writeToBuffer(ctx, x_col2, y++, "5. Zero e Um (13)", verde);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Pao", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
     y += 2;
 
     const char *exitCmd = "[V]oltar ao Jogo";
@@ -366,63 +425,63 @@ void desenharCardapio_pagina2(GameContext *ctx, GameState *state)
     int y = 3; 
 
     writeToBuffer(ctx, x_col1, y++, "6. Chicken Duckey (21)", verde);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Maionese", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Cebola", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Frango", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Onion_Rings", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "maionese", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "cebola", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "frango", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "onion_rings", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
     y += 2;
 
     writeToBuffer(ctx, x_col1, y++, "7. Pato Sobre Rodas (24)", verde);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Onion_Rings", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Cebola", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Cebola", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Onion_Rings", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "onion_rings", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "cebola", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "cebola", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "onion_rings", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
     y += 2;
 
-    writeToBuffer(ctx, x_col1, y++, "9. Pato Verde (21)", verde);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Maionese", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Picles", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Cebola", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Falafel", branco);
-    writeToBuffer(ctx, x_col1 + 2, y++, "Pao", branco);
+    writeToBuffer(ctx, x_col1, y++, "8. Recursivo (35)", verde);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "cebola", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "tomate", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "cebola", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "hamburguer", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "maionese", branco);
+    writeToBuffer(ctx, x_col1 + 2, y++, "pao", branco);
     y += 2;
 
     y = 3; 
 
-    writeToBuffer(ctx, x_col2, y++, "8. Recursivo (35)", verde);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Pao", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Cebola", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Tomate", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Cebola", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Queijo", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Carne", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Maionese", branco);
-    writeToBuffer(ctx, x_col2 + 2, y++, "Pao", branco);
+    writeToBuffer(ctx, x_col2, y++, "9. Pato Verde (21)", verde);
+    writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "maionese", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "picles", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "cebola", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "queijo", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "falafel", branco);
+    writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
     y += 2;
 
     if (y < height - 10) 
     {
         writeToBuffer(ctx, x_col2, y++, "10. Pickles and MAYO! (25)", verde);
-        writeToBuffer(ctx, x_col2 + 2, y++, "Pao", branco);
-        writeToBuffer(ctx, x_col2 + 2, y++, "Picles", branco);
-        writeToBuffer(ctx, x_col2 + 2, y++, "Maionese", branco);
-        writeToBuffer(ctx, x_col2 + 2, y++, "Bacon", branco);
-        writeToBuffer(ctx, x_col2 + 2, y++, "Picles", branco);
-        writeToBuffer(ctx, x_col2 + 2, y++, "Maionese", branco);
-        writeToBuffer(ctx, x_col2 + 2, y++, "Pao", branco);
+        writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
+        writeToBuffer(ctx, x_col2 + 2, y++, "picles", branco);
+        writeToBuffer(ctx, x_col2 + 2, y++, "maionese", branco);
+        writeToBuffer(ctx, x_col2 + 2, y++, "bacon", branco);
+        writeToBuffer(ctx, x_col2 + 2, y++, "picles", branco);
+        writeToBuffer(ctx, x_col2 + 2, y++, "maionese", branco);
+        writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
     }
 
     const char *prevCmd = "<- pagina [A]nterior";
@@ -533,7 +592,7 @@ void empilharIngrediente_display(GameState *state, const char *item, int *invent
         state->stackSize++;
 
         if (strcmp(item, "Pao") == 0) adicionarIngredienteLE(&state->burgerPlayer, 1);
-        else if (strcmp(item, "Hamburguer Grelhado") == 0) adicionarIngredienteLE(&state->burgerPlayer, 2);
+        else if (strcmp(item, "Hamburguer") == 0) adicionarIngredienteLE(&state->burgerPlayer, 2);
         else if (strcmp(item, "Queijo") == 0) adicionarIngredienteLE(&state->burgerPlayer, 3);
         else if (strcmp(item, "Alface") == 0) adicionarIngredienteLE(&state->burgerPlayer, 4);
         else if (strcmp(item, "Tomate") == 0) adicionarIngredienteLE(&state->burgerPlayer, 5);
@@ -543,8 +602,7 @@ void empilharIngrediente_display(GameState *state, const char *item, int *invent
         else if (strcmp(item, "Falafel") == 0) adicionarIngredienteLE(&state->burgerPlayer, 9);
         else if (strcmp(item, "Maionese do Pato") == 0) adicionarIngredienteLE(&state->burgerPlayer, 10);
         else if (strcmp(item, "Onion Rings") == 0) adicionarIngredienteLE(&state->burgerPlayer, 11);
-        else if (strcmp(item, "Maionese") == 0) adicionarIngredienteLE(&state->burgerPlayer, 12);
-        else if (strcmp(item, "Frango") == 0) adicionarIngredienteLE(&state->burgerPlayer, 13);
+        else if (strcmp(item, "Frango") == 0) adicionarIngredienteLE(&state->burgerPlayer, 12);
     }
 }
 
@@ -573,7 +631,7 @@ void processCommand(GameContext *ctx, GameState *state)
     else if (_stricmp(state->currentCommand, "alface") == 0) empilharIngrediente_display(state, "Alface", &state->alface_count);
     else if (_stricmp(state->currentCommand, "tomate") == 0) empilharIngrediente_display(state, "Tomate", &state->tomate_count);
     else if (_stricmp(state->currentCommand, "queijo") == 0) empilharIngrediente_display(state, "Queijo", &state->queijo_count);
-    else if (_stricmp(state->currentCommand, "hamburguer") == 0) empilharIngrediente_display(state, "Hamburguer Grelhado", &state->hamburguerGrelhado_count);
+    else if (_stricmp(state->currentCommand, "hamburguer") == 0) empilharIngrediente_display(state, "Hamburguer", &state->hamburguerGrelhado_count);
     else if (_stricmp(state->currentCommand, "bacon") == 0) empilharIngrediente_display(state, "Bacon", &state->bacon_count);
     else if (_stricmp(state->currentCommand, "maionese") == 0) empilharIngrediente_display(state, "Maionese do Pato", &state->maioneseDoPato_count);
     else if (_stricmp(state->currentCommand, "onion_rings") == 0) empilharIngrediente_display(state, "Onion Rings", &state->onion_rings_count);
@@ -704,6 +762,8 @@ void processCommand(GameContext *ctx, GameState *state)
                 }
             }
             state->stackSize = 0;
+
+            deletaBurgerLE(&state->burgerPlayer);
         }
         else if (state->stackSize <= 0){ 
             state->hamburguerVazio = 1; 
@@ -1089,6 +1149,7 @@ BOOL runEndScreen(GameContext *ctx, GameState *state)
     return FALSE; 
 }
 
+//Encerra o jogo.
 void cleanup(GameContext *ctx, GameState *state)
 {
     clearStack(state);

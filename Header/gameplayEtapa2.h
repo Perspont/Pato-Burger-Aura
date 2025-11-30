@@ -55,6 +55,20 @@ typedef struct
     int picles_count;
     int falafel_count;
     int frango_count;
+
+    int pao_vendidos;
+    int alface_vendidos;
+    int tomate_vendidos;
+    int queijo_vendidos;
+    int hamburguer_vendidos;
+
+    int bacon_vendidos;
+    int maioneseDoPato_vendidos;
+    int onion_rings_vendidos;
+    int cebola_vendidos;
+    int picles_vendidos;
+    int falafel_vendidos;
+    int frango_vendidos; //Número de ingredientes vendidos.
     
 	int totalHamburgueresVendidos; // Total geral para o save
     int vendasNoDiaAtual;          // Contador do dia (reseta quando dorme)
@@ -106,6 +120,7 @@ typedef struct
 void initializeGame(GameContext *ctx, GameState *state);
 void clearStack(GameState *state);
 void resizeBuffer(GameContext *ctx, int width, int height);
+WORD obterCorDoIngrediente(const char* nomeIngrediente);
 void drawTimer(GameContext *ctx, GameState *state);
 void drawCardapioScreen(GameContext *ctx, GameState *state);
 void desenharCardapio_pagina2(GameContext *ctx, GameState *state); 
