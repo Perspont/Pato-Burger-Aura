@@ -128,7 +128,7 @@ BOOL runEndScreen(GameContext *ctx, GameState *state);
 void cleanup(GameContext *ctx, GameState *state);
 void salvarJogo(GameState *state);
 void carregarJogo(GameState *state);
-drawMainMenu(GameContext *ctx, int selectedOption);
+void drawMainMenu(GameContext *ctx, int selectedOption);
 int runMainMenu(GameContext *ctx);
 void telaPrincipalEtapa2();
 

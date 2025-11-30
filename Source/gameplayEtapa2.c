@@ -873,7 +873,7 @@ void updateGame(GameState *state)
     ULONGLONG intervaloSpawn = GAME_DURATION_MS / state->totalPedidosNoDia;
     if (intervaloSpawn < 1000) intervaloSpawn = 1000;
 
-    if ((now - state->ultimoSpawnDisplayPedidos >= intervaloSpawn) &&
+    /*if ((now - state->ultimoSpawnDisplayPedidos >= intervaloSpawn) &&
         (state->filaDePedidos.inicio != NULL) &&
         (state->contadorDisplayPedidos < 3))
     {
@@ -889,6 +889,43 @@ void updateGame(GameState *state)
 
         enfileiraPedido_FilaLE(&state->filaAtiva, pedidoAtual); 
         state->contadorDisplayPedidos++;
+    }*/
+
+    // Verifica se já passou o tempo E se tem pedidos aguardando para entrar
+    // REMOVIDA a verificação (state->contadorDisplayPedidos < 3) para não travar o spawn
+    if ((now - state->ultimoSpawnDisplayPedidos >= intervaloSpawn) &&
+        (state->filaDePedidos.inicio != NULL))
+    {
+        state->ultimoSpawnDisplayPedidos = now; // Reseta o timer imediatamente
+
+        // Lógica para atualizar o DISPLAY (Visual)
+        // Se tivermos 3 pedidos, o loop vai de 2 até 1.
+        // O item em [2] (o mais antigo visualmente) será sobrescrito pelo [1].
+        // Isso faz o pedido antigo "sumir" da tela, criando o desafio de memória.
+        int limiteShift = (state->contadorDisplayPedidos < 3) ? state->contadorDisplayPedidos : 2;
+
+        for (int j = limiteShift; j > 0; j--) {
+            state->pedidosDisplay[j] = state->pedidosDisplay[j - 1];
+        }
+
+        // Tira o pedido da fila de "backstage" (pedidos do dia)
+        Pedido_FilaLE pedidoAtual;
+        desenfileiraPedido_FilaLE(&state->filaDePedidos, &pedidoAtual);
+
+        // Coloca o NOVO pedido na posição 0 (Topo/Mais recente no visual)
+        state->pedidosDisplay[0].spawnTime = now;
+        strcpy(state->pedidosDisplay[0].text, getNomeDoBurger(pedidoAtual.id_burger));
+        state->pedidosDisplay[0].id_burger = pedidoAtual.id_burger;
+
+        // CRUCIAL: Adiciona na Fila Ativa (Lógica do jogo)
+        // Mesmo que o pedido antigo tenha sumido visualmente no "for" acima,
+        // ele CONTINUA nesta fila aqui. O jogador precisa entregar esse primeiro.
+        enfileiraPedido_FilaLE(&state->filaAtiva, pedidoAtual);
+
+        // Só aumenta o contador visual se ainda não estiver cheio
+        if (state->contadorDisplayPedidos < 3) {
+            state->contadorDisplayPedidos++;
+        }
     }
 
     // 3. Sync ordersPending
@@ -961,6 +998,12 @@ void initializeNextDay(GameState *state)
     salvarRelatorioDiario(state->dia, state->vendasNoDiaAtual);
     state->vendasNoDiaAtual = 0;
 
+    // --- CORREÇÃO 1: Limpar fila de pedidos ativos do dia anterior ---
+    while (state->filaAtiva.tamanho != 0) {
+        Pedido_FilaLE temp;
+        desenfileiraPedido_FilaLE(&state->filaAtiva, &temp);
+    }
+
     state->stackSize = 0;
     state->ordersPending = 0;
     state->isGrilling = FALSE;
@@ -971,6 +1014,10 @@ void initializeNextDay(GameState *state)
     state->showCardapio_2 = FALSE;
     state->hamburguerVazio = 0;
     state->semPedidos = 0;
+
+    // --- CORREÇÃO 2: Resetar visualização da tela ---
+    state->contadorDisplayPedidos = 0;
+    state->ultimoSpawnDisplayPedidos = 0; // Importante para reiniciar o timer de spawn
 
     deletaBurgerLE(&state->burgerPlayer); 
     state->tempoDoJogo = (ULONGLONG)GetTickCount();
@@ -990,7 +1037,10 @@ void initializeNextDay(GameState *state)
     geraPedidos_FilaLE(&state->filaDePedidos, state->dia); 
 
     state->totalPedidosNoDia = state->filaDePedidos.tamanho;
-    if (state->totalPedidosNoDia == 0) state->totalPedidosNoDia = 1; 
+    if (state->totalPedidosNoDia == 0) state->totalPedidosNoDia = 1;
+
+    // --- CORREÇÃO 3: Atualizar o contador de pendentes com o novo total ---
+    state->ordersPending = state->totalPedidosNoDia;
 }
 
 BOOL runEndScreen(GameContext *ctx, GameState *state)
