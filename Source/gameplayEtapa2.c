@@ -509,8 +509,8 @@ void drawEndScreen(GameContext *ctx, GameState *state)
     writeToBuffer(ctx, (width - (int)strlen(title)) / 2, y, title, FOREGROUND_RED | FOREGROUND_INTENSITY);
     y += 3;
 
-    snprintf(text, sizeof(text), "Final Score: $%d", state->dinheiro);
-    writeToBuffer(ctx, (width - (int)strlen(text)) / 2, y, text, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    snprintf(text, sizeof(text), "Dinheiro Final: $%d", state->dinheiro);
+    writeToBuffer(ctx, (width - (int)strlen(text)) / 2, y, text, FOREGROUND_GREEN | FOREGROUND_INTENSITY);  //Substituir por hambúrgueres vendidos.
     y += 4;
 
     const char *restart = "[R]estart";
@@ -1098,7 +1098,7 @@ void initializeNextDay(GameState *state)
     state->ordersPending = state->totalPedidosNoDia;
 }
 
-BOOL runEndScreen(GameContext *ctx, GameState *state)
+int runEndScreen(GameContext *ctx, GameState *state)
 {
     BOOL inEndScreen = TRUE;
     deletaBurgerLE(&state->burgerPlayer); 
@@ -1126,27 +1126,33 @@ BOOL runEndScreen(GameContext *ctx, GameState *state)
                             {
                                 clearStack(state);
                                 initializeGame(ctx, state); 
-                                return TRUE; 
+                                free(eventBuffer);
+                                return 1; //Código 1: Reiniciar
                             }
-                        if (c == 'e' || c == 'E') return FALSE; 
+                            if (c == 's' || c == 'S') { //Sair para a tela inicial.
+                                clearStack(state);
+                                free(eventBuffer);
+                                return 2; //Código 2: Voltar ao Menu
+                            }
+                        }
+                        break;
+                    case WINDOW_BUFFER_SIZE_EVENT:
+                    {
+                        CONSOLE_SCREEN_BUFFER_INFO csbi;
+                        GetConsoleScreenBufferInfo(ctx->hConsoleOut, &csbi);
+                        int newWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+                        int newHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+                        if (newWidth != ctx->screenSize.X || newHeight != ctx->screenSize.Y) resizeBuffer(ctx, newWidth, newHeight);
+                        break;
                     }
-                    break;
-                case WINDOW_BUFFER_SIZE_EVENT:
-                {
-                    CONSOLE_SCREEN_BUFFER_INFO csbi;
-                    GetConsoleScreenBufferInfo(ctx->hConsoleOut, &csbi);
-                    int newWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-                    int newHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-                    if (newWidth != ctx->screenSize.X || newHeight != ctx->screenSize.Y) resizeBuffer(ctx, newWidth, newHeight);
-                    break;
-                }
+                    default: return FALSE;
                 }
             }
             free(eventBuffer);
         }
         Sleep(33);
     }
-    return FALSE; 
+    return 0;
 }
 
 //Encerra o jogo.
@@ -1405,57 +1411,79 @@ void telaPrincipalEtapa2()
     cursorInfo.bVisible = FALSE;
     SetConsoleCursorInfo(gameContext.hConsoleOut, &cursorInfo);
 
-    // --- MAIN MENU ---
-    int choice = runMainMenu(&gameContext);
-    
-    // --- GAME START ---
+    //loop do jogo.
+    BOOL jogoRodando = TRUE;
 
-    inicializarInventario_loja(&inventarioJogador, 100);
-    inicializarLoja(&loja);
-    organizaloja(&loja);
+    while (jogoRodando) {
+        // --- MAIN MENU ---
+        int choice = runMainMenu(&gameContext);
 
-    initializeGame(&gameContext, &gameState);
-    
-    if (choice == 0) {
-        carregarJogo(&gameState); // carrega o jogo APENAS se o usuário escolheu "Carregar Jogo"
-    }
-    // Se choice == 1 (Novo Jogo), initializeGame já configurou os defaults (Dia 1, $100, etc.)
+        // --- GAME START ---
 
-    BOOL showShopScreen = FALSE; 
+        inicializarInventario_loja(&inventarioJogador, 100);
+        inicializarLoja(&loja);
+        organizaloja(&loja);
 
-    while (gameState.isRunning) {
-        if (gameState.showEndScreen)
-        {
-            if (gameState.dinheiro <= 0)
+        initializeGame(&gameContext, &gameState);
+
+        if (choice == 0) {
+            carregarJogo(&gameState); // carrega o jogo APENAS se o usuário escolheu "Carregar Jogo"
+        }
+        // Se choice == 1 (Novo Jogo), initializeGame já configurou os defaults (Dia 1, $100, etc.)
+
+        BOOL showShopScreen = FALSE;
+
+        while (gameState.isRunning) {
+            if (gameState.showEndScreen)
             {
-                if (runEndScreen(&gameContext, &gameState)) gameState.showEndScreen = FALSE;
-                else gameState.isRunning = FALSE;
+                if (gameState.dinheiro <= 0)
+                {
+                    // Chama a nova runEndScreen que retorna int
+                    int acao = runEndScreen(&gameContext, &gameState);
+
+                    if (acao == 1) {
+                        // [R] Reiniciar: O runEndScreen já chamou initializeGame,
+                        // apenas removemos a flag de endScreen.
+                        gameState.showEndScreen = FALSE;
+                    }
+                    else if (acao == 2) {
+                        // [S] Voltar ao Menu:
+                        gameState.isRunning = FALSE; // Sai do loop do jogo
+                        // appRodando continua TRUE, então o while externo recomeça e mostra o Menu
+                    }
+                    else {
+                        // Sair do App
+                        gameState.isRunning = FALSE;
+                        jogoRodando = FALSE; // Encerra tudo
+                    }
+                }
+                else
+                {
+                    gameState.showEndScreen = FALSE;
+                    showShopScreen = TRUE;
+                }
+            }
+            else if (showShopScreen)
+            {
+                salvarJogo(&gameState);
+                inventarioJogador.dinheiro = gameState.dinheiro;
+                loopfuncionaloja(&loja, &inventarioJogador);
+                gameState.dinheiro = inventarioJogador.dinheiro;
+                showShopScreen = FALSE;
+                clearStack(&gameState);
+                initializeNextDay(&gameState);
             }
             else
             {
-                gameState.showEndScreen = FALSE;
-                showShopScreen = TRUE;
+                processInput(&gameContext, &gameState);
+                updateGame(&gameState);
+                if (gameState.showCardapio) drawCardapioScreen(&gameContext, &gameState);
+                else if (gameState.showCardapio_2) desenharCardapio_pagina2(&gameContext, &gameState);
+                else renderGame(&gameContext, &gameState);
+                Sleep(33);
             }
         }
-        else if (showShopScreen)
-        {
-			salvarJogo(&gameState); 
-            inventarioJogador.dinheiro = gameState.dinheiro; 
-            loopfuncionaloja(&loja, &inventarioJogador); 
-            gameState.dinheiro = inventarioJogador.dinheiro; 
-            showShopScreen = FALSE; 
-            clearStack(&gameState);
-            initializeNextDay(&gameState); 
-        }
-        else
-        {
-            processInput(&gameContext, &gameState);
-            updateGame(&gameState);
-            if (gameState.showCardapio) drawCardapioScreen(&gameContext, &gameState);
-            else if (gameState.showCardapio_2) desenharCardapio_pagina2(&gameContext, &gameState);
-            else renderGame(&gameContext, &gameState);
-            Sleep(33); 
-        }
     }
+
     cleanup(&gameContext, &gameState);
 }

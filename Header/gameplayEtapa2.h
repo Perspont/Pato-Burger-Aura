@@ -139,7 +139,7 @@ void processInput(GameContext *ctx, GameState *state);
 void renderGame(GameContext *ctx, GameState *state);
 void salvarRelatorioDiario(int dia, int vendas);
 void initializeNextDay(GameState *state);
-BOOL runEndScreen(GameContext *ctx, GameState *state);
+int runEndScreen(GameContext *ctx, GameState *state);
 void cleanup(GameContext *ctx, GameState *state);
 void salvarJogo(GameState *state);
 void carregarJogo(GameState *state);
