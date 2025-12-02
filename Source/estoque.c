@@ -2,23 +2,87 @@
 #include <string.h>
 #include "../Header/estoque.h"
 
+void inicializa_Pao(Ingrediente *ing)
+{
+	*ing = (Ingrediente){1, "Pao", 2.0, 10};
+}
+
+void inicializa_Hamburguer(Ingrediente *ing)
+{
+	*ing = (Ingrediente){2, "Hamburguer", 5.0, 10};
+}
+
+void inicializa_Queijo(Ingrediente *ing)
+{
+	*ing = (Ingrediente){3, "Queijo", 3.0, 10};
+}
+
+void inicializa_Alface(Ingrediente *ing)
+{
+	*ing = (Ingrediente){4, "Alface", 4.0, 10};
+}
+
+void inicializa_Tomate(Ingrediente *ing)
+{
+	*ing = (Ingrediente){5, "Tomate", 3.0, 10};
+}
+
+void inicializa_Bacon(Ingrediente *ing)
+{
+	*ing = (Ingrediente){6, "Bacon", 4.0, 10};
+}
+
+void inicializa_Picles(Ingrediente *ing)
+{
+	*ing = (Ingrediente){7, "Picles", 4.0, 10};
+}
+
+void inicializa_Cebola(Ingrediente *ing)
+{
+	*ing = (Ingrediente){8, "Cebola", 3.0, 10};
+}
+
+void inicializa_Falafel(Ingrediente *ing)
+{
+	*ing = (Ingrediente){9, "Falafel", 7.0, 10};
+}
+
+void inicializa_MolhoDoPato(Ingrediente *ing)
+{
+	*ing = (Ingrediente){10, "Molho do Pato", 2.0, 10};
+}
+
+void inicializa_OnionRings(Ingrediente *ing)
+{
+	*ing = (Ingrediente){11, "Onion Rings", 6.0, 10};
+}
+
+void inicializa_Maionese(Ingrediente *ing)
+{
+	*ing = (Ingrediente){12, "Maionese", 3.0, 10};
+}
+
+void inicializa_Frango(Ingrediente *ing)
+{
+	*ing = (Ingrediente){13, "Frango", 4.0, 10};
+}
 // inicializa a fila
 void inicializarEstoque(Estoque *estoque)
 {
     // --- TEXTO MODIFICADO ---
-	estoque->ingredientes[0] = (Ingrediente){1, "Pao", 2.0, 10};
-	estoque->ingredientes[1] = (Ingrediente){2, "Carne", 5.0, 10};
-	estoque->ingredientes[2] = (Ingrediente){3, "Queijo", 3.0, 10};
-	estoque->ingredientes[3] = (Ingrediente){4, "Alface", 4.0, 10};
-	estoque->ingredientes[4] = (Ingrediente){5, "Tomate", 3.0, 10};
-	estoque->ingredientes[5] = (Ingrediente){6, "Bacon", 4.0, 10};
-	estoque->ingredientes[6] = (Ingrediente){7, "Picles", 4.0, 10};
-	estoque->ingredientes[7] = (Ingrediente){8, "Cebola", 3.0, 10};
-	estoque->ingredientes[8] = (Ingrediente){9, "Falafel", 7.0, 10};
-	estoque->ingredientes[9] = (Ingrediente){10, "Molho do Pato", 2.0, 10};
-	estoque->ingredientes[10] = (Ingrediente){11, "Onion Rings", 6.0, 10};
-	estoque->ingredientes[11] = (Ingrediente){12, "Maionese", 3.0, 10};
-	estoque->ingredientes[12] = (Ingrediente){13, "Frango", 4.0, 10};
+		inicializa_Pao(&estoque->ingredientes[0]);
+		inicializa_Hamburguer(&estoque->ingredientes[1]);
+		inicializa_Queijo(&estoque->ingredientes[2]);
+		inicializa_Alface(&estoque->ingredientes[3]);
+		inicializa_Tomate(&estoque->ingredientes[4]);
+		inicializa_Bacon(&estoque->ingredientes[5]);
+		inicializa_Picles(&estoque->ingredientes[6]);
+		inicializa_Cebola(&estoque->ingredientes[7]);
+		inicializa_Falafel(&estoque->ingredientes[8]);
+		inicializa_MolhoDoPato(&estoque->ingredientes[9]);
+		inicializa_OnionRings(&estoque->ingredientes[10]);
+		inicializa_Maionese(&estoque->ingredientes[11]);
+		inicializa_Frango(&estoque->ingredientes[12]);
 }
 
 void adicionarIngrediente(Estoque *estoque, int id, int quantidade) {
