@@ -24,11 +24,6 @@ typedef struct
     CHAR_INFO *charBuffer; 
 } GameContext;
 
-/**
-
-  Possui variáveis para o display de pedidos.
-
-**/
 typedef struct {
     char text[30];
     ULONGLONG spawnTime;
@@ -39,7 +34,7 @@ typedef struct {
 
 typedef struct
 {
-    // Inventario
+    // Inventario (Estoque atual)
     int dinheiro;
     int pao_count;
     int hamburguerCru_count;
@@ -56,22 +51,23 @@ typedef struct
     int falafel_count;
     int frango_count;
 
+    // Estatisticas de Venda (Para o relatorio diario)
     int pao_vendidos;
     int alface_vendidos;
     int tomate_vendidos;
     int queijo_vendidos;
     int hamburguer_vendidos;
-
     int bacon_vendidos;
     int maioneseDoPato_vendidos;
     int onion_rings_vendidos;
     int cebola_vendidos;
     int picles_vendidos;
     int falafel_vendidos;
-    int frango_vendidos; //Número de ingredientes vendidos.
+    int frango_vendidos; 
     
-	int totalHamburgueresVendidos; // Total geral para o save
-    int vendasNoDiaAtual;          // Contador do dia (reseta quando dorme)
+    // Contadores Gerais
+	int totalHamburgueresVendidos; 
+    int vendasNoDiaAtual;          
     
     char *PilhaDeHamburguerLE_display[MAX_BURGER_STACK]; 
     int stackSize;
@@ -111,7 +107,7 @@ typedef struct
 
     int dia;
 
-    // Arvore de Historico
+    // Arvore de Historico (Unidade 3)
     NoHistorico *historicoVendas;
 
 } GameState;
@@ -137,7 +133,7 @@ void empilharIngrediente_display(GameState *state, const char *item, int *invent
 void processCommand(GameContext *ctx, GameState *state);
 void processInput(GameContext *ctx, GameState *state);
 void renderGame(GameContext *ctx, GameState *state);
-void salvarRelatorioDiario(int dia, int vendas);
+void salvarLogDiario(GameState *state); // Alterei para receber o state todo
 void initializeNextDay(GameState *state);
 int runEndScreen(GameContext *ctx, GameState *state);
 void cleanup(GameContext *ctx, GameState *state);
@@ -146,5 +142,6 @@ void carregarJogo(GameState *state);
 void drawMainMenu(GameContext *ctx, int selectedOption);
 int runMainMenu(GameContext *ctx);
 void telaPrincipalEtapa2();
+void updateGame(GameState *state); // Adicionei o prototipo que faltava
 
 #endif
