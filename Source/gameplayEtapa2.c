@@ -447,31 +447,6 @@ void desenharCardapio_pagina2(GameContext *ctx, GameState *state)
     blitToScreen(ctx);
 }
 
-// Função auxiliar recursiva para desenhar o histórico de vendas
-void drawHistoricoVendasRec(GameContext *ctx, NoHistorico *raiz, int x, int *y) {
-    if (raiz == NULL) return;
-
-    // Percorre lado esquerdo (IDs menores)
-    drawHistoricoVendasRec(ctx, raiz->esq, x, y);
-
-    // Verifica se ainda cabe na tela
-    if (*y < ctx->screenSize.Y - 4) {
-        const char* nome = getNomeDoBurger(raiz->id_burger);
-        char buffer[64];
-
-        // Formata a string: "Nome do Burger: Quantidade"
-        snprintf(buffer, sizeof(buffer), "%s: %d", nome, raiz->quantidade_vendida);
-
-        // Desenha na tela (Cor Amarela para destaque)
-        writeToBuffer(ctx, x, *y, buffer, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
-
-        (*y)++; // Incrementa a linha para o próximo item
-    }
-
-    // Percorre lado direito (IDs maiores)
-    drawHistoricoVendasRec(ctx, raiz->dir, x, y);
-}
-
 void drawEndScreen(GameContext *ctx, GameState *state)
 {
     clearBuffer(ctx);
@@ -487,22 +462,9 @@ void drawEndScreen(GameContext *ctx, GameState *state)
     writeToBuffer(ctx, (width - (int)strlen(title)) / 2, y, title, FOREGROUND_RED | FOREGROUND_INTENSITY);
     y += 3;
 
-    // 2. Título
-    const char *relatorio = "RELATORIO DE VENDAS";
-    int titleX = (width - (int)strlen(title)) / 2;
-    writeToBuffer(ctx, titleX, 2, relatorio, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
-
-    writeToBuffer(ctx, 4, 6, "Hamburgueres Vendidos:", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
-
-    int startX = 6;
-    int startY = 8; // Começa a listar na linha 8
-
-    if (state->historicoVendas == NULL) {
-        writeToBuffer(ctx, startX, startY, "Nenhuma venda registrada.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-    } else {
-        // Chama a função recursiva passando o endereço de startY para que ela possa incrementá-lo
-        drawHistoricoVendasRec(ctx, state->historicoVendas, startX, &startY);
-    }
+    snprintf(text, sizeof(text), "Dinheiro Final: $%d", state->dinheiro);
+    writeToBuffer(ctx, (width - (int)strlen(text)) / 2, y, text, FOREGROUND_GREEN | FOREGROUND_INTENSITY); 
+    y += 4;
 
     const char *restart = "[R]estart";
     writeToBuffer(ctx, (width - (int)strlen(restart)) / 2, y, restart, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
@@ -911,7 +873,7 @@ void updateGame(GameState *state)
         state->contadorDisplayPedidos++;
     }
 
-    state->ordersPending = state->filaDePedidos.tamanho;
+    state->ordersPending = state->filaAtiva.tamanho;
 
     if (state->dinheiro <= 0)
     {
