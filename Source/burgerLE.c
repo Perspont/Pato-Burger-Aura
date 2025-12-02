@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "../Header/burgerLE.h"
+#include <string.h>
 
 
 void inicializar_BurgerLE_Player(BurgerLE_Player *burger) { //Ingredientes -> Possui a pilha.
@@ -190,10 +191,6 @@ float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedid
     destroi_pilha_LE(&ingredientesUsadosPlayer);
     destroi_pilha_LE(&ingredientesUsadosPedido);
 
-    destroi_pilha_LE(&(burgerPedido->ingredientes));
-    deletaBurgerLE(burgerPlayer); //Deleta apenas a pilha de ingredientes.
-
-
     float moedasFinais = moedas - totalPenalidade;
     moedasFinais = (moedasFinais < 0) ? 0 : moedasFinais;
 
@@ -203,7 +200,10 @@ float comparaHamburgueresLE(BurgerLE_Player *burgerPlayer, BurgerLE *burgerPedid
 //Função de inicializa o burguerLE
 void inicializa_BitAndBacon_LE(BurgerLE *burgerPedido) //{1, 2, 3, 6, 1};
 {
+    burgerPedido->id = 1;
     burgerPedido->preco = 16;
+
+    strcpy(burgerPedido->nome, "Bit and Bacon");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
@@ -215,7 +215,9 @@ void inicializa_BitAndBacon_LE(BurgerLE *burgerPedido) //{1, 2, 3, 6, 1};
 
 void inicializa_DuckCheese_LE(BurgerLE *burgerPedido) //{1, 3, 5, 4, 1}};
 {
+    burgerPedido->id = 2;
     burgerPedido->preco = 16;
+    strcpy(burgerPedido->nome, "Duck Cheese");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
@@ -227,7 +229,10 @@ void inicializa_DuckCheese_LE(BurgerLE *burgerPedido) //{1, 3, 5, 4, 1}};
 
 void inicializa_Quackteirao_LE(BurgerLE *burgerPedido)
 {
+    burgerPedido->id = 3;
     burgerPedido->preco = 16;
+
+    strcpy(burgerPedido->nome, "Quackteirão");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
@@ -240,7 +245,10 @@ void inicializa_Quackteirao_LE(BurgerLE *burgerPedido)
 
 void inicializa_BigPato_LE(BurgerLE *burgerPedido)
 {
+    burgerPedido->id = 4;
     burgerPedido->preco = 27;
+
+    strcpy(burgerPedido->nome, "Big Pato");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
@@ -255,7 +263,10 @@ void inicializa_BigPato_LE(BurgerLE *burgerPedido)
 
 void inicializa_ZeroUm_LE(BurgerLE *burgerPedido)
 {
+    burgerPedido->id = 5;
     burgerPedido->preco = 13;
+
+    strcpy(burgerPedido->nome, "Zero e Um");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
@@ -266,7 +277,10 @@ void inicializa_ZeroUm_LE(BurgerLE *burgerPedido)
 
 void inicializa_ChickenDuckey_LE(BurgerLE *burgerPedido)
 {
+    burgerPedido->id = 6;
     burgerPedido->preco = 21;
+
+    strcpy(burgerPedido->nome, "Chicken Duckey");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
@@ -279,7 +293,10 @@ void inicializa_ChickenDuckey_LE(BurgerLE *burgerPedido)
 
 void inicializa_PatoSobreRodas_LE(BurgerLE *burgerPedido)
 {
+    burgerPedido->id = 7;
     burgerPedido->preco = 24;
+
+    strcpy(burgerPedido->nome, "Pato Sobre Rodas");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
@@ -295,7 +312,10 @@ void inicializa_PatoSobreRodas_LE(BurgerLE *burgerPedido)
 
 void inicializa_Recursivo_LE(BurgerLE *burgerPedido) {
 
+    burgerPedido->id = 8;
     burgerPedido->preco = 35;
+
+    strcpy(burgerPedido->nome, "Recursivo");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     int ids[] = {1, 10, 2, 3, 8, 5, 8, 4, 2, 3, 2, 3, 6, 10, 1};
@@ -306,7 +326,10 @@ void inicializa_Recursivo_LE(BurgerLE *burgerPedido) {
 
 void inicializa_PatoVerde_LE(BurgerLE *burgerPedido)
 {
+    burgerPedido->id = 9;
     burgerPedido->preco = 21;
+
+    strcpy(burgerPedido->nome, "Pato Verde");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
@@ -320,7 +343,10 @@ void inicializa_PatoVerde_LE(BurgerLE *burgerPedido)
 
 void inicializa_PicklesAndMayo_LE(BurgerLE *burgerPedido)
 {
+    burgerPedido->id = 10;
     burgerPedido->preco = 25;
+
+    strcpy(burgerPedido->nome, "Pickles and MAYO!");
 
     burgerPedido->ingredientes = inicializa_pilha_LE();
     push_pilha_LE(burgerPedido->ingredientes, 1);
