@@ -6,7 +6,7 @@ Repositório para o projeto de AED 2025.2 da equipe Ronaldo + Aura + Ego.
   1. Abrir novo projeto no Dev C++ (C project -> Console application).
   2. Abrir apenas os [.c].
   3. Rodar do main.
-OU
+# Para rodar(2):
   1. Abra o terminal na pasta do jogo
   2. utilize o comando : gcc main.c source/*.c -o burger.exe
   3. execute o burguer.exe
