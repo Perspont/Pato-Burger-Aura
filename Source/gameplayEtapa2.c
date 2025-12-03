@@ -509,14 +509,20 @@ void desenharCardapio_pagina2(GameContext *ctx, GameState *state)
 }
 
 // Função auxiliar recursiva para desenhar o histórico de vendas
-void drawHistoricoVendasRec(GameContext *ctx, NoHistorico *raiz, int x, int *y) {
+void drawHistoricoVendasRec(GameContext *ctx, NoHistorico *raiz, int *x, int *y) {
     if (raiz == NULL) return;
 
     // Percorre lado esquerdo (IDs menores)
     drawHistoricoVendasRec(ctx, raiz->esq, x, y);
 
-    // Verifica se ainda cabe na tela
-    if (*y < ctx->screenSize.Y - 4) {
+    // Verifica se ainda cabe na tela (deixa 4 linhas de margem embaixo)
+    if (*y >= ctx->screenSize.Y - 4) {
+        *y = 8; // Reseta para a linha inicial (mesma de startY em drawEndScreen)
+        *x += 30; // Move para a próxima coluna (ajuste o valor conforme necessário)
+    }
+
+    // Verifica se a nova coluna ainda cabe na tela
+    if (*x < ctx->screenSize.X - 20) {
         const char* nome = getNomeDoBurger(raiz->id_burger);
         char buffer[64];
 
@@ -524,7 +530,7 @@ void drawHistoricoVendasRec(GameContext *ctx, NoHistorico *raiz, int x, int *y) 
         snprintf(buffer, sizeof(buffer), "%s: %d", nome, raiz->quantidade_vendida);
 
         // Desenha na tela (Cor Amarela para destaque)
-        writeToBuffer(ctx, x, *y, buffer, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+        writeToBuffer(ctx, *x, *y, buffer, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
 
         (*y)++; // Incrementa a linha para o próximo item
     }
@@ -561,7 +567,7 @@ void drawEndScreen(GameContext *ctx, GameState *state)
         writeToBuffer(ctx, startX, startY, "Nenhuma venda registrada.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
     } else {
         // Chama a função recursiva passando o endereço de startY para que ela possa incrementá-lo
-        drawHistoricoVendasRec(ctx, state->historicoVendas, startX, &startY);
+        drawHistoricoVendasRec(ctx, state->historicoVendas, &startX, &startY);
     }
 
     const char *restart = "[R]estart";
@@ -772,6 +778,9 @@ void processCommand(GameContext *ctx, GameState *state)
                 case 10: inicializa_PicklesAndMayo_LE(&burgerPedido); break;
                 default: break;
             }
+
+            // REGISTRA A VENDA NA ARVORE DE HISTORICO (PARA O GAME OVER)
+            registrar_venda_arvore(&state->historicoVendas, pedidoAlvo.id_burger);
 
             state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); 
 
@@ -1084,18 +1093,8 @@ void initializeNextDay(GameState *state)
     // SALVA O RELATORIO ANTES DE MUDAR O DIA
     salvarLogDiario(state);
 
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Pao", state->pao_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Hamburguer", state->hamburguer_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Queijo", state->queijo_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Alface", state->alface_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Tomate", state->tomate_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Bacon", state->bacon_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Maionese do Pato", state->maioneseDoPato_vendidos); // Verifique o nome exato da variável no struct
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Onion Rings", state->onion_rings_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Cebola", state->cebola_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Picles", state->picles_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Falafel", state->falafel_vendidos);
-    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Frango", state->frango_vendidos);
+    // REMOVIDO: inicializarArvoreIngredientesDia(&state->raizIngredientes);
+    // REMOVIDO: atualizar_quantidade_ingrediente... (movido para atualizarIngredientesDoDia)
 
     
     // Zera os contadores diarios
@@ -1530,6 +1529,21 @@ int runMainMenu(GameContext *ctx)
 // ADDED FUNCTIONS END HERE
 // ==========================================================
 
+void atualizarIngredientesDoDia(GameState *state) {
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Pao", state->pao_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Hamburguer", state->hamburguer_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Queijo", state->queijo_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Alface", state->alface_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Tomate", state->tomate_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Bacon", state->bacon_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Maionese do Pato", state->maioneseDoPato_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Onion Rings", state->onion_rings_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Cebola", state->cebola_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Picles", state->picles_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Falafel", state->falafel_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Frango", state->frango_vendidos);
+}
+
 void telaPrincipalEtapa2()
 {
     GameContext gameContext = {0};
@@ -1584,6 +1598,7 @@ void telaPrincipalEtapa2()
                 }
                 else
                 {
+                    atualizarIngredientesDoDia(&gameState); // Atualiza ANTES de mostrar
                     runTelaHistoricoIngredientes(&gameContext, &gameState);
                     gameState.showEndScreen = FALSE;
                     showShopScreen = TRUE;
