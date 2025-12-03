@@ -298,7 +298,7 @@ void drawInstructionsScreen(GameContext *ctx, GameState *state)
 
     drawBox(ctx, 0, 0, width - 1, height - 1, laranja);
 
-    const char *header = " INSTRUCOES (1/3) ";
+    const char *header = " INSTRUCOES ";
     writeToBuffer(ctx, (width - (int)strlen(header)) / 2, 0, header, amarelo);
 
     int y = 3;
@@ -512,30 +512,28 @@ void desenharCardapio_pagina2(GameContext *ctx, GameState *state)
 void drawHistoricoVendasRec(GameContext *ctx, NoHistorico *raiz, int *x, int *y) {
     if (raiz == NULL) return;
 
-    // Percorre lado esquerdo (IDs menores)
+    //Percorre lado esquerdo (IDs menores)
     drawHistoricoVendasRec(ctx, raiz->esq, x, y);
 
-    // Verifica se ainda cabe na tela (deixa 4 linhas de margem embaixo)
+    //Verifica se ainda cabe na tela (deixa 4 linhas de margem embaixo)
     if (*y >= ctx->screenSize.Y - 4) {
-        *y = 8; // Reseta para a linha inicial (mesma de startY em drawEndScreen)
-        *x += 30; // Move para a próxima coluna (ajuste o valor conforme necessário)
+        *y = 8; //Move para o próximo espaço.
+        *x += 30;
     }
 
-    // Verifica se a nova coluna ainda cabe na tela
+    //Verifica se a nova coluna ainda cabe na tela
     if (*x < ctx->screenSize.X - 20) {
         const char* nome = getNomeDoBurger(raiz->id_burger);
         char buffer[64];
 
-        // Formata a string: "Nome do Burger: Quantidade"
         snprintf(buffer, sizeof(buffer), "%s: %d", nome, raiz->quantidade_vendida);
 
-        // Desenha na tela (Cor Amarela para destaque)
         writeToBuffer(ctx, *x, *y, buffer, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
 
         (*y)++; // Incrementa a linha para o próximo item
     }
 
-    // Percorre lado direito (IDs maiores)
+    //Percorre lado direito (IDs maiores)
     drawHistoricoVendasRec(ctx, raiz->dir, x, y);
 }
 
@@ -1325,22 +1323,19 @@ void carregarJogo(GameState *state) {
     fclose(arquivo);
 }
 
-// Função auxiliar recursiva para desenhar a árvore na tela
-// Faz um percurso In-Order Reverso (Direita -> Raiz -> Esquerda) para mostrar do maior para o menor
-// (Assumindo que a árvore está ordenada pela quantidade ou que você deseja essa ordem de visualização)
+//Função auxiliar recursiva para desenhar a árvore na tela --> Necessário.
 void drawIngredientesTreeRecursive(GameContext *ctx, NO_AVL *no, int x, int *y) {
     if (no == NULL) return;
 
-    // Se a árvore estiver ordenada por quantidade, ir para a direita primeiro pega os maiores valores
+    //ir para a direita primeiro (Pois está ordenada por quantidade).
     drawIngredientesTreeRecursive(ctx, no->dir, x, y);
 
-    // Verifica se ainda cabe na tela
+    //Verifica se ainda cabe na tela
     if (*y < ctx->screenSize.Y - 4) {
         char buffer[64];
-        // Formata: Nome do Ingrediente | Quantidade
+
         snprintf(buffer, sizeof(buffer), "%-20s | %d", no->ingrediente, no->quantidade);
 
-        // Define uma cor (ex: Ciano para o texto)
         WORD cor = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
 
         writeToBuffer(ctx, x, *y, buffer, cor);
@@ -1389,13 +1384,13 @@ void runTelaHistoricoIngredientes(GameContext *ctx, GameState *state) {
         writeToBuffer(ctx, 10, 5, "----------------------------------", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 
         //Desenha a arvore.
-        //Definimos a linha inicial (Y) onde a lista começa
+
         int linhaAtual = 6;
 
         if (state->raizIngredientes == NULL) {
             writeToBuffer(ctx, 10, linhaAtual, "Nenhum dado registrado ainda.", FOREGROUND_RED);
         } else {
-            // Chamamos a função recursiva passando o endereço de linhaAtual
+
             desenharArvoreNoBuffer(ctx, state->raizIngredientes, 10, &linhaAtual);
         }
 
@@ -1423,7 +1418,7 @@ void runTelaHistoricoIngredientes(GameContext *ctx, GameState *state) {
             free(eventBuffer);
         }
 
-        // Pequeno delay para não consumir 100% da CPU
+        //Delay necessário.
         Sleep(50);
     }
 }
@@ -1434,17 +1429,17 @@ void drawMainMenu(GameContext *ctx, int selectedOption)
     int width = ctx->screenSize.X;
     int height = ctx->screenSize.Y;
 
-    // Desenha borda amarela
+
     drawBox(ctx, 0, 0, width - 1, height - 1, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 
-    // Título
+
     const char *title = "=== PATO BURGER ===";
     const char *subtitle = "O Melhor Hamburguer do Lago";
     
     writeToBuffer(ctx, (width - (int)strlen(title)) / 2, height / 2 - 5, title, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     writeToBuffer(ctx, (width - (int)strlen(subtitle)) / 2, height / 2 - 4, subtitle, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 
-    // Opções
+
     const char *options[] = { "Carregar Jogo", "Novo Jogo", "Sair" };
     int numOptions = 3;
 
@@ -1467,7 +1462,7 @@ void drawMainMenu(GameContext *ctx, int selectedOption)
         writeToBuffer(ctx, (width - (int)strlen(buffer)) / 2, height / 2 - 1 + (i * 2), buffer, color);
     }
     
-    // Instruções no rodapé
+
     const char *instr = "Use SETAS para mover e ENTER para selecionar";
     writeToBuffer(ctx, (width - (int)strlen(instr)) / 2, height - 3, instr, FOREGROUND_RED | FOREGROUND_GREEN);
 
@@ -1476,11 +1471,11 @@ void drawMainMenu(GameContext *ctx, int selectedOption)
 
 int runMainMenu(GameContext *ctx)
 {
-    int selectedOption = 1; // Default to "Novo Jogo"
+    int selectedOption = 1; //Default = Novo Jogo
     int numOptions = 3;
     BOOL inMenu = TRUE;
 
-    // Loop do Menu
+
     while (inMenu)
     {
         drawMainMenu(ctx, selectedOption);
@@ -1527,9 +1522,6 @@ int runMainMenu(GameContext *ctx)
     return 1;
 }
 
-// ==========================================================
-// ADDED FUNCTIONS END HERE
-// ==========================================================
 
 void atualizarIngredientesDoDia(GameState *state) {
     atualizar_quantidade_ingrediente(&state->raizIngredientes, "Pao", state->pao_vendidos);

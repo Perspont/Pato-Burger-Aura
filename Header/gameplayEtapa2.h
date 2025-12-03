@@ -13,7 +13,7 @@
 #define MAX_COMMAND_LENGTH 50
 #define MAX_BURGER_STACK 20
 #define GRILL_TIME_MS 5000     
-#define GAME_DURATION_MS 180000 
+#define GAME_DURATION_MS 120000
 #define TEMPO_PARA_NOTIFICACAO_MS 3000 
 
 typedef struct
@@ -51,7 +51,7 @@ typedef struct
     int falafel_count;
     int frango_count;
 
-    // Estatisticas de Venda (Para o relatorio diario)
+    //Estatisticas de Venda (Para o relatorio diario!!!)
     int pao_vendidos;
     int alface_vendidos;
     int tomate_vendidos;
@@ -65,7 +65,7 @@ typedef struct
     int falafel_vendidos;
     int frango_vendidos; 
     
-    // Contadores Gerais
+    //Contadores Gerais
 	int totalHamburgueresVendidos; 
     int vendasNoDiaAtual;          
     
@@ -86,7 +86,7 @@ typedef struct
     ULONGLONG grillStartTime;
     ULONGLONG tempoDoJogo; 
 
-    // Display de Pedidos
+    //Display de Pedidos.
     pedidoDisplay pedidosDisplay[MAX_PEDIDOS_DISPLAY];
     int contadorDisplayPedidos;
     ULONGLONG ultimoSpawnDisplayPedidos;
@@ -108,7 +108,7 @@ typedef struct
 
     int dia;
 
-    // Arvore de Historico.
+    //Arvore de Historico.
     NoHistorico *historicoVendas;
     NO_AVL *raizIngredientes; //Ponteiro para a raiz da árvore de ingredientes do dia.
 
@@ -135,7 +135,7 @@ void empilharIngrediente_display(GameState *state, const char *item, int *invent
 void processCommand(GameContext *ctx, GameState *state);
 void processInput(GameContext *ctx, GameState *state);
 void renderGame(GameContext *ctx, GameState *state);
-void salvarLogDiario(GameState *state); // Alterei para receber o state todo
+void salvarLogDiario(GameState *state);
 void initializeNextDay(GameState *state);
 int runEndScreen(GameContext *ctx, GameState *state);
 void cleanup(GameContext *ctx, GameState *state);
@@ -144,6 +144,6 @@ void carregarJogo(GameState *state);
 void drawMainMenu(GameContext *ctx, int selectedOption);
 int runMainMenu(GameContext *ctx);
 void telaPrincipalEtapa2();
-void updateGame(GameState *state); // Adicionei o prototipo que faltava
+void updateGame(GameState *state);
 
 #endif

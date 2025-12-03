@@ -4,7 +4,7 @@ void inicializa_arvore(NoHistorico **raiz) {
     *raiz = NULL;
 }
 
-// Funcao recursiva para inserir ou atualizar vendas na arvore
+//Insere ou atualiza vendas na árvore (Recursiva).
 void registrar_venda_arvore(NoHistorico **raiz, int id) {
     if (*raiz == NULL) {
         NoHistorico *novo = (NoHistorico*) malloc(sizeof(NoHistorico));
@@ -19,7 +19,7 @@ void registrar_venda_arvore(NoHistorico **raiz, int id) {
         } else if (id > (*raiz)->id_burger) {
             registrar_venda_arvore(&(*raiz)->dir, id);
         } else {
-            // Se o ID ja existe, apenas incrementamos a quantidade
+            //Se o ID ja existe, apenas incrementamos a quantidade
             (*raiz)->quantidade_vendida++;
         }
     }
@@ -93,7 +93,7 @@ NO_AVL* inserirOrdenado(NO_AVL *no, int quantidade, char nome[]) {
         no->dir = inserirOrdenado(no->dir, quantidade, nome);
 
     else {
-        // desempate por nome
+        //desempate por nome.
         if (strcmp(nome, no->ingrediente) < 0)
             no->esq = inserirOrdenado(no->esq, quantidade, nome);
         else
@@ -104,22 +104,21 @@ NO_AVL* inserirOrdenado(NO_AVL *no, int quantidade, char nome[]) {
 
     int balance = getBalance(no);
 
-    // CASO 1: Esquerda-Esquerda (Left-Left)
-    // Acontece se for menor, OU se for igual mas o nome for "menor" alfabeticamente
+    //Esquerda-Esquerda (Left-Left)
     if (balance > 1 &&
        (quantidade < no->esq->quantidade ||
        (quantidade == no->esq->quantidade && strcmp(nome, no->esq->ingrediente) < 0))) {
         return rotacaoDireita(no);
        }
 
-    // CASO 2: Direita-Direita (Right-Right)
+    //Direita-Direita (Right-Right)
     if (balance < -1 &&
        (quantidade > no->dir->quantidade ||
        (quantidade == no->dir->quantidade && strcmp(nome, no->dir->ingrediente) > 0))) {
         return rotacaoEsquerda(no);
        }
 
-    // CASO 3: Esquerda-Direita (Left-Right)
+    //Esquerda-Direita (Left-Right)
     if (balance > 1 &&
        (quantidade > no->esq->quantidade ||
        (quantidade == no->esq->quantidade && strcmp(nome, no->esq->ingrediente) > 0))) {
@@ -127,7 +126,7 @@ NO_AVL* inserirOrdenado(NO_AVL *no, int quantidade, char nome[]) {
         return rotacaoDireita(no);
        }
 
-    // CASO 4: Direita-Esquerda (Right-Left)
+    //Direita-Esquerda (Right-Left)
     if (balance < -1 &&
        (quantidade < no->dir->quantidade ||
        (quantidade == no->dir->quantidade && strcmp(nome, no->dir->ingrediente) < 0))) {
@@ -206,7 +205,7 @@ NO_AVL* removerNo(NO_AVL* root, int quantidade, char nome[]) {
 }
 
 
-// Função auxiliar para encontrar nó pelo nome (necessária pois a árvore é ordenada por quantidade)
+//Função auxiliar para encontrar nó pelo nome (necessária pois a árvore é ordenada por quantidade)
 NO_AVL* buscarPorNome(NO_AVL* raiz, char* nome) {
     if (raiz == NULL) return NULL;
     if (strcmp(raiz->ingrediente, nome) == 0) return raiz;
@@ -219,25 +218,25 @@ NO_AVL* buscarPorNome(NO_AVL* raiz, char* nome) {
 
 //FUNÇÃO PRINCIPAL DE REGISTRO.
 void registrarIngredienteUsado(NO_AVL **raiz, char nome[]) {
-    // Busca o nó usando a função de varredura (não a lógica binária de string)
+    //Busca via função anterior.
     NO_AVL *encontrado = buscarPorNome(*raiz, nome);
 
     if (encontrado != NULL) {
-        // Se achou, pega a quantidade antiga
+        //Se achou, pega a quantidade antiga.
         int quantidadeVelha = encontrado->quantidade;
 
-        // Remove o nó antigo (necessário pois a chave de ordenação mudou)
+        //Remove o nó antigo (necessário pois a chave de ordenação mudou).
         *raiz = removerNo(*raiz, quantidadeVelha, nome);
 
-        // Insere com a nova quantidade
+        //Insere com a nova quantidade.
         *raiz = inserirOrdenado(*raiz, quantidadeVelha + 1, nome);
     } else {
-        // Se não achou, insere novo com quantidade 1
+        //Se não achou, insere novo com quantidade 1.
         *raiz = inserirOrdenado(*raiz, 1, nome);
     }
 }
 
-// Função principal para atualizar ou inserir ingrediente com quantidade acumulada
+//Função principal para atualizar ou inserir ingrediente (Quantidade acumulada. YIPEEE).
 void atualizar_quantidade_ingrediente(NO_AVL **raiz, char *nome, int qtdAdicional) {
     if (qtdAdicional <= 0) return;
 
@@ -245,15 +244,15 @@ void atualizar_quantidade_ingrediente(NO_AVL **raiz, char *nome, int qtdAdiciona
     int novaQuantidade = qtdAdicional;
 
     if (encontrado != NULL) {
-        // Se já existe, pegamos a quantidade antiga e somamos
+        //Pega a quantidade antiga e soma, caso já exista.
         int qtdAntiga = encontrado->quantidade;
         novaQuantidade += qtdAntiga;
 
-        // Removemos o nó antigo pois a chave (quantidade) mudou
+        //Removemos o nó antigo pois a quantidade mudou.
         *raiz = removerNo(*raiz, qtdAntiga, nome);
     }
 
-    // Insere o nó com a nova quantidade total (inserirOrdenado já deve existir no seu código)
+    //Insere o nó.
     *raiz = inserirOrdenado(*raiz, novaQuantidade, nome);
 }
 
