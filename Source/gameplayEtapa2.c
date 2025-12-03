@@ -634,7 +634,9 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->semPedidos = 0;
 
     // Inicializa a arvore aqui
+    liberar_arvore(state->historicoVendas);
     inicializa_arvore(&state->historicoVendas);
+    inicializarArvoreIngredientesDia(&state->raizIngredientes);
 
     state->tempoDoJogo = (ULONGLONG)GetTickCount();
 
