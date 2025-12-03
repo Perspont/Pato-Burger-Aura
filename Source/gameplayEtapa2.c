@@ -284,6 +284,60 @@ void blitToScreen(GameContext *ctx)
     WriteConsoleOutputA(ctx->hConsoleOut, ctx->charBuffer, bufferSize, bufferCoord, &writeRegion);
 }
 
+
+void drawInstructionsScreen(GameContext *ctx, GameState *state)
+{
+    clearBuffer(ctx);
+    int width = ctx->screenSize.X;
+    int height = ctx->screenSize.Y;
+
+    WORD laranja = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+    WORD branco = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
+    WORD verde = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+    WORD amarelo = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+
+    drawBox(ctx, 0, 0, width - 1, height - 1, laranja);
+
+    const char *header = " INSTRUCOES (1/3) ";
+    writeToBuffer(ctx, (width - (int)strlen(header)) / 2, 0, header, amarelo);
+
+    int y = 3;
+    int x_col1 = 4;
+    int x_col2 = (width / 2) + 2;
+
+    // Coluna 1
+    writeToBuffer(ctx, x_col1, y++, "grelhar    -> Grelha hamburguer", branco);
+    writeToBuffer(ctx, x_col1, y++, "pao        -> Empilha pao", branco);
+    writeToBuffer(ctx, x_col1, y++, "alface     -> Empilha alface", branco);
+    writeToBuffer(ctx, x_col1, y++, "tomate     -> Empilha tomate", branco);
+    writeToBuffer(ctx, x_col1, y++, "queijo     -> Empilha queijo", branco);
+    writeToBuffer(ctx, x_col1, y++, "hamburguer -> Empilha carne", branco);
+    writeToBuffer(ctx, x_col1, y++, "bacon      -> Empilha bacon", branco);
+    writeToBuffer(ctx, x_col1, y++, "maionese   -> Empilha maionese", branco);
+
+    // Reinicia Y para Coluna 2
+    y = 3;
+    writeToBuffer(ctx, x_col2, y++, "onion_rings -> Empilha onion rings", branco);
+    writeToBuffer(ctx, x_col2, y++, "cebola      -> Empilha cebola", branco);
+    writeToBuffer(ctx, x_col2, y++, "picles      -> Empilha picles", branco);
+    writeToBuffer(ctx, x_col2, y++, "falafel     -> Empilha falafel", branco);
+    writeToBuffer(ctx, x_col2, y++, "frango      -> Empilha frango", branco);
+    y++; // Espaço extra
+    writeToBuffer(ctx, x_col2, y++, "servir      -> Serve o pedido", verde);
+    writeToBuffer(ctx, x_col2, y++, "lixo        -> Joga fora", FOREGROUND_RED | FOREGROUND_INTENSITY);
+    writeToBuffer(ctx, x_col2, y++, "cardapio    -> Abre este menu", branco);
+    writeToBuffer(ctx, x_col2, y++, "sair        -> Sai do jogo", branco);
+
+    const char *exitCmd = "[V]oltar ao Jogo";
+    writeToBuffer(ctx, (width / 2), (height - 2), exitCmd, branco);
+    const char *cardCmd = "Mostrar [C]ardapio";
+    writeToBuffer(ctx, (width / 2), (height - 4), cardCmd, branco);
+
+    drawTimer(ctx, state);
+    blitToScreen(ctx);
+}
+
+
 void drawCardapioScreen(GameContext *ctx, GameState *state)
 {
     clearBuffer(ctx);
@@ -347,6 +401,10 @@ void drawCardapioScreen(GameContext *ctx, GameState *state)
     writeToBuffer(ctx, x_col2 + 2, y++, "hamburguer", branco);
     writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
     y += 2;
+
+
+    const char *instCmd = "Mostrar [I]nstrucoes";
+    writeToBuffer(ctx, (width / 2), (height - 4), instCmd, branco);
 
     const char *exitCmd = "[V]oltar ao Jogo";
     writeToBuffer(ctx, (width / 2) - 20, (height - 2), exitCmd, branco);
@@ -437,6 +495,9 @@ void desenharCardapio_pagina2(GameContext *ctx, GameState *state)
         writeToBuffer(ctx, x_col2 + 2, y++, "pao", branco);
     }
 
+    const char *instCmd = "Mostrar [I]nstrucoes";
+    writeToBuffer(ctx, (width / 2), (height - 4), instCmd, branco);
+
     const char *prevCmd = "<- pagina [A]nterior";
     writeToBuffer(ctx, (width / 2) - 20, (height - 2), prevCmd, branco);
     const char *exitCmd = "[V]oltar ao Jogo";
@@ -522,6 +583,7 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->currentCommand[0] = '\0';
     state->isRunning = TRUE;
     state->showEndScreen = FALSE;
+    state->showInstructions = FALSE;
     state->showCardapio = FALSE;
     state->showCardapio_2 = FALSE; 
     state->dia = 1; 
@@ -735,7 +797,8 @@ void processCommand(GameContext *ctx, GameState *state)
 
     else if (_stricmp(state->currentCommand, "cardapio") == 0)
     {
-        state->showCardapio = TRUE; 
+        state->showInstructions = TRUE;
+        state->showCardapio = FALSE;
         state->showCardapio_2 = FALSE;
     }
 
@@ -792,20 +855,41 @@ void processInput(GameContext *ctx, GameState *state)
             {
                 char c = eventBuffer[i].Event.KeyEvent.uChar.AsciiChar;
 
-                if (state->showCardapio)
+                if (state->showInstructions) {
+                    if (c == 'v' || c == 'V') state->showInstructions = FALSE;
+                    else if (c == 'c' || c == 'C') {
+                        state->showInstructions = FALSE;
+                        state->showCardapio = TRUE;
+                        state->showCardapio_2 = FALSE;
+                    }
+                }
+
+                else if (state->showCardapio)
                 {
                     if (c == 'v' || c == 'V') state->showCardapio = FALSE; 
                     else if (c == 'p' || c == 'P') {
+                        state->showInstructions = FALSE;
                         state->showCardapio = FALSE;
                         state->showCardapio_2 = TRUE; 
+                    }
+                    else if (c == 'i' || c == 'I') {
+                        state->showInstructions = TRUE;
+                        state->showCardapio = FALSE;
+                        state->showCardapio_2 = FALSE;
                     }
                 }
                 else if (state->showCardapio_2)
                 {
                     if (c == 'v' || c == 'V') state->showCardapio_2 = FALSE; 
                     else if (c == 'a' || c == 'A') {
+                        state->showInstructions = FALSE;
                         state->showCardapio_2 = FALSE;
                         state->showCardapio = TRUE; 
+                    }
+                    else if (c == 'i' || c == 'I') {
+                        state->showInstructions = TRUE;
+                        state->showCardapio = FALSE;
+                        state->showCardapio_2 = FALSE;
                     }
                 }
                 else
@@ -1014,7 +1098,8 @@ void initializeNextDay(GameState *state)
     state->isGrilling = FALSE;
     state->commandLength = 0;
     state->currentCommand[0] = '\0';
-    state->showEndScreen = FALSE; 
+    state->showEndScreen = FALSE;
+    state->showInstructions = FALSE;
     state->showCardapio = FALSE;
     state->showCardapio_2 = FALSE;
     state->hamburguerVazio = 0;
@@ -1430,7 +1515,8 @@ void telaPrincipalEtapa2()
             {
                 processInput(&gameContext, &gameState);
                 updateGame(&gameState);
-                if (gameState.showCardapio) drawCardapioScreen(&gameContext, &gameState);
+                if (gameState.showInstructions) drawInstructionsScreen(&gameContext, &gameState);
+                else if (gameState.showCardapio) drawCardapioScreen(&gameContext, &gameState);
                 else if (gameState.showCardapio_2) desenharCardapio_pagina2(&gameContext, &gameState);
                 else renderGame(&gameContext, &gameState);
                 Sleep(33); 

@@ -103,7 +103,8 @@ typedef struct
     BOOL isRunning;
     BOOL showEndScreen; 
     BOOL showCardapio;  
-    BOOL showCardapio_2; 
+    BOOL showCardapio_2;
+    int showInstructions;
 
     int dia;
 
