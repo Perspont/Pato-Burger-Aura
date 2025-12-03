@@ -34,197 +34,279 @@ void liberar_arvore(NoHistorico *raiz) {
 }
 
 
-//Funções auxiliares
-int altura(NO_AVL *n)
-{
+//FUNÇÕES AUXILIARES DA AVL
+int altura(NO_AVL *n) {
     return (n == NULL ? 0 : n->altura);
 }
 
-int max(int a, int b)
-{
+int max_arvoreAVL(int a, int b) {
     return (a > b ? a : b);
 }
 
-NO_AVL* novoNo(char ingrediente[])
-{
-    // Aloca memória para o tamanho da ESTRUTURA, mas atribui a um PONTEIRO
-    NO_AVL *n = (NO_AVL*) malloc(sizeof(NO_AVL));
-
-    if (n == NULL) {
-        printf("Erro de alocação de memória!\n");
-        exit(1);
-    }
-
-    // Copia segura (evita buffer overflow se a string for gigante)
-    strncpy(n->ingrediente, ingrediente, 49);
-    n->ingrediente[49] = '\0'; // Garante o fim da string
-
-    n->quantidade = 1;
-    n->altura = 1;
-    n->esq = n->dir = NULL;
-
-    return n;
-}
-
-//Rotações
-NO_AVL* rotacaoDireita(NO_AVL *y)
-{
+// ROTAÇÕES AVL
+NO_AVL* rotacaoDireita(NO_AVL *y) {
     NO_AVL *x = y->esq;
     NO_AVL *T2 = x->dir;
 
     x->dir = y;
     y->esq = T2;
 
-    y->altura = max(altura(y->esq), altura(y->dir)) + 1;
-    x->altura = max(altura(x->esq), altura(x->dir)) + 1;
+    y->altura = max_arvoreAVL(altura(y->esq), altura(y->dir)) + 1;
+    x->altura = max_arvoreAVL(altura(x->esq), altura(x->dir)) + 1;
 
     return x;
 }
 
-NO_AVL* rotacaoEsquerda(NO_AVL *x)
-{
+NO_AVL* rotacaoEsquerda(NO_AVL *x) {
     NO_AVL *y = x->dir;
     NO_AVL *T2 = y->esq;
 
     y->esq = x;
     x->dir = T2;
 
-    x->altura = max(altura(x->esq), altura(x->dir)) + 1;
-    y->altura = max(altura(y->esq), altura(y->dir)) + 1;
+    x->altura = max_arvoreAVL(altura(x->esq), altura(x->dir)) + 1;
+    y->altura = max_arvoreAVL(altura(y->esq), altura(y->dir)) + 1;
 
     return y;
 }
 
-int getBalance(NO_AVL *n)
-{
+int getBalance(NO_AVL *n) {
     return (n == NULL ? 0 : altura(n->esq) - altura(n->dir));
 }
 
-//Inserção e contagem
-NO_AVL* inserirIngrediente(NO_AVL *no, char ingrediente[])
-{
-
-    if (no == NULL)
-	{
-        return novoNo(ingrediente);
+// INSERÇÃO ORDENADA POR QUANTIDADE
+NO_AVL* inserirOrdenado(NO_AVL *no, int quantidade, char nome[]) {
+    if (no == NULL) {
+        NO_AVL *novo = (NO_AVL*) malloc(sizeof(NO_AVL));
+        strncpy(novo->ingrediente, nome, 49);
+        novo->ingrediente[49] = '\0';
+        novo->quantidade = quantidade;
+        novo->altura = 1;
+        novo->esq = novo->dir = NULL;
+        return novo;
     }
 
-    int cmp = strcmp(ingrediente, no->ingrediente);
+    if (quantidade < no->quantidade)
+        no->esq = inserirOrdenado(no->esq, quantidade, nome);
 
-    if (cmp == 0)
-	{
-        no->quantidade += 1;
-        return no;
+    else if (quantidade > no->quantidade)
+        no->dir = inserirOrdenado(no->dir, quantidade, nome);
+
+    else {
+        // desempate por nome
+        if (strcmp(nome, no->ingrediente) < 0)
+            no->esq = inserirOrdenado(no->esq, quantidade, nome);
+        else
+            no->dir = inserirOrdenado(no->dir, quantidade, nome);
     }
 
-    if (cmp < 0)
-	{
-        no->esq = inserirIngrediente(no->esq, ingrediente);
-    }
-
-    else
-	{
-        no->dir = inserirIngrediente(no->dir, ingrediente);
-    }
-
-    no->altura = 1 + max(altura(no->esq), altura(no->dir));
+    no->altura = 1 + max_arvoreAVL(altura(no->esq), altura(no->dir));
 
     int balance = getBalance(no);
 
-    if (balance > 1 && strcmp(ingrediente, no->esq->ingrediente) < 0)
+    // CASO 1: Esquerda-Esquerda (Left-Left)
+    // Acontece se for menor, OU se for igual mas o nome for "menor" alfabeticamente
+    if (balance > 1 &&
+       (quantidade < no->esq->quantidade ||
+       (quantidade == no->esq->quantidade && strcmp(nome, no->esq->ingrediente) < 0))) {
         return rotacaoDireita(no);
+       }
 
-    if (balance < -1 && strcmp(ingrediente, no->dir->ingrediente) > 0)
+    // CASO 2: Direita-Direita (Right-Right)
+    if (balance < -1 &&
+       (quantidade > no->dir->quantidade ||
+       (quantidade == no->dir->quantidade && strcmp(nome, no->dir->ingrediente) > 0))) {
         return rotacaoEsquerda(no);
+       }
 
-    if (balance > 1 && strcmp(ingrediente, no->esq->ingrediente) > 0)
-	{
+    // CASO 3: Esquerda-Direita (Left-Right)
+    if (balance > 1 &&
+       (quantidade > no->esq->quantidade ||
+       (quantidade == no->esq->quantidade && strcmp(nome, no->esq->ingrediente) > 0))) {
         no->esq = rotacaoEsquerda(no->esq);
         return rotacaoDireita(no);
-    }
+       }
 
-    if (balance < -1 && strcmp(ingrediente, no->dir->ingrediente) < 0)
-	{
+    // CASO 4: Direita-Esquerda (Right-Left)
+    if (balance < -1 &&
+       (quantidade < no->dir->quantidade ||
+       (quantidade == no->dir->quantidade && strcmp(nome, no->dir->ingrediente) < 0))) {
         no->dir = rotacaoDireita(no->dir);
         return rotacaoEsquerda(no);
-    }
+       }
 
     return no;
 }
 
-//Contagem dos ingredientes
-void registrarIngredienteUsado(NO_AVL *raizIngredientes, char ingrediente[])
-{
-    raizIngredientes = inserirIngrediente(raizIngredientes, ingrediente);
+
+// REMOVER NÓ DA AVL
+NO_AVL* removerNo(NO_AVL* root, int quantidade, char nome[]) {
+    if (root == NULL)
+        return NULL;
+
+    if (quantidade < root->quantidade)
+        root->esq = removerNo(root->esq, quantidade, nome);
+
+    else if (quantidade > root->quantidade)
+        root->dir = removerNo(root->dir, quantidade, nome);
+
+    else {
+        int cmp = strcmp(nome, root->ingrediente);
+
+        if (cmp < 0)
+            root->esq = removerNo(root->esq, quantidade, nome);
+
+        else if (cmp > 0)
+            root->dir = removerNo(root->dir, quantidade, nome);
+
+        else {
+            if (root->esq == NULL) {
+                NO_AVL *temp = root->dir;
+                free(root);
+                return temp;
+            }
+            else if (root->dir == NULL) {
+                NO_AVL *temp = root->esq;
+                free(root);
+                return temp;
+            }
+
+            NO_AVL *temp = root->dir;
+            while (temp->esq != NULL)
+                temp = temp->esq;
+
+            strcpy(root->ingrediente, temp->ingrediente);
+            root->quantidade = temp->quantidade;
+
+            root->dir = removerNo(root->dir, temp->quantidade, temp->ingrediente);
+        }
+    }
+
+    root->altura = 1 + max_arvoreAVL(altura(root->esq), altura(root->dir));
+
+    int balance = getBalance(root);
+
+    if (balance > 1 && getBalance(root->esq) >= 0)
+        return rotacaoDireita(root);
+
+    if (balance > 1 && getBalance(root->esq) < 0) {
+        root->esq = rotacaoEsquerda(root->esq);
+        return rotacaoDireita(root);
+    }
+
+    if (balance < -1 && getBalance(root->dir) <= 0)
+        return rotacaoEsquerda(root);
+
+    if (balance < -1 && getBalance(root->dir) > 0) {
+        root->dir = rotacaoDireita(root->dir);
+        return rotacaoEsquerda(root);
+    }
+
+    return root;
 }
 
-//Reiniciar estatísticas do dia
-void destruirAVL(NO_AVL *no)
-{
-    if (no == NULL) return;
 
+// Função auxiliar para encontrar nó pelo nome (necessária pois a árvore é ordenada por quantidade)
+NO_AVL* buscarPorNome(NO_AVL* raiz, char* nome) {
+    if (raiz == NULL) return NULL;
+    if (strcmp(raiz->ingrediente, nome) == 0) return raiz;
+
+    NO_AVL* res = buscarPorNome(raiz->esq, nome);
+    if (res != NULL) return res;
+
+    return buscarPorNome(raiz->dir, nome);
+}
+
+//FUNÇÃO PRINCIPAL DE REGISTRO.
+void registrarIngredienteUsado(NO_AVL **raiz, char nome[]) {
+    // Busca o nó usando a função de varredura (não a lógica binária de string)
+    NO_AVL *encontrado = buscarPorNome(*raiz, nome);
+
+    if (encontrado != NULL) {
+        // Se achou, pega a quantidade antiga
+        int quantidadeVelha = encontrado->quantidade;
+
+        // Remove o nó antigo (necessário pois a chave de ordenação mudou)
+        *raiz = removerNo(*raiz, quantidadeVelha, nome);
+
+        // Insere com a nova quantidade
+        *raiz = inserirOrdenado(*raiz, quantidadeVelha + 1, nome);
+    } else {
+        // Se não achou, insere novo com quantidade 1
+        *raiz = inserirOrdenado(*raiz, 1, nome);
+    }
+}
+
+// Função principal para atualizar ou inserir ingrediente com quantidade acumulada
+void atualizar_quantidade_ingrediente(NO_AVL **raiz, char *nome, int qtdAdicional) {
+    if (qtdAdicional <= 0) return;
+
+    NO_AVL *encontrado = buscarPorNome(*raiz, nome);
+    int novaQuantidade = qtdAdicional;
+
+    if (encontrado != NULL) {
+        // Se já existe, pegamos a quantidade antiga e somamos
+        int qtdAntiga = encontrado->quantidade;
+        novaQuantidade += qtdAntiga;
+
+        // Removemos o nó antigo pois a chave (quantidade) mudou
+        *raiz = removerNo(*raiz, qtdAntiga, nome);
+    }
+
+    // Insere o nó com a nova quantidade total (inserirOrdenado já deve existir no seu código)
+    *raiz = inserirOrdenado(*raiz, novaQuantidade, nome);
+}
+
+// DESTRUIR E REINICIAR AVL
+void destruirAVL(NO_AVL *no) {
+    if (no == NULL) return;
     destruirAVL(no->esq);
     destruirAVL(no->dir);
     free(no);
 }
 
-void inicializarArvoreIngredientesDia(NO_AVL *raizIngredientes)
-{
-    destruirAVL(raizIngredientes);
-    raizIngredientes = NULL;
+void inicializarArvoreIngredientesDia(NO_AVL **raizIngredientes) {
+    destruirAVL(*raizIngredientes);
+    *raizIngredientes = NULL;
 }
 
-//Inprimir estatísticas do jogador
-void exibirEstatisticasRec(NO_AVL *no)
-{
+
+// EXIBIÇÃO DE ESTATÍSTICAS
+void exibirEstatisticasRec(NO_AVL *no) {
     if (no == NULL) return;
 
     exibirEstatisticasRec(no->esq);
 
-    printf("Ingrediente: %-20s  Usado: %d\n", no->ingrediente, no->quantidade);
+    printf("%-12s | Usado: %d vezes\n",
+        no->ingrediente,
+        no->quantidade
+    );
 
     exibirEstatisticasRec(no->dir);
 }
 
-void exibirEstatisticasIngredientes(NO_AVL *raizIngredientes)
-{
-    printf("**ESTATÍSTICAS DO DIA**\n");
+void exibirEstatisticasIngredientes(NO_AVL *raizIngredientes) {
+    printf("*ESTATÍSTICAS DO DIA*\n");
 
     if (raizIngredientes == NULL)
-	{
         printf("Nenhum ingrediente usado hoje.\n");
-    }
-
-	else
-	{
+    else
         exibirEstatisticasRec(raizIngredientes);
-    }
 
     printf("\nPressione ENTER para prosseguir...");
-
     getchar();
 }
 
-//Tela de estatísticas
-void telaEstatisticasIngredientes(NO_AVL *raizIngredientes)
-{
+void telaEstatisticasIngredientes(NO_AVL *raizIngredientes) {
     system("cls");
-    printf("**ESTATÍSTICAS DE INGREDIENTES**\n");
+    printf("*ESTATÍSTICAS DE INGREDIENTES*\n");
 
     if (raizIngredientes == NULL)
-	{
         printf("Nenhum ingrediente foi utilizado hoje!\n\n");
-    }
-
-	else
-	{
+    else
         exibirEstatisticasRec(raizIngredientes);
 
-        printf("\n");
-    }
-
-    printf("1 - Prosseguir para a loja\n");
+    printf("\n1 - Prosseguir para a loja\n");
     printf("Digite qualquer tecla para continuar...\n");
-
     getchar();
 }
