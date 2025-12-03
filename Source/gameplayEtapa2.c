@@ -508,6 +508,31 @@ void desenharCardapio_pagina2(GameContext *ctx, GameState *state)
     blitToScreen(ctx);
 }
 
+// Função auxiliar recursiva para desenhar o histórico de vendas
+void drawHistoricoVendasRec(GameContext *ctx, NoHistorico *raiz, int x, int *y) {
+    if (raiz == NULL) return;
+
+    // Percorre lado esquerdo (IDs menores)
+    drawHistoricoVendasRec(ctx, raiz->esq, x, y);
+
+    // Verifica se ainda cabe na tela
+    if (*y < ctx->screenSize.Y - 4) {
+        const char* nome = getNomeDoBurger(raiz->id_burger);
+        char buffer[64];
+
+        // Formata a string: "Nome do Burger: Quantidade"
+        snprintf(buffer, sizeof(buffer), "%s: %d", nome, raiz->quantidade_vendida);
+
+        // Desenha na tela (Cor Amarela para destaque)
+        writeToBuffer(ctx, x, *y, buffer, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+
+        (*y)++; // Incrementa a linha para o próximo item
+    }
+
+    // Percorre lado direito (IDs maiores)
+    drawHistoricoVendasRec(ctx, raiz->dir, x, y);
+}
+
 void drawEndScreen(GameContext *ctx, GameState *state)
 {
     clearBuffer(ctx);
@@ -523,9 +548,21 @@ void drawEndScreen(GameContext *ctx, GameState *state)
     writeToBuffer(ctx, (width - (int)strlen(title)) / 2, y, title, FOREGROUND_RED | FOREGROUND_INTENSITY);
     y += 3;
 
-    snprintf(text, sizeof(text), "Dinheiro Final: $%d", state->dinheiro);
-    writeToBuffer(ctx, (width - (int)strlen(text)) / 2, y, text, FOREGROUND_GREEN | FOREGROUND_INTENSITY); 
-    y += 4;
+    const char *relatorio = "RELATORIO DE VENDAS";
+    int titleX = (width - (int)strlen(title)) / 2;
+    writeToBuffer(ctx, titleX, 2, relatorio, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+
+    writeToBuffer(ctx, 4, 6, "Hamburgueres Vendidos:", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+
+    int startX = 6;
+    int startY = 8; // Começa a listar na linha 8
+
+    if (state->historicoVendas == NULL) {
+        writeToBuffer(ctx, startX, startY, "Nenhuma venda registrada.", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+    } else {
+        // Chama a função recursiva passando o endereço de startY para que ela possa incrementá-lo
+        drawHistoricoVendasRec(ctx, state->historicoVendas, startX, &startY);
+    }
 
     const char *restart = "[R]estart";
     writeToBuffer(ctx, (width - (int)strlen(restart)) / 2, y, restart, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
@@ -737,42 +774,11 @@ void processCommand(GameContext *ctx, GameState *state)
             }
 
             state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); 
-            
-            // CALCULA PEDIDOS OCULTOS (QUE JA SUMIRAM DA TELA MAS ESTAO NA FILA)
-            // Adicionamos +1 porque acabamos de remover um item da filaAtiva na linha 659
+
             int hiddenOrders = (state->filaAtiva.tamanho + 1) - state->contadorDisplayPedidos;
 
             if (hiddenOrders > 0) {
-                // SE TEM PEDIDO OCULTO, SERVE ELE PRIMEIRO (FIFO)
-                // NAO MEXE NO DISPLAY, POIS O PEDIDO JA NAO ESTA LA
             } else {
-                // SE NAO TEM PEDIDO OCULTO, SERVE O QUE ESTA NA TELA (O MAIS ANTIGO VISIVEL)
-                // COMO O DISPLAY EH UMA LISTA, O MAIS ANTIGO EH O 0? NAO, O DISPLAY EH PREENCHIDO DE CIMA PRA BAIXO
-                // O ARRAY PEDIDOSDISPLAY TEM O 0 COMO O MAIS RECENTE OU MAIS ANTIGO?
-                // VAMOS VER O UPDATEGAME... 
-                // "state->pedidosDisplay[0].spawnTime = now;" -> O 0 EH O MAIS RECENTE QUE ENTROU
-                // ENTAO O MAIS ANTIGO EH O ULTIMO (contadorDisplayPedidos - 1)
-                
-                // ESPERA, A LOGICA ORIGINAL ERA:
-                // "state->pedidosDisplay[j] = state->pedidosDisplay[j + 1];"
-                // ISSO MOVE TUDO PRA CIMA (INDEX MENOR).
-                // SE O 0 EH O MAIS RECENTE, ENTAO O MAIS ANTIGO ESTA NO FUNDO?
-                // "drawOrders": loop de 0 a contadorDisplayPedidos.
-                // "snprintf(buffer... state->pedidosDisplay[i].text)"
-                // SE O 0 EH O PRIMEIRO A SER DESENHADO (EM CIMA), ELE DEVERIA SER O MAIS ANTIGO?
-                // NO UPDATEGAME: "for (int j = state->contadorDisplayPedidos; j > 0; j--) state->pedidosDisplay[j] = state->pedidosDisplay[j - 1];"
-                // ISSO ABRE ESPACO NO 0.
-                // "state->pedidosDisplay[0]... = now"
-                // ENTAO O 0 EH O MAIS RECENTE!
-                // O MAIS ANTIGO (QUE DEVE SER SERVIDO PRIMEIRO) EH O (contadorDisplayPedidos - 1).
-                
-                // MAS A LOGICA ORIGINAL DO SERVIR ERA:
-                // "state->contadorDisplayPedidos--;"
-                // E DEPOIS NO PROXIMO LOOP DE DESENHO ELE SO IGNORAVA O ULTIMO?
-                // NAO, ELE NAO FAZIA SHIFT NO SERVIR ORIGINALMENTE?
-                // ORIGINALMENTE: "state->contadorDisplayPedidos--;" APENAS.
-                // SE O 0 EH O MAIS RECENTE, E A GENTE DIMINUI O CONTADOR, A GENTE CORTA O ULTIMO (O MAIS ANTIGO).
-                // ENTAO ESTAVA CERTO. O MAIS ANTIGO EH O QUE ESTA NO FINAL DO ARRAY.
                 
                 state->contadorDisplayPedidos--; 
             }
@@ -1077,6 +1083,20 @@ void initializeNextDay(GameState *state)
 {
     // SALVA O RELATORIO ANTES DE MUDAR O DIA
     salvarLogDiario(state);
+
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Pao", state->pao_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Hamburguer", state->hamburguer_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Queijo", state->queijo_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Alface", state->alface_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Tomate", state->tomate_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Bacon", state->bacon_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Maionese do Pato", state->maioneseDoPato_vendidos); // Verifique o nome exato da variável no struct
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Onion Rings", state->onion_rings_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Cebola", state->cebola_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Picles", state->picles_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Falafel", state->falafel_vendidos);
+    atualizar_quantidade_ingrediente(&state->raizIngredientes, "Frango", state->frango_vendidos);
+
     
     // Zera os contadores diarios
     state->vendasNoDiaAtual = 0; 
@@ -1302,11 +1322,110 @@ void carregarJogo(GameState *state) {
     fscanf(arquivo, "%d\n", &state->totalHamburgueresVendidos);
     fscanf(arquivo, "\n");
     fclose(arquivo);
-} 
+}
 
-// ==========================================================
-// ADDED FUNCTIONS START HERE
-// ==========================================================
+// Função auxiliar recursiva para desenhar a árvore na tela
+// Faz um percurso In-Order Reverso (Direita -> Raiz -> Esquerda) para mostrar do maior para o menor
+// (Assumindo que a árvore está ordenada pela quantidade ou que você deseja essa ordem de visualização)
+void drawIngredientesTreeRecursive(GameContext *ctx, NO_AVL *no, int x, int *y) {
+    if (no == NULL) return;
+
+    // Se a árvore estiver ordenada por quantidade, ir para a direita primeiro pega os maiores valores
+    drawIngredientesTreeRecursive(ctx, no->dir, x, y);
+
+    // Verifica se ainda cabe na tela
+    if (*y < ctx->screenSize.Y - 4) {
+        char buffer[64];
+        // Formata: Nome do Ingrediente | Quantidade
+        snprintf(buffer, sizeof(buffer), "%-20s | %d", no->ingrediente, no->quantidade);
+
+        // Define uma cor (ex: Ciano para o texto)
+        WORD cor = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+
+        writeToBuffer(ctx, x, *y, buffer, cor);
+        (*y)++;
+    }
+
+    drawIngredientesTreeRecursive(ctx, no->esq, x, y);
+}
+
+
+void desenharArvoreNoBuffer(GameContext *ctx, NO_AVL *raiz, int x, int *y) {
+    if (raiz == NULL) return;
+
+    desenharArvoreNoBuffer(ctx, raiz->esq, x, y);
+
+
+    if (*y < ctx->screenSize.Y - 2) {
+        char bufferTexto[64];
+
+        snprintf(bufferTexto, sizeof(bufferTexto), "%-20s | Qtd: %d", raiz->ingrediente, raiz->quantidade);
+        
+        writeToBuffer(ctx, x, *y, bufferTexto, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+
+        (*y)++;
+    }
+
+    desenharArvoreNoBuffer(ctx, raiz->dir, x, y);
+}
+
+void runTelaHistoricoIngredientes(GameContext *ctx, GameState *state) {
+    BOOL inScreen = TRUE;
+
+
+    while (inScreen) {
+
+        clearBuffer(ctx);
+
+        drawBox(ctx, 0, 0, ctx->screenSize.X - 1, ctx->screenSize.Y - 1, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+
+        const char *titulo = "HISTORICO ACUMULADO DE INGREDIENTES";
+        int tituloX = (ctx->screenSize.X - (int)strlen(titulo)) / 2;
+        writeToBuffer(ctx, tituloX, 2, titulo, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+
+        const char *subtitulo = "Ingrediente          | Quantidade";
+        writeToBuffer(ctx, 10, 4, subtitulo, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+        writeToBuffer(ctx, 10, 5, "----------------------------------", FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+
+        //Desenha a arvore.
+        //Definimos a linha inicial (Y) onde a lista começa
+        int linhaAtual = 6;
+
+        if (state->raizIngredientes == NULL) {
+            writeToBuffer(ctx, 10, linhaAtual, "Nenhum dado registrado ainda.", FOREGROUND_RED);
+        } else {
+            // Chamamos a função recursiva passando o endereço de linhaAtual
+            desenharArvoreNoBuffer(ctx, state->raizIngredientes, 10, &linhaAtual);
+        }
+
+        const char *msg = "Pressione [ENTER] para ir para a Loja";
+        writeToBuffer(ctx, (ctx->screenSize.X - (int)strlen(msg)) / 2, ctx->screenSize.Y - 3, msg, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+
+        //Renderizar tudo na tela (Blit)
+        blitToScreen(ctx);
+
+        //Saida com ESC ou ENTER.
+        DWORD numEvents = 0;
+        GetNumberOfConsoleInputEvents(ctx->hConsoleIn, &numEvents);
+        if (numEvents > 0) {
+            INPUT_RECORD *eventBuffer = (INPUT_RECORD *)malloc(sizeof(INPUT_RECORD) * numEvents);
+            DWORD eventsRead = 0;
+            ReadConsoleInputA(ctx->hConsoleIn, eventBuffer, numEvents, &eventsRead);
+            for (DWORD i = 0; i < eventsRead; ++i) {
+                if (eventBuffer[i].EventType == KEY_EVENT && eventBuffer[i].Event.KeyEvent.bKeyDown) {
+                    WORD key = eventBuffer[i].Event.KeyEvent.wVirtualKeyCode;
+                    if (key == VK_ESCAPE || key == VK_RETURN) {
+                        inScreen = FALSE;
+                    }
+                }
+            }
+            free(eventBuffer);
+        }
+
+        // Pequeno delay para não consumir 100% da CPU
+        Sleep(50);
+    }
+}
 
 void drawMainMenu(GameContext *ctx, int selectedOption)
 {
@@ -1465,6 +1584,7 @@ void telaPrincipalEtapa2()
                 }
                 else
                 {
+                    runTelaHistoricoIngredientes(&gameContext, &gameState);
                     gameState.showEndScreen = FALSE;
                     showShopScreen = TRUE;
                 }

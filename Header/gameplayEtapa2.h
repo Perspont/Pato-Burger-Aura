@@ -108,8 +108,9 @@ typedef struct
 
     int dia;
 
-    // Arvore de Historico (Unidade 3)
+    // Arvore de Historico.
     NoHistorico *historicoVendas;
+    NO_AVL *raizIngredientes; //Ponteiro para a raiz da árvore de ingredientes do dia.
 
 } GameState;
 
