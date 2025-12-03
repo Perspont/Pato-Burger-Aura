@@ -164,7 +164,7 @@ static noprodutoloja* buscarID(Loja *loja, int id)
     return NULL;
 }   
 
-static void compraritem(Loja *loja, Inventarioplayer *inv, int produtoID) 
+static void compraritem(Loja *loja, Inventarioplayer *inv, int produtoID, int quantidade) 
 {
     noprodutoloja *produto = buscarID(loja, produtoID); 
     if (produto == NULL) {
@@ -173,8 +173,10 @@ static void compraritem(Loja *loja, Inventarioplayer *inv, int produtoID)
         return;
     }
 
-    if (inv->dinheiro < produto->precoBase) { 
-        printf("\n[ERRO] Dinheiro insuficiente! Voce precisa de $%.2f.\n", produto->precoBase); 
+    float custoTotal = produto->precoBase * quantidade;
+
+    if (inv->dinheiro < custoTotal) { 
+        printf("\n[ERRO] Dinheiro insuficiente! Voce precisa de $%.2f para %d itens.\n", custoTotal, quantidade); 
         Sleep(1500);
         return;
     }
@@ -188,9 +190,13 @@ static void compraritem(Loja *loja, Inventarioplayer *inv, int produtoID)
     }
 
     // pagamento feito de maneira certa
-    inv->dinheiro -= produto->precoBase;
-    adicionaingredino(listaDestino); 
-    printf("\n[SUCESSO] Voce comprou 1 %s.\n", produto->nome);
+    inv->dinheiro -= custoTotal;
+    
+    for(int i=0; i<quantidade; i++) {
+        adicionaingredino(listaDestino); 
+    }
+
+    printf("\n[SUCESSO] Voce comprou %d %s(s).\n", quantidade, produto->nome);
     printf("Novo saldo: $%.2f. Total no inventario: %d\n", inv->dinheiro, listaDestino->quantidade);
     Sleep(1500);
 }
@@ -336,8 +342,16 @@ void loopfuncionaloja(Loja *loja, Inventarioplayer *inv)
         if (IDselecionado == 0) {
             funcionando = 0; 
         } else {
-            compraritem(loja, inv, IDselecionado);
+            int quantidade = 1;
+            printf("Digite a quantidade: ");
+            if (scanf("%d", &quantidade) != 1 || quantidade <= 0) {
+                printf("\nQuantidade invalida. Considerando 1.\n");
+                quantidade = 1;
+                limparBufferInput();
+            }
+            limparBufferInput();
 
+            compraritem(loja, inv, IDselecionado, quantidade);
         }
     }
     limparTela();

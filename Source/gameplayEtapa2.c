@@ -785,17 +785,46 @@ void processCommand(GameContext *ctx, GameState *state)
 
             state->dinheiro += comparaHamburgueresLE(&state->burgerPlayer, &burgerPedido); 
             
-            // --- Unidade 3: Registrar venda na arvore ---
-            registrar_venda_arvore(&state->historicoVendas, burgerPedido.id);
+            // CALCULA PEDIDOS OCULTOS (QUE JA SUMIRAM DA TELA MAS ESTAO NA FILA)
+            // Adicionamos +1 porque acabamos de remover um item da filaAtiva na linha 659
+            int hiddenOrders = (state->filaAtiva.tamanho + 1) - state->contadorDisplayPedidos;
 
-            state->contadorDisplayPedidos--; 
-
-            for (int i = 0; i < state->stackSize; i++)
-            {
-                if (state->PilhaDeHamburguerLE_display[i] != NULL) {
-                    free(state->PilhaDeHamburguerLE_display[i]);
-                }
+            if (hiddenOrders > 0) {
+                // SE TEM PEDIDO OCULTO, SERVE ELE PRIMEIRO (FIFO)
+                // NAO MEXE NO DISPLAY, POIS O PEDIDO JA NAO ESTA LA
+            } else {
+                // SE NAO TEM PEDIDO OCULTO, SERVE O QUE ESTA NA TELA (O MAIS ANTIGO VISIVEL)
+                // COMO O DISPLAY EH UMA LISTA, O MAIS ANTIGO EH O 0? NAO, O DISPLAY EH PREENCHIDO DE CIMA PRA BAIXO
+                // O ARRAY PEDIDOSDISPLAY TEM O 0 COMO O MAIS RECENTE OU MAIS ANTIGO?
+                // VAMOS VER O UPDATEGAME... 
+                // "state->pedidosDisplay[0].spawnTime = now;" -> O 0 EH O MAIS RECENTE QUE ENTROU
+                // ENTAO O MAIS ANTIGO EH O ULTIMO (contadorDisplayPedidos - 1)
+                
+                // ESPERA, A LOGICA ORIGINAL ERA:
+                // "state->pedidosDisplay[j] = state->pedidosDisplay[j + 1];"
+                // ISSO MOVE TUDO PRA CIMA (INDEX MENOR).
+                // SE O 0 EH O MAIS RECENTE, ENTAO O MAIS ANTIGO ESTA NO FUNDO?
+                // "drawOrders": loop de 0 a contadorDisplayPedidos.
+                // "snprintf(buffer... state->pedidosDisplay[i].text)"
+                // SE O 0 EH O PRIMEIRO A SER DESENHADO (EM CIMA), ELE DEVERIA SER O MAIS ANTIGO?
+                // NO UPDATEGAME: "for (int j = state->contadorDisplayPedidos; j > 0; j--) state->pedidosDisplay[j] = state->pedidosDisplay[j - 1];"
+                // ISSO ABRE ESPACO NO 0.
+                // "state->pedidosDisplay[0]... = now"
+                // ENTAO O 0 EH O MAIS RECENTE!
+                // O MAIS ANTIGO (QUE DEVE SER SERVIDO PRIMEIRO) EH O (contadorDisplayPedidos - 1).
+                
+                // MAS A LOGICA ORIGINAL DO SERVIR ERA:
+                // "state->contadorDisplayPedidos--;"
+                // E DEPOIS NO PROXIMO LOOP DE DESENHO ELE SO IGNORAVA O ULTIMO?
+                // NAO, ELE NAO FAZIA SHIFT NO SERVIR ORIGINALMENTE?
+                // ORIGINALMENTE: "state->contadorDisplayPedidos--;" APENAS.
+                // SE O 0 EH O MAIS RECENTE, E A GENTE DIMINUI O CONTADOR, A GENTE CORTA O ULTIMO (O MAIS ANTIGO).
+                // ENTAO ESTAVA CERTO. O MAIS ANTIGO EH O QUE ESTA NO FINAL DO ARRAY.
+                
+                state->contadorDisplayPedidos--; 
             }
+
+            clearStack(state); // Limpa o hamburguer da mao do jogador para o proximo pedido
             state->stackSize = 0;
         }
         else if (state->stackSize <= 0){ 
@@ -989,13 +1018,16 @@ void updateGame(GameState *state)
     int timerPedidoAtual = 0;
     while (timerPedidoAtual < state->contadorDisplayPedidos)
     {
-        if (now - state->pedidosDisplay[timerPedidoAtual].spawnTime >= 10000)
+        // AUMENTADO PARA 15 SEGUNDOS
+        if (now - state->pedidosDisplay[timerPedidoAtual].spawnTime >= 15000)
         {
             for (int j = timerPedidoAtual; j < state->contadorDisplayPedidos - 1; j++)
             {
                 state->pedidosDisplay[j] = state->pedidosDisplay[j + 1];
             }
             state->contadorDisplayPedidos--;
+            
+            // NAO REMOVE DA FILA ATIVA! O PEDIDO CONTINUA VALENDO, SO FICA INVISIVEL.
         }
         else timerPedidoAtual++;
     }
@@ -1021,7 +1053,11 @@ void updateGame(GameState *state)
         state->contadorDisplayPedidos++;
     }
 
-    state->ordersPending = state->filaAtiva.tamanho;
+    // PENDENTES = TOTAL NA FILA - O QUE ESTA NA TELA
+    // SE TEM 5 NA FILA E 3 NA TELA, TEM 2 PENDENTES (OCULTOS)
+    int pendentes = state->filaAtiva.tamanho - state->contadorDisplayPedidos;
+    if (pendentes < 0) pendentes = 0; // Just in case
+    state->ordersPending = pendentes;
 
     if (state->dinheiro <= 0)
     {
@@ -1151,6 +1187,12 @@ void initializeNextDay(GameState *state)
     if (state->stackSize > 0) {
         int multaDesperdicio = state->stackSize * 2; 
         state->dinheiro -= multaDesperdicio;
+    }
+
+    // LIMPA A FILA ATIVA (PEDIDOS NA TELA)
+    while (state->filaAtiva.tamanho != 0) {
+        Pedido_FilaLE pedido;
+        desenfileiraPedido_FilaLE(&state->filaAtiva, &pedido);
     }
 
     while (state->filaDePedidos.tamanho != 0) {
