@@ -105,6 +105,7 @@ typedef struct
     BOOL showCardapio;  
     BOOL showCardapio_2;
     int showInstructions;
+    int showInstructionsIngame;
 
     int dia;
 
@@ -119,6 +120,8 @@ void clearStack(GameState *state);
 void resizeBuffer(GameContext *ctx, int width, int height);
 WORD obterCorDoIngrediente(const char* nomeIngrediente);
 void drawTimer(GameContext *ctx, GameState *state);
+void drawIngameInstructionsScreen(GameContext *ctx, GameState *state);
+void drawInstructionsScreen(GameContext *ctx, GameState *state);
 void drawCardapioScreen(GameContext *ctx, GameState *state);
 void desenharCardapio_pagina2(GameContext *ctx, GameState *state); 
 void writeToBuffer(GameContext *ctx, int x, int y, const char *texto, WORD atributos);

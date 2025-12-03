@@ -43,7 +43,7 @@ static void liberaringredilista(listaingredientes *lista)
     lista->quantidade = 0;
 }
 //adiciona um no (uma unidade) a lista de ingredientes do jogador.
-static void adicionaingredino(listaingredientes *lista) 
+static void adicionaingredino(listaingredientes *lista)
 {
     ingredino *novoNo = (ingredino*) malloc(sizeof(ingredino));
     if (novoNo == NULL) {

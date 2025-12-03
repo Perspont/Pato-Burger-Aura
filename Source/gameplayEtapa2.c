@@ -284,8 +284,7 @@ void blitToScreen(GameContext *ctx)
     WriteConsoleOutputA(ctx->hConsoleOut, ctx->charBuffer, bufferSize, bufferCoord, &writeRegion);
 }
 
-
-void drawInstructionsScreen(GameContext *ctx, GameState *state)
+void drawIngameInstructionsScreen(GameContext *ctx, GameState *state)
 {
     clearBuffer(ctx);
     int width = ctx->screenSize.X;
@@ -298,12 +297,12 @@ void drawInstructionsScreen(GameContext *ctx, GameState *state)
 
     drawBox(ctx, 0, 0, width - 1, height - 1, laranja);
 
-    const char *header = " INSTRUCOES (1/3) ";
+    const char *header = " INSTRUCOES ";
     writeToBuffer(ctx, (width - (int)strlen(header)) / 2, 0, header, amarelo);
 
     int y = 3;
-    int x_col1 = 4;
-    int x_col2 = (width / 2) + 2;
+    int x_col1 = 7;
+    int x_col2 = (width / 2) + 5;
 
     // Coluna 1
     writeToBuffer(ctx, x_col1, y++, "grelhar    -> Grelha hamburguer", branco);
@@ -325,7 +324,57 @@ void drawInstructionsScreen(GameContext *ctx, GameState *state)
     y++; // Espaço extra
     writeToBuffer(ctx, x_col2, y++, "servir      -> Serve o pedido", verde);
     writeToBuffer(ctx, x_col2, y++, "lixo        -> Joga fora", FOREGROUND_RED | FOREGROUND_INTENSITY);
-    writeToBuffer(ctx, x_col2, y++, "cardapio    -> Abre este menu", branco);
+    writeToBuffer(ctx, x_col2, y++, "instrucoes    -> Abre este menu", branco);
+    writeToBuffer(ctx, x_col2, y++, "sair        -> Sai do jogo", branco);
+
+    const char *exitCmd = "[V]oltar ao Jogo";
+    writeToBuffer(ctx, (width / 2), (height - 2), exitCmd, branco);
+
+    drawTimer(ctx, state);
+    blitToScreen(ctx);
+}
+
+void drawInstructionsScreen(GameContext *ctx, GameState *state)
+{
+    clearBuffer(ctx);
+    int width = ctx->screenSize.X;
+    int height = ctx->screenSize.Y;
+
+    WORD laranja = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+    WORD branco = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE;
+    WORD verde = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+    WORD amarelo = FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+
+    drawBox(ctx, 0, 0, width - 1, height - 1, laranja);
+
+    const char *header = " INSTRUCOES ";
+    writeToBuffer(ctx, (width - (int)strlen(header)) / 2, 0, header, amarelo);
+
+    int y = 3;
+    int x_col1 = 7;
+    int x_col2 = (width / 2) + 5;
+
+    // Coluna 1
+    writeToBuffer(ctx, x_col1, y++, "grelhar    -> Grelha hamburguer", branco);
+    writeToBuffer(ctx, x_col1, y++, "pao        -> Empilha pao", branco);
+    writeToBuffer(ctx, x_col1, y++, "alface     -> Empilha alface", branco);
+    writeToBuffer(ctx, x_col1, y++, "tomate     -> Empilha tomate", branco);
+    writeToBuffer(ctx, x_col1, y++, "queijo     -> Empilha queijo", branco);
+    writeToBuffer(ctx, x_col1, y++, "hamburguer -> Empilha carne", branco);
+    writeToBuffer(ctx, x_col1, y++, "bacon      -> Empilha bacon", branco);
+    writeToBuffer(ctx, x_col1, y++, "maionese   -> Empilha maionese", branco);
+
+    // Reinicia Y para Coluna 2
+    y = 3;
+    writeToBuffer(ctx, x_col2, y++, "onion_rings -> Empilha onion rings", branco);
+    writeToBuffer(ctx, x_col2, y++, "cebola      -> Empilha cebola", branco);
+    writeToBuffer(ctx, x_col2, y++, "picles      -> Empilha picles", branco);
+    writeToBuffer(ctx, x_col2, y++, "falafel     -> Empilha falafel", branco);
+    writeToBuffer(ctx, x_col2, y++, "frango      -> Empilha frango", branco);
+    y++; // Espaço extra
+    writeToBuffer(ctx, x_col2, y++, "servir      -> Serve o pedido", verde);
+    writeToBuffer(ctx, x_col2, y++, "lixo        -> Joga fora", FOREGROUND_RED | FOREGROUND_INTENSITY);
+    writeToBuffer(ctx, x_col2, y++, "instrucoes    -> Abre este menu (Durante o jogo)", branco);
     writeToBuffer(ctx, x_col2, y++, "sair        -> Sai do jogo", branco);
 
     const char *exitCmd = "[V]oltar ao Jogo";
@@ -333,7 +382,6 @@ void drawInstructionsScreen(GameContext *ctx, GameState *state)
     const char *cardCmd = "Mostrar [C]ardapio";
     writeToBuffer(ctx, (width / 2), (height - 4), cardCmd, branco);
 
-    drawTimer(ctx, state);
     blitToScreen(ctx);
 }
 
@@ -411,7 +459,6 @@ void drawCardapioScreen(GameContext *ctx, GameState *state)
     const char *nextCmd = "[P]roxima Pagina ->";
     writeToBuffer(ctx, (width / 2) + 5, (height - 2), nextCmd, branco);
 
-    drawTimer(ctx, state);
 
     blitToScreen(ctx);
 }
@@ -503,7 +550,6 @@ void desenharCardapio_pagina2(GameContext *ctx, GameState *state)
     const char *exitCmd = "[V]oltar ao Jogo";
     writeToBuffer(ctx, (width / 2) + 5, (height - 2), exitCmd, branco);
 
-    drawTimer(ctx, state);
 
     blitToScreen(ctx);
 }
@@ -584,6 +630,7 @@ void initializeGame(GameContext *ctx, GameState *state)
     state->isRunning = TRUE;
     state->showEndScreen = FALSE;
     state->showInstructions = FALSE;
+    state->showInstructionsIngame = FALSE;
     state->showCardapio = FALSE;
     state->showCardapio_2 = FALSE; 
     state->dia = 1; 
@@ -766,11 +813,9 @@ void processCommand(GameContext *ctx, GameState *state)
         deletaBurgerLE(&state->burgerPlayer); 
     }
 
-    else if (_stricmp(state->currentCommand, "cardapio") == 0)
+    else if (_stricmp(state->currentCommand, "instrucoes") == 0)
     {
-        state->showInstructions = TRUE;
-        state->showCardapio = FALSE;
-        state->showCardapio_2 = FALSE;
+        state->showInstructionsIngame = TRUE;
     }
 
 	else if (_stricmp(state->currentCommand, "salvar") == 0) 
@@ -807,97 +852,116 @@ void processCommand(GameContext *ctx, GameState *state)
     state->currentCommand[0] = '\0';
 }
 
+// --- Handlers de Input por Estado ---
+
+// 1. INPUT: Tela de Instruções (Principal ou In-game)
+void handleInstructionsInput(GameContext *ctx, GameState *state, char c) {
+    // 'V' para Voltar ao jogo (fecha tudo)
+    if (c == 'v' || c == 'V') {
+        if (state->showInstructions) {
+            state->tempoDoJogo = (ULONGLONG)GetTickCount();
+        }
+        state->showInstructions = FALSE;
+        state->showInstructionsIngame = FALSE;
+
+        // Se veio do menu, volta pro jogo. Se estava no jogo, volta pro jogo.
+    }
+    // 'C' para ir ao Cardápio (apenas se não estiver na versão Ingame, se desejar)
+    else if ((c == 'c' || c == 'C') && !state->showInstructionsIngame) {
+        state->showInstructions = FALSE;
+        state->showCardapio = TRUE; // Muda o estado para Cardápio
+    }
+}
+
+// 2. INPUT: Cardápio (Página 1)
+void handleCardapioInput(GameContext *ctx, GameState *state, char c) {
+    if (c == 'v' || c == 'V') {
+        state->showCardapio = FALSE; // Volta ao jogo
+    }
+    else if (c == 'p' || c == 'P') {
+        state->showCardapio = FALSE;
+        state->showCardapio_2 = TRUE; // Vai para página 2
+    }
+    else if (c == 'i' || c == 'I') {
+        state->showCardapio = FALSE;
+        state->showInstructions = TRUE; // Vai para instruções
+    }
+}
+
+// 3. INPUT: Cardápio (Página 2)
+void handleCardapio2Input(GameContext *ctx, GameState *state, char c) {
+    if (c == 'v' || c == 'V') {
+        state->showCardapio_2 = FALSE; // Volta ao jogo
+    }
+    else if (c == 'a' || c == 'A') {
+        state->showCardapio_2 = FALSE;
+        state->showCardapio = TRUE; // Volta para página 1
+    }
+    else if (c == 'i' || c == 'I') {
+        state->showCardapio_2 = FALSE;
+        state->showInstructions = TRUE; // Vai para instruções
+    }
+}
+
+// 4. INPUT: Gameplay (Digitando comandos)
+void handleGameplayInput(GameContext *ctx, GameState *state, char c) {
+    // Processa Enter (enviar comando)
+    if (c == '\r') {
+        processCommand(ctx, state); // Sua função existente de processar comando
+    }
+    // Processa Backspace (apagar)
+    else if (c == '\b') {
+        if (state->commandLength > 0) {
+            state->commandLength--;
+            state->currentCommand[state->commandLength] = '\0';
+        }
+    }
+    // Processa caracteres digitáveis
+    else if (isprint(c) && state->commandLength < MAX_COMMAND_LENGTH) {
+        state->currentCommand[state->commandLength] = c;
+        state->commandLength++;
+        state->currentCommand[state->commandLength] = '\0';
+    }
+}
+
 void processInput(GameContext *ctx, GameState *state)
 {
     DWORD numEvents = 0;
     GetNumberOfConsoleInputEvents(ctx->hConsoleIn, &numEvents);
-    if (numEvents == 0) return;
 
-    INPUT_RECORD *eventBuffer = (INPUT_RECORD *)malloc(sizeof(INPUT_RECORD) * numEvents);
-    DWORD eventsRead = 0;
-    ReadConsoleInputA(ctx->hConsoleIn, eventBuffer, numEvents, &eventsRead);
-
-    for (DWORD i = 0; i < eventsRead; ++i)
+    if (numEvents > 0)
     {
-        switch (eventBuffer[i].EventType)
+        INPUT_RECORD *eventBuffer = (INPUT_RECORD *)malloc(sizeof(INPUT_RECORD) * numEvents);
+        DWORD eventsRead = 0;
+        ReadConsoleInputA(ctx->hConsoleIn, eventBuffer, numEvents, &eventsRead);
+
+        for (DWORD i = 0; i < eventsRead; ++i)
         {
-        case KEY_EVENT:
-            if (eventBuffer[i].Event.KeyEvent.bKeyDown)
+            if (eventBuffer[i].EventType == KEY_EVENT && eventBuffer[i].Event.KeyEvent.bKeyDown)
             {
                 char c = eventBuffer[i].Event.KeyEvent.uChar.AsciiChar;
 
-                if (state->showInstructions) {
-                    if (c == 'v' || c == 'V') state->showInstructions = FALSE;
-                    else if (c == 'c' || c == 'C') {
-                        state->showInstructions = FALSE;
-                        state->showCardapio = TRUE;
-                        state->showCardapio_2 = FALSE;
-                    }
-                }
+                // --- STATE MACHINE ---
+                // Verifica qual tela está ativa e chama SOMENTE o handler dela
 
-                else if (state->showCardapio)
-                {
-                    if (c == 'v' || c == 'V') state->showCardapio = FALSE; 
-                    else if (c == 'p' || c == 'P') {
-                        state->showInstructions = FALSE;
-                        state->showCardapio = FALSE;
-                        state->showCardapio_2 = TRUE; 
-                    }
-                    else if (c == 'i' || c == 'I') {
-                        state->showInstructions = TRUE;
-                        state->showCardapio = FALSE;
-                        state->showCardapio_2 = FALSE;
-                    }
+                if (state->showInstructions || state->showInstructionsIngame) {
+                    handleInstructionsInput(ctx, state, c);
                 }
-                else if (state->showCardapio_2)
-                {
-                    if (c == 'v' || c == 'V') state->showCardapio_2 = FALSE; 
-                    else if (c == 'a' || c == 'A') {
-                        state->showInstructions = FALSE;
-                        state->showCardapio_2 = FALSE;
-                        state->showCardapio = TRUE; 
-                    }
-                    else if (c == 'i' || c == 'I') {
-                        state->showInstructions = TRUE;
-                        state->showCardapio = FALSE;
-                        state->showCardapio_2 = FALSE;
-                    }
+                else if (state->showCardapio) {
+                    handleCardapioInput(ctx, state, c);
                 }
-                else
-                {
-                    if (c == '\r') processCommand(ctx, state);
-                    else if (c == '\b') {
-                        if (state->commandLength > 0) {
-                            state->commandLength--;
-                            state->currentCommand[state->commandLength] = '\0';
-                        }
-                    }
-                    else if (isprint(c) && state->commandLength < MAX_COMMAND_LENGTH - 1) {
-                        state->currentCommand[state->commandLength] = c;
-                        state->commandLength++;
-                        state->currentCommand[state->commandLength] = '\0';
-                    }
+                else if (state->showCardapio_2) {
+                    handleCardapio2Input(ctx, state, c);
+                }
+                else {
+                    // Se nenhuma tela especial está ativa, é gameplay normal
+                    handleGameplayInput(ctx, state, c);
                 }
             }
-            break;
-
-        case WINDOW_BUFFER_SIZE_EVENT:
-        {
-            CONSOLE_SCREEN_BUFFER_INFO csbi;
-            GetConsoleScreenBufferInfo(ctx->hConsoleOut, &csbi);
-            int newWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-            int newHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-            if (newWidth != ctx->screenSize.X || newHeight != ctx->screenSize.Y) resizeBuffer(ctx, newWidth, newHeight);
-            break;
         }
-        case MOUSE_EVENT:
-        case FOCUS_EVENT:
-            break;
-        }
+        free(eventBuffer);
     }
-    free(eventBuffer);
 }
-
 void updateGame(GameState *state)
 {
     if (state->isGrilling)
@@ -1064,6 +1128,7 @@ void initializeNextDay(GameState *state)
     state->currentCommand[0] = '\0';
     state->showEndScreen = FALSE;
     state->showInstructions = FALSE;
+    state->showInstructionsIngame = FALSE;
     state->showCardapio = FALSE;
     state->showCardapio_2 = FALSE;
     state->hamburguerVazio = 0;
@@ -1277,7 +1342,7 @@ void drawMainMenu(GameContext *ctx, int selectedOption)
 
     // Título
     const char *title = "=== PATO BURGER ===";
-    const char *subtitle = "O Melhor Hamburguer do Lago";
+    const char *subtitle = "O Pato Sabe Fazer Hamburguer";
     
     writeToBuffer(ctx, (width - (int)strlen(title)) / 2, height / 2 - 5, title, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     writeToBuffer(ctx, (width - (int)strlen(subtitle)) / 2, height / 2 - 4, subtitle, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
@@ -1360,7 +1425,7 @@ int runMainMenu(GameContext *ctx)
             }
             free(eventBuffer);
         }
-        Sleep(33); 
+        Sleep(33);
     }
     return 1;
 }
@@ -1376,6 +1441,13 @@ void telaPrincipalEtapa2()
 
     Loja loja;
     Inventarioplayer inventarioJogador;
+
+    // --- VARIÁVEIS DE CONTROLE DE TEMPO ---
+    ULONGLONG inicioPausa = 0;
+
+    // === ADICIONE ESTA LINHA AQUI ===
+    BOOL cronometroPausado = FALSE;
+    // ================================
 
     // Menu handles
     gameContext.hConsoleIn = GetStdHandle(STD_INPUT_HANDLE);
@@ -1401,10 +1473,14 @@ void telaPrincipalEtapa2()
 
         initializeGame(&gameContext, &gameState);
 
+
         // If choice was 0 (Carregar), load the game. Otherwise, it starts fresh (New Game)
         if (choice == 0) {
-            carregarJogo(&gameState); 
+            carregarJogo(&gameState);
+            gameState.showInstructions = TRUE;
         }
+
+        gameState.showInstructions = TRUE;
 
         BOOL showShopScreen = FALSE; 
 
@@ -1467,17 +1543,71 @@ void telaPrincipalEtapa2()
 
                 showShopScreen = FALSE; 
                 clearStack(&gameState);
-                initializeNextDay(&gameState); 
+
+                initializeNextDay(&gameState);
+
+                gameState.showInstructions = TRUE;
+
             }
+            // Dentro do loop principal...
             else
             {
+                // 1. Processa o Input (sua State Machine já lida com quem recebe o input)
                 processInput(&gameContext, &gameState);
-                updateGame(&gameState);
-                if (gameState.showInstructions) drawInstructionsScreen(&gameContext, &gameState);
-                else if (gameState.showCardapio) drawCardapioScreen(&gameContext, &gameState);
-                else if (gameState.showCardapio_2) desenharCardapio_pagina2(&gameContext, &gameState);
-                else renderGame(&gameContext, &gameState);
-                Sleep(33); 
+
+                // Controle de Pausa
+                if (gameState.showInstructionsIngame || gameState.showInstructions || gameState.showCardapio || gameState.showCardapio_2) {
+                    if (!cronometroPausado) {
+                        inicioPausa = GetTickCount();
+                        cronometroPausado = TRUE;
+                    }
+                } else {
+                    // Se saiu do menu, aplica a compensação do tempo
+                    if (cronometroPausado) {
+                        ULONGLONG fimPausa = GetTickCount();
+                        ULONGLONG tempoPausado = fimPausa - inicioPausa;
+
+                        gameState.tempoDoJogo += tempoPausado;         // Ajusta o início do dia
+                        gameState.grillStartTime += tempoPausado;      // Ajusta a grelha
+                        gameState.ultimoSpawnDisplayPedidos += tempoPausado;
+                        gameState.tempoDeNotificacao += tempoPausado;
+
+                        for (int i = 0; i < gameState.contadorDisplayPedidos; i++) {
+                            gameState.pedidosDisplay[i].spawnTime += tempoPausado;
+                        }
+                        cronometroPausado = FALSE;
+                    }
+                }
+
+                // 2. Lógica (Update) - Agora é seguro chamar, pois o tempo já foi corrigido
+                if (!gameState.showInstructionsIngame && !gameState.showInstructions && !gameState.showCardapio && !gameState.showCardapio_2) {
+                    updateGame(&gameState);
+
+                    // --- CORREÇÃO DO PROBLEMA DE NÃO PASSAR DE DIA (ver abaixo) ---
+                    // Verifica se o dia acabou (sem pedidos na fila, sem pedidos ativos, mão vazia e grelha vazia)
+                    if (gameState.filaDePedidos.tamanho == 0 &&
+                        gameState.ordersPending == 0 &&
+                        gameState.stackSize == 0 &&
+                        !gameState.isGrilling)
+                    {
+                        showShopScreen = TRUE; // Vai para a loja e depois inicia o próximo dia
+                    }
+                }
+
+                // 3. Renderização (Desenho)
+                // O desenho continua normal, verificando qual tela mostrar
+                if (gameState.showInstructionsIngame)
+                    drawIngameInstructionsScreen(&gameContext, &gameState);
+                else if (gameState.showInstructions)
+                    drawInstructionsScreen(&gameContext, &gameState);
+                else if (gameState.showCardapio)
+                    drawCardapioScreen(&gameContext, &gameState);
+                else if (gameState.showCardapio_2)
+                    desenharCardapio_pagina2(&gameContext, &gameState);
+                else
+                    renderGame(&gameContext, &gameState);
+
+                Sleep(33); // ~30 FPS
             }
         }
     }
